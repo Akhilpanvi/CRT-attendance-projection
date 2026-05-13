@@ -224,61 +224,117 @@ app.post('/api/admin/upload-csv', auth, adminOnly, upload.single('csv'), async (
     const knownCols = [rollCol, nameCol, branchCol, deptCol, clusterCol, crtSecCol, crtRoomCol, snoCol].filter(Boolean);
     const slotCols  = cols.filter(c => !knownCols.includes(c));
 
-    let created = 0, updated = 0, attendanceCount = 0;
-    const errors = [];
+    // ── Build bulk operation arrays in one pass over the rows ─────────────────
+    const studentBulk    = [];
+    const attendanceBulk = [];
+    const rollNumbers    = [];
 
     for (const row of rows) {
       const rollNumber = row[rollCol]?.trim().toUpperCase();
       const name       = row[nameCol]?.trim();
       if (!rollNumber || !name) continue;
+      rollNumbers.push(rollNumber);
 
-      const studentData = {
-        name,
-        branch:  branchCol  ? (row[branchCol]  || '') : '',
-        dept:    deptCol    ? (row[deptCol]    || '') : '',
-        cluster: clusterCol ? (row[clusterCol] || '') : '',
-        crtSec:  crtSecCol  ? (row[crtSecCol]  || '') : '',
-        crtRoom: crtRoomCol ? (row[crtRoomCol] || '') : '',
-        sno:     snoCol     ? (parseInt(row[snoCol]) || 0) : 0,
-      };
+      // Student upsert
+      studentBulk.push({ updateOne: {
+        filter: { rollNumber },
+        update: { $set: {
+          name,
+          branch:  branchCol  ? (row[branchCol]  || '') : '',
+          dept:    deptCol    ? (row[deptCol]    || '') : '',
+          cluster: clusterCol ? (row[clusterCol] || '') : '',
+          crtSec:  crtSecCol  ? (row[crtSecCol]  || '') : '',
+          crtRoom: crtRoomCol ? (row[crtRoomCol] || '') : '',
+          sno:     snoCol     ? (parseInt(row[snoCol]) || 0) : 0,
+        }},
+        upsert: true,
+      }});
 
-      try {
-        const existing = await Student.findOne({ rollNumber });
-        if (existing) { await Student.findOneAndUpdate({ rollNumber }, studentData); updated++; }
-        else           { await Student.create({ rollNumber, ...studentData }); created++; }
-
-        // Create student login if not exists
-        if (!await User.findOne({ username: rollNumber })) {
-          const passwordHash = await bcrypt.hash(rollNumber, 10);
-          await User.create({ username: rollNumber, passwordHash, role: 'student', rollNumber, mustChangePassword: true });
-        }
-
-        // Import attendance for each slot column
-        for (const slotCol of slotCols) {
-          const val = row[slotCol]?.trim().toUpperCase();
-          if (!val || !['P', 'A'].includes(val)) continue;
-          const status = val === 'P' ? 'present' : 'absent';
-          await Attendance.findOneAndUpdate(
-            { rollNumber, date: attendanceDate, slot: slotCol },
-            { status, week, year, markedAt: new Date() },
-            { upsert: true, new: true }
-          );
-          attendanceCount++;
-        }
-      } catch (e) { errors.push(`${rollNumber}: ${e.message}`); }
+      // Attendance upserts for each slot
+      for (const slotCol of slotCols) {
+        const val = row[slotCol]?.trim().toUpperCase();
+        if (!val || !['P', 'A'].includes(val)) continue;
+        attendanceBulk.push({ updateOne: {
+          filter: { rollNumber, date: attendanceDate, slot: slotCol },
+          update: { $set: { status: val === 'P' ? 'present' : 'absent', week, year, markedAt: new Date() } },
+          upsert: true,
+        }});
+      }
     }
 
-    res.json({ success: true, created, updated, attendanceCount, total: rows.length, slotCols, errors, date: attendanceDate });
+    // ── 1. Bulk-upsert all students in one round-trip ─────────────────────────
+    const stuResult = rollNumbers.length
+      ? await Student.bulkWrite(studentBulk, { ordered: false })
+      : { upsertedCount: 0, modifiedCount: 0 };
+
+    // ── 2. Create missing user accounts (one find + one insertMany) ───────────
+    const existingUsers = await User.find(
+      { username: { $in: rollNumbers } }, { username: 1 }
+    ).lean();
+    const existingSet  = new Set(existingUsers.map(u => u.username));
+    const newRollNums  = rollNumbers.filter(r => !existingSet.has(r));
+
+    if (newRollNums.length) {
+      // Hash in batches of 50 (saltRounds=6 for bulk speed; changed on first login anyway)
+      const HASH_BATCH = 50;
+      const userDocs = [];
+      for (let i = 0; i < newRollNums.length; i += HASH_BATCH) {
+        const batch = newRollNums.slice(i, i + HASH_BATCH);
+        const hashed = await Promise.all(batch.map(r => bcrypt.hash(r, 6)));
+        batch.forEach((r, idx) => userDocs.push({
+          username: r, passwordHash: hashed[idx],
+          role: 'student', rollNumber: r, mustChangePassword: true,
+        }));
+      }
+      await User.insertMany(userDocs, { ordered: false });
+    }
+
+    // ── 3. Bulk-upsert attendance in chunks of 500 (handles 40k+ records) ────
+    const CHUNK = 500;
+    let attUpserted = 0, attModified = 0;
+    for (let i = 0; i < attendanceBulk.length; i += CHUNK) {
+      const r = await Attendance.bulkWrite(attendanceBulk.slice(i, i + CHUNK), { ordered: false });
+      attUpserted += r.upsertedCount || 0;
+      attModified += r.modifiedCount || 0;
+    }
+    const attResult = { upsertedCount: attUpserted, modifiedCount: attModified };
+
+    const created         = stuResult.upsertedCount  || 0;
+    const updated         = stuResult.modifiedCount  || 0;
+    const attendanceCount = (attResult.upsertedCount || 0) + (attResult.modifiedCount || 0);
+
+    res.json({ success: true, created, updated, attendanceCount, total: rollNumbers.length, slotCols, errors: [], date: attendanceDate });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // ─── Admin Routes ─────────────────────────────────────────────────────────────
 app.get('/api/admin/students', auth, adminOnly, async (req, res) => {
   try {
-    const students = await Student.find().sort({ sno: 1, name: 1 });
-    const result = await Promise.all(students.map(async s => {
-      const stats = await getStudentStats(s.rollNumber, false);
-      return { ...s.toObject(), stats };
+    // Single aggregation replaces N individual stats queries
+    const [students, statsAgg] = await Promise.all([
+      Student.find().sort({ sno: 1, name: 1 }).lean(),
+      Attendance.aggregate([
+        { $group: {
+          _id: '$rollNumber',
+          total:   { $sum: 1 },
+          present: { $sum: { $cond: [{ $eq: ['$status', 'present'] }, 1, 0] } }
+        }}
+      ])
+    ]);
+
+    const statsMap = {};
+    for (const s of statsAgg) {
+      statsMap[s._id] = {
+        total:      s.total,
+        present:    s.present,
+        absent:     s.total - s.present,
+        overallPct: s.total > 0 ? Math.round((s.present / s.total) * 100) : 0,
+      };
+    }
+
+    const result = students.map(s => ({
+      ...s,
+      stats: statsMap[s.rollNumber] || { total: 0, present: 0, absent: 0, overallPct: 0 }
     }));
     res.json(result);
   } catch (err) { res.status(500).json({ error: err.message }); }
