@@ -7,24 +7,32 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const { parse } = require('csv-parse/sync');
-const fs = require('fs');
 
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || 'crt-kl-secret-2024';
 
-// Ensure uploads dir exists (needed on platforms with ephemeral filesystems)
-if (!fs.existsSync('uploads')) fs.mkdirSync('uploads');
-
-const upload = multer({ dest: 'uploads/' });
+// Memory storage — no disk writes (required for Vercel serverless)
+const upload = multer({ storage: multer.memoryStorage() });
 
 app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
 
+// ─── MongoDB — cached connection for serverless ───────────────────────────────
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/crt_attendance';
-mongoose.connect(MONGO_URI)
-  .then(() => { console.log('✅ MongoDB connected'); initAdmin(); })
-  .catch(err => console.error('❌ MongoDB error:', err));
+let _mongoReady = false;
+async function connectDB() {
+  if (_mongoReady) return;
+  await mongoose.connect(MONGO_URI);
+  _mongoReady = true;
+  console.log('✅ MongoDB connected');
+  await initAdmin();
+}
+// Middleware: ensure DB is connected before every request
+app.use(async (req, res, next) => {
+  try { await connectDB(); next(); }
+  catch (e) { res.status(500).json({ error: 'Database connection failed: ' + e.message }); }
+});
 
 // ─── Schemas ──────────────────────────────────────────────────────────────────
 const StudentSchema = new mongoose.Schema({
@@ -175,8 +183,7 @@ app.post('/api/auth/change-password', auth, async (req, res) => {
 app.post('/api/admin/upload-csv', auth, adminOnly, upload.single('csv'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
   try {
-    const content = fs.readFileSync(req.file.path, 'utf8');
-    fs.unlinkSync(req.file.path);
+    const content = req.file.buffer.toString('utf8');
 
     const rows = parse(content, { columns: true, skip_empty_lines: true, trim: true });
     if (!rows.length) return res.status(400).json({ error: 'CSV is empty' });
@@ -302,5 +309,10 @@ app.post('/api/attendance/mark', auth, adminOnly, async (req, res) => {
 // Serve frontend
 app.get('/{*any}', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 CRT Attendance Portal running at http://localhost:${PORT}`));
+// Export for Vercel serverless; also start locally when run directly
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => console.log(`🚀 CRT Attendance Portal running at http://localhost:${PORT}`));
+}
+
+module.exports = app;
