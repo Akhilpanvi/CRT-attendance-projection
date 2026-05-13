@@ -50,8 +50,8 @@ export default function MarkPage() {
       <Toast toast={toast} />
 
       <div className="mb-5">
-        <h1 className="text-lg font-bold text-gray-900">Mark Attendance</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Manually record a single attendance entry</p>
+        <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100">Mark Attendance</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Manually record a single attendance entry</p>
       </div>
 
       <div className="card">
@@ -69,14 +69,15 @@ export default function MarkPage() {
         </form>
 
         {student && (
-          <div className="mt-3 flex items-center gap-3 bg-gray-50 border border-gray-200 rounded p-3">
-            <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold shrink-0 text-xs"
-                 style={{ background: '#5b21b6' }}>
+          <div className="mt-3 flex items-center gap-3 bg-slate-50 dark:bg-slate-700/50
+                          border border-slate-200 dark:border-slate-600 rounded p-3">
+            <div className="w-9 h-9 rounded-full flex items-center justify-center
+                            text-white font-bold shrink-0 text-xs bg-slate-700 dark:bg-slate-600">
               {student.name.split(' ').map(w => w[0]).join('').slice(0, 2)}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="font-medium text-sm text-gray-900">{student.name}</div>
-              <div className="text-xs text-gray-400 mt-0.5">
+              <div className="font-medium text-sm text-slate-900 dark:text-slate-100">{student.name}</div>
+              <div className="text-xs text-slate-400 mt-0.5">
                 {[student.branch, student.dept, student.crtSec, `Room ${student.crtRoom}`].filter(Boolean).join(' · ')}
               </div>
             </div>
@@ -116,9 +117,9 @@ export default function MarkPage() {
                     value={s}
                     checked={status === s}
                     onChange={() => setStatus(s)}
-                    className="accent-purple-700 w-4 h-4"
+                    className="w-4 h-4 accent-slate-700"
                   />
-                  <span className={`text-sm font-medium ${s === 'present' ? 'text-green-700' : 'text-red-700'}`}>
+                  <span className={`text-sm font-medium ${s === 'present' ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`}>
                     {s === 'present' ? 'Present' : 'Absent'}
                   </span>
                 </label>

@@ -2,12 +2,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { fmtDate, pctColor } from '@/lib/helpers';
+import ThemeToggle from '@/components/ThemeToggle';
 
 function PctBar({ pct }) {
   const color = pctColor(pct);
   return (
     <div className="flex items-center gap-2">
-      <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+      <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
         <div className="h-full rounded-full" style={{ width: `${pct}%`, background: color }} />
       </div>
       <span className="text-sm font-bold min-w-[42px] text-right" style={{ color }}>{pct}%</span>
@@ -35,13 +36,13 @@ export default function StudentPage() {
   }
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <p className="text-gray-400 text-sm">Loading…</p>
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+      <p className="text-slate-400 text-sm">Loading…</p>
     </div>
   );
 
   if (error) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 p-4">
       <div className="alert-danger max-w-sm">{error}</div>
     </div>
   );
@@ -51,22 +52,24 @@ export default function StudentPage() {
   const dates = Object.keys(stats.byDate || {}).sort().reverse();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Top bar */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-0 flex items-center" style={{ height: 52 }}>
+      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-4 flex items-center" style={{ height: 52 }}>
           <div className="flex items-center gap-2.5 mr-4">
-            <div className="w-7 h-7 rounded flex items-center justify-center text-xs font-black text-white shrink-0"
-                 style={{ background: '#5b21b6' }}>KL</div>
-            <span className="font-semibold text-sm text-gray-800">CRT Attendance Portal</span>
+            <div className="w-7 h-7 rounded flex items-center justify-center text-xs font-black
+                            text-white shrink-0 bg-slate-800 dark:bg-slate-700">KL</div>
+            <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">CRT Attendance Portal</span>
           </div>
-          <span className="hidden sm:block text-gray-300 text-xs mr-2">·</span>
-          <span className="hidden sm:block text-xs text-gray-400">Y-23 Summer CRT Training</span>
-          <div className="ml-auto">
+          <span className="hidden sm:block text-slate-300 dark:text-slate-600 text-xs mr-2">·</span>
+          <span className="hidden sm:block text-xs text-slate-400 dark:text-slate-500">Y-23 Summer CRT Training</span>
+          <div className="ml-auto flex items-center gap-1">
+            <ThemeToggle />
             <button
               onClick={logout}
-              className="text-xs text-gray-500 hover:text-gray-900 border border-gray-200 hover:border-gray-300
-                         rounded px-3 py-1.5 transition-colors font-medium">
+              className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100
+                         border border-slate-200 dark:border-slate-600 hover:border-slate-300
+                         rounded px-3 py-1.5 transition-colors font-medium ml-1">
               Sign Out
             </button>
           </div>
@@ -75,55 +78,58 @@ export default function StudentPage() {
 
       <main className="max-w-4xl mx-auto px-4 py-6 space-y-4">
         {/* Profile */}
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-4">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center text-white text-base font-bold shrink-0"
-                 style={{ background: '#5b21b6' }}>
+            <div className="w-12 h-12 rounded-full flex items-center justify-center
+                            text-white text-base font-bold shrink-0 bg-slate-700 dark:bg-slate-600">
               {s.name.split(' ').map(w => w[0]).join('').slice(0, 2)}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="font-semibold text-gray-900 text-base leading-tight">{s.name}</div>
-              <div className="text-xs text-gray-400 mt-0.5">
+              <div className="font-semibold text-slate-900 dark:text-slate-100 text-base leading-tight">
+                {s.name}
+              </div>
+              <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
                 {[s.branch, s.dept, `Cluster ${s.cluster}`, s.crtSec, `Room ${s.crtRoom}`].filter(Boolean).join(' · ')}
               </div>
               <div className="mt-2.5 max-w-xs">
                 <PctBar pct={pct} />
               </div>
             </div>
-            <div className="text-right shrink-0">
-              <span className="badge-purple text-xs">{s.rollNumber}</span>
-            </div>
+            <span className="badge-purple text-xs shrink-0">{s.rollNumber}</span>
           </div>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-4 gap-3">
           {[
-            { label: 'Total Sessions', value: stats.total,   color: '#5b21b6' },
+            { label: 'Total Sessions', value: stats.total,   color: '#334155' },
             { label: 'Present',        value: stats.present, color: '#15803d' },
             { label: 'Absent',         value: stats.absent,  color: '#dc2626' },
             { label: 'Attendance',     value: pct + '%',     color: pctColor(pct) },
           ].map(item => (
-            <div key={item.label} className="bg-white border border-gray-200 rounded-lg p-4 text-center">
+            <div key={item.label}
+                 className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
+                            rounded-lg p-4 text-center">
               <div className="text-2xl font-bold" style={{ color: item.color }}>{item.value}</div>
-              <div className="text-[10px] uppercase tracking-wider text-gray-400 mt-1">{item.label}</div>
+              <div className="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 mt-1">
+                {item.label}
+              </div>
             </div>
           ))}
         </div>
 
         {/* Attendance log */}
-        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-            <div>
-              <h2 className="text-sm font-semibold text-gray-900">Attendance Log</h2>
-              <p className="text-xs text-gray-400 mt-0.5">
-                {dates.length} session{dates.length !== 1 ? 's' : ''} recorded
-              </p>
-            </div>
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
+                        rounded-lg overflow-hidden">
+          <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700">
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Attendance Log</h2>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+              {dates.length} session{dates.length !== 1 ? 's' : ''} recorded
+            </p>
           </div>
 
           {dates.length === 0 ? (
-            <p className="text-gray-400 text-sm text-center py-10">No attendance records yet.</p>
+            <p className="text-slate-400 text-sm text-center py-10">No attendance records yet.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-xs">

@@ -9,7 +9,7 @@ function PctBar({ pct }) {
   const color = pctColor(pct);
   return (
     <div className="flex items-center gap-2 min-w-[110px]">
-      <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+      <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
         <div className="h-full rounded-full" style={{ width: `${pct}%`, background: color }} />
       </div>
       <span className="text-xs font-bold min-w-[36px] text-right" style={{ color }}>{pct}%</span>
@@ -30,17 +30,23 @@ function Modal({ roll, name, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
-      <div className="bg-white rounded-lg border border-gray-200 w-full max-w-4xl max-h-[90vh] flex flex-col">
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-200">
-          <h3 className="font-semibold text-gray-900 text-sm">{name} — Attendance Detail</h3>
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
+                      rounded-lg w-full max-w-4xl max-h-[90vh] flex flex-col">
+        <div className="flex items-center justify-between px-5 py-3.5
+                        border-b border-slate-200 dark:border-slate-700">
+          <h3 className="font-semibold text-slate-900 dark:text-slate-100 text-sm">
+            {name} — Attendance Detail
+          </h3>
           <button onClick={onClose}
-                  className="text-gray-400 hover:text-gray-700 text-lg leading-none font-bold w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100">
+                  className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-lg
+                             leading-none font-bold w-6 h-6 flex items-center justify-center
+                             rounded hover:bg-slate-100 dark:hover:bg-slate-700">
             &#10005;
           </button>
         </div>
         <div className="overflow-y-auto p-5 flex-1">
           {err   && <div className="alert-danger">{err}</div>}
-          {!data && !err && <p className="text-gray-400 text-sm">Loading…</p>}
+          {!data && !err && <p className="text-slate-400 text-sm">Loading…</p>}
           {data  && <DetailView data={data} />}
         </div>
       </div>
@@ -54,14 +60,15 @@ function DetailView({ data }) {
   const dates = Object.keys(stats.byDate || {}).sort().reverse();
   return (
     <>
-      <div className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded p-3 mb-4">
-        <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shrink-0 text-sm"
-             style={{ background: '#5b21b6' }}>
+      <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-700/50
+                      border border-slate-200 dark:border-slate-600 rounded p-3 mb-4">
+        <div className="w-10 h-10 rounded-full flex items-center justify-center
+                        text-white font-bold shrink-0 text-sm bg-slate-700 dark:bg-slate-600">
           {s.name.split(' ').map(w => w[0]).join('').slice(0, 2)}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="font-semibold text-sm text-gray-900">{s.name}</div>
-          <div className="text-xs text-gray-400 mt-0.5">
+          <div className="font-semibold text-sm text-slate-900 dark:text-slate-100">{s.name}</div>
+          <div className="text-xs text-slate-400 mt-0.5">
             {[s.branch, s.dept, `Cluster ${s.cluster}`, s.crtSec, `Room ${s.crtRoom}`].filter(Boolean).join(' · ')}
           </div>
         </div>
@@ -70,23 +77,24 @@ function DetailView({ data }) {
 
       <div className="grid grid-cols-4 gap-2 mb-4">
         {[
-          ['Total',   stats.total,   'text-purple-700'],
-          ['Present', stats.present, 'text-green-700'],
-          ['Absent',  stats.absent,  'text-red-700'],
+          ['Total',   stats.total,   'text-slate-800 dark:text-slate-200'],
+          ['Present', stats.present, 'text-green-700 dark:text-green-400'],
+          ['Absent',  stats.absent,  'text-red-700 dark:text-red-400'],
           ['%',       pct + '%',     null],
         ].map(([l, v, c]) => (
-          <div key={l} className="border border-gray-200 rounded p-2.5 text-center">
+          <div key={l} className="border border-slate-200 dark:border-slate-600
+                                   bg-slate-50 dark:bg-slate-700/40 rounded p-2.5 text-center">
             <div className={`text-xl font-bold ${c || ''}`}
                  style={!c ? { color: pctColor(pct) } : undefined}>{v}</div>
-            <div className="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">{l}</div>
+            <div className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">{l}</div>
           </div>
         ))}
       </div>
 
       {dates.length === 0
-        ? <p className="text-gray-400 text-sm">No attendance records yet.</p>
+        ? <p className="text-slate-400 text-sm">No attendance records yet.</p>
         : (
-          <div className="overflow-x-auto rounded border border-gray-200">
+          <div className="overflow-x-auto rounded border border-slate-200 dark:border-slate-700">
             <table className="w-full text-xs">
               <thead>
                 <tr>
@@ -167,8 +175,8 @@ export default function StudentsPage() {
 
       <div className="mb-4 flex items-center gap-3 flex-wrap">
         <div>
-          <h1 className="text-lg font-bold text-gray-900">All Students</h1>
-          <p className="text-xs text-gray-400 mt-0.5">Click any row to view full attendance</p>
+          <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100">All Students</h1>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Click any row to view full attendance</p>
         </div>
         <div className="ml-auto flex gap-2">
           <input
@@ -188,8 +196,9 @@ export default function StudentsPage() {
         </div>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="px-4 py-2 border-b border-gray-100 text-xs text-gray-400">
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+        <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-700
+                        text-xs text-slate-400 dark:text-slate-500">
           Showing {filtered.length} of {all.length} students
           {totalPages > 1 && ` · Page ${page} of ${totalPages}`}
         </div>
@@ -201,12 +210,16 @@ export default function StudentsPage() {
                   <th key={h} className="tbl-header">{h}</th>
                 ))}
               </tr>
-              <tr className="bg-gray-50 border-b border-gray-200">
+              <tr className="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700">
                 <th />
                 {[['name','Name'],['branch','Branch'],['dept','Dept'],['cluster','Cluster'],['crtSec','Sec'],['crtRoom','Room'],['roll','Reg. No']].map(([k, ph]) => (
                   <th key={k} className="px-2 py-1">
                     <input
-                      className="w-full border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-purple-400"
+                      className="w-full border border-slate-200 dark:border-slate-600
+                                 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100
+                                 rounded px-2 py-1 text-xs focus:outline-none
+                                 focus:border-slate-400 dark:focus:border-slate-500
+                                 placeholder-slate-400 dark:placeholder-slate-500"
                       placeholder={ph}
                       onChange={e => setFilter(k, e.target.value)}
                     />
@@ -217,23 +230,25 @@ export default function StudentsPage() {
             </thead>
             <tbody>
               {loading && (
-                <tr><td colSpan={11} className="text-center text-gray-400 py-10 text-sm">Loading students…</td></tr>
+                <tr><td colSpan={11} className="text-center text-slate-400 py-10 text-sm">Loading students…</td></tr>
               )}
               {!loading && paged.length === 0 && (
-                <tr><td colSpan={11} className="text-center text-gray-400 py-10 text-sm">No students found.</td></tr>
+                <tr><td colSpan={11} className="text-center text-slate-400 py-10 text-sm">No students found.</td></tr>
               )}
               {paged.map((s, i) => (
                 <tr key={s.rollNumber} className="tbl-row cursor-pointer"
                     onClick={() => setModal({ roll: s.rollNumber, name: s.name })}>
-                  <td className="tbl-cell text-center text-gray-400">{(page - 1) * PAGE_SIZE + i + 1}</td>
-                  <td className="tbl-cell font-medium text-gray-900">{s.name}</td>
+                  <td className="tbl-cell text-center text-slate-400">{(page - 1) * PAGE_SIZE + i + 1}</td>
+                  <td className="tbl-cell font-medium text-slate-900 dark:text-slate-100">{s.name}</td>
                   <td className="tbl-cell">{s.branch || '—'}</td>
                   <td className="tbl-cell">{s.dept    || '—'}</td>
                   <td className="tbl-cell">{s.cluster || '—'}</td>
                   <td className="tbl-cell">{s.crtSec  || '—'}</td>
                   <td className="tbl-cell">{s.crtRoom || '—'}</td>
                   <td className="tbl-cell"><span className="badge-purple">{s.rollNumber}</span></td>
-                  <td className="tbl-cell text-center font-semibold text-green-700">{s.stats?.present ?? 0}</td>
+                  <td className="tbl-cell text-center font-semibold text-green-700 dark:text-green-400">
+                    {s.stats?.present ?? 0}
+                  </td>
                   <td className="tbl-cell text-center">{s.stats?.total ?? 0}</td>
                   <td className="tbl-cell"><PctBar pct={s.stats?.overallPct ?? 0} /></td>
                 </tr>
@@ -243,11 +258,12 @@ export default function StudentsPage() {
         </div>
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-2.5 border-t border-gray-200">
+          <div className="flex items-center justify-between px-4 py-2.5
+                          border-t border-slate-200 dark:border-slate-700">
             <button className="btn-outline btn-sm" disabled={page === 1} onClick={() => setPage(p => p - 1)}>
               Prev
             </button>
-            <span className="text-xs text-gray-500">Page {page} of {totalPages}</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">Page {page} of {totalPages}</span>
             <button className="btn-outline btn-sm" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>
               Next
             </button>
