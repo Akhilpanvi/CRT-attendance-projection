@@ -243,7 +243,7 @@ app.post('/api/admin/upload-csv', auth, adminOnly, upload.single('csv'), async (
       } catch (e) { errors.push(`${rollNumber}: ${e.message}`); }
     }
 
-    res.json({ success: true, created, updated, attendanceCount, total: rows.length, slotCols, errors });
+    res.json({ success: true, created, updated, attendanceCount, total: rows.length, slotCols, errors, date: attendanceDate });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 

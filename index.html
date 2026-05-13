@@ -578,17 +578,19 @@ tbody td { padding: 9px 12px; white-space: nowrap; vertical-align: middle; }
             </div>
           </div>
 
-          <div class="form-row cols-2">
-            <div>
-              <label>Attendance Date</label>
-              <input type="date" id="upload-date">
-            </div>
-            <div style="display:flex; align-items:flex-end; gap:8px;">
-              <button class="btn btn-outline btn-full" onclick="downloadSampleCSV()" style="flex:1;">
-                ⬇ Sample CSV
-              </button>
+            <!-- Step 1: Pick date -->
+          <div style="background:var(--purple-light); border:1.5px solid #c4b5fd; border-radius:var(--radius); padding:14px 16px; margin-bottom:16px;">
+            <div style="font-size:11px; font-weight:700; color:var(--purple); letter-spacing:0.06em; text-transform:uppercase; margin-bottom:8px;">Step 1 — Select the Attendance Date</div>
+            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+              <div style="flex:1; min-width:180px;">
+                <input type="date" id="upload-date" onchange="onDateChange()" style="font-size:15px; font-weight:600; border-color:var(--purple);">
+              </div>
+              <div id="date-confirm" style="font-size:13px; color:var(--purple); font-weight:600; white-space:nowrap;"></div>
             </div>
           </div>
+
+          <!-- Step 2: Upload file -->
+          <div style="font-size:11px; font-weight:700; color:var(--purple); letter-spacing:0.06em; text-transform:uppercase; margin-bottom:8px;">Step 2 — Upload CSV File</div>
 
           <div class="upload-zone" id="upload-zone"
                onclick="document.getElementById('file-input').click()"
@@ -597,13 +599,16 @@ tbody td { padding: 9px 12px; white-space: nowrap; vertical-align: middle; }
                ondrop="onFileDrop(event)">
             <div class="uz-icon">📂</div>
             <div class="uz-main" id="upload-filename">Click to browse or drag &amp; drop</div>
-            <div class="uz-sub">Accepts .csv files only</div>
+            <div class="uz-sub" id="upload-date-preview">Accepts .csv files only</div>
           </div>
           <input type="file" id="file-input" accept=".csv" onchange="onFileSelect(this)">
 
-          <button class="btn btn-primary" id="upload-btn" onclick="uploadCSV()" disabled>
-            ⬆ Upload &amp; Import
-          </button>
+          <div style="display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;">
+            <button class="btn btn-primary" id="upload-btn" onclick="uploadCSV()" disabled style="flex:1;">
+              ⬆ Upload &amp; Import Attendance
+            </button>
+            <button class="btn btn-outline" onclick="downloadSampleCSV()">⬇ Sample CSV</button>
+          </div>
         </div>
 
         <div id="upload-result" class="hidden"></div>
@@ -879,6 +884,7 @@ function toggleStudentSidebar() {
 window.addEventListener('DOMContentLoaded', () => {
   $('upload-date').value = today();
   $('mark-date').value   = today();
+  onDateChange();
   $('login-pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
   $('login-user').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
@@ -1000,11 +1006,25 @@ function adminPane(p) {
 // ══════════════════════════════════════════════════════════════
 // ADMIN — Upload CSV
 // ══════════════════════════════════════════════════════════════
+function onDateChange() {
+  const d = $('upload-date').value;
+  if (d) {
+    $('date-confirm').textContent = '📅 Recording for: ' + fmtDate(d);
+    $('upload-date-preview').textContent = selectedFile
+      ? 'Will import for ' + fmtDate(d)
+      : 'Accepts .csv files only — will record for ' + fmtDate(d);
+  } else {
+    $('date-confirm').textContent = '';
+    $('upload-date-preview').textContent = 'Accepts .csv files only';
+  }
+}
 function onFileSelect(input) {
   const f = input.files[0]; if (!f) return;
   selectedFile = f;
   $('upload-filename').textContent = '📄 ' + f.name;
   $('upload-btn').disabled = false;
+  const d = $('upload-date').value;
+  $('upload-date-preview').textContent = d ? 'Will import for ' + fmtDate(d) : 'Please select a date above';
 }
 function onFileDrop(e) {
   e.preventDefault(); $('upload-zone').classList.remove('drag');
@@ -1013,6 +1033,8 @@ function onFileDrop(e) {
   selectedFile = f;
   $('upload-filename').textContent = '📄 ' + f.name;
   $('upload-btn').disabled = false;
+  const d = $('upload-date').value;
+  $('upload-date-preview').textContent = d ? 'Will import for ' + fmtDate(d) : 'Please select a date above';
 }
 
 function downloadSampleCSV() {
@@ -1047,18 +1069,29 @@ async function uploadCSV() {
     const d = await r.json();
     if (!r.ok) throw new Error(d.error);
 
+    const confirmedDate = d.date || date;
     $('upload-result').innerHTML = `
       <div class="card">
-        <div class="card-title">✅ Import Complete — ${fmtDate(date)}</div>
+        <div class="card-title">✅ Attendance Imported Successfully</div>
+
+        <!-- Date banner -->
+        <div style="background:var(--purple); color:#fff; border-radius:var(--radius); padding:14px 18px; margin-bottom:16px; display:flex; align-items:center; gap:12px;">
+          <span style="font-size:22px;">📅</span>
+          <div>
+            <div style="font-size:11px; opacity:0.75; text-transform:uppercase; letter-spacing:0.06em;">Attendance recorded for</div>
+            <div style="font-size:20px; font-weight:700; letter-spacing:-0.5px;">${fmtDate(confirmedDate)}</div>
+          </div>
+        </div>
+
         <div class="stats-row" style="margin-bottom:14px;">
           <div class="stat-box s-green"  style="margin:0;"><div class="stat-val">${d.created}</div><div class="stat-lbl">New Students</div></div>
           <div class="stat-box s-purple" style="margin:0;"><div class="stat-val">${d.updated}</div><div class="stat-lbl">Updated</div></div>
           <div class="stat-box"          style="margin:0;"><div class="stat-val">${d.attendanceCount}</div><div class="stat-lbl">Att. Records</div></div>
           <div class="stat-box"          style="margin:0;"><div class="stat-val">${d.total}</div><div class="stat-lbl">Total Rows</div></div>
         </div>
-        ${d.slotCols?.length ? `<div class="a-info alert"><span>📋</span><span>Slots imported: <strong>${d.slotCols.join(' · ')}</strong></span></div>` : ''}
-        ${d.errors?.length   ? `<div class="a-warn alert"><span>⚠️</span><span>${d.errors.length} row(s) had errors. First few: ${d.errors.slice(0,3).join('; ')}</span></div>` : ''}
-        <div class="text-sm muted">Student accounts created — username &amp; default password = Reg.No. Students must change password on first login.</div>
+        ${d.slotCols?.length ? `<div class="a-info alert"><span>📋</span><span>Slots: <strong>${d.slotCols.join(' · ')}</strong></span></div>` : ''}
+        ${d.errors?.length   ? `<div class="a-warn alert"><span>⚠️</span><span>${d.errors.length} row(s) had errors: ${d.errors.slice(0,3).join('; ')}</span></div>` : ''}
+        <div class="text-sm muted">Student accounts auto-created — username &amp; default password = Reg.No. First login requires password change.</div>
       </div>`;
     show('upload-result');
     toast(`Imported ${d.total} students · ${d.attendanceCount} records`);
