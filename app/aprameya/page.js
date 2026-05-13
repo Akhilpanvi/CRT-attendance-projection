@@ -133,25 +133,24 @@ function CircleView({ members, stats, fetching, onAdd, onRemove, onSelect, onRef
         </p>
       )}
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         {members.map(roll => {
-          const d    = stats[roll];
-          const s    = d?.stats;
-          const b75  = s ? calcBunk(s.present, s.total, 75) : null;
-          const weeks = (s?.weeks || []).slice(0, 3);
-          const isSelected = selected === roll;
-
-          const b85  = s ? calcBunk(s.present, s.total, 85) : null;
+          const d        = stats[roll];
+          const s        = d?.stats;
+          const b75      = s ? calcBunk(s.present, s.total, 75) : null;
+          const b85      = s ? calcBunk(s.present, s.total, 85) : null;
+          const weeks    = (s?.weeks || []).slice(0, 4);
+          const isExpanded = selected === roll;
 
           return (
             <div key={roll}
-                 className={`border rounded-lg overflow-hidden transition-colors cursor-pointer
-                   ${isSelected
-                     ? 'border-slate-500 dark:border-slate-400'
-                     : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'}`}
-                 onClick={() => onSelect(isSelected ? null : roll)}>
-              <div className="flex items-center gap-3 px-3 py-2.5
-                              bg-slate-50 dark:bg-slate-700/40">
+                 className={`border rounded-lg overflow-hidden
+                   ${isExpanded
+                     ? 'border-slate-400 dark:border-slate-500'
+                     : 'border-slate-200 dark:border-slate-600'}`}>
+
+              {/* ── Header row ─────────────────────────────────────── */}
+              <div className="flex items-center gap-3 px-3 py-2.5 bg-slate-50 dark:bg-slate-700/40">
                 <div className="w-8 h-8 rounded-full bg-slate-600 dark:bg-slate-500 flex items-center
                                 justify-center text-white text-xs font-bold shrink-0">
                   {d?.student?.name
@@ -170,21 +169,16 @@ function CircleView({ members, stats, fetching, onAdd, onRemove, onSelect, onRef
                         : [d.student.branch, d.student.dept, d.student.crtSec].filter(Boolean).join(' · ')}
                   </div>
                 </div>
-                {s && (
-                  <div className="flex items-center gap-3 shrink-0">
-                    <div className="text-right hidden sm:block">
-                      <div className="text-xs text-slate-400">{s.present}/{s.total}</div>
-                      {b75 && (
-                        <div className={`text-xs font-medium ${b75.canBunk > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                          {b75.canBunk > 0 ? `skip ${b75.canBunk}` : `need ${b75.needAttend}`}
-                        </div>
-                      )}
-                    </div>
-                    <PctPill pct={s.overallPct} />
-                  </div>
-                )}
+                {s && <PctPill pct={s.overallPct} />}
                 <button
-                  onClick={e => { e.stopPropagation(); onRemove(roll); }}
+                  onClick={() => onSelect(isExpanded ? null : roll)}
+                  className="text-xs text-slate-400 hover:text-slate-700 dark:hover:text-slate-200
+                             border border-slate-200 dark:border-slate-600 rounded px-2 py-1
+                             hover:border-slate-300 dark:hover:border-slate-500 transition-colors shrink-0">
+                  {isExpanded ? 'Less' : 'Details'}
+                </button>
+                <button
+                  onClick={() => onRemove(roll)}
                   className="text-slate-300 hover:text-red-500 dark:text-slate-600 dark:hover:text-red-400 shrink-0">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -192,11 +186,56 @@ function CircleView({ members, stats, fetching, onAdd, onRemove, onSelect, onRef
                 </button>
               </div>
 
-              {/* Expanded detail */}
-              {isSelected && s && (
+              {/* ── Bunk calculator — always visible ───────────────── */}
+              {s ? (
+                <div className="px-3 py-2.5 border-t border-slate-100 dark:border-slate-700
+                                bg-white dark:bg-slate-800">
+                  <div className="text-[10px] font-semibold text-slate-400 dark:text-slate-500
+                                  uppercase tracking-wider mb-2">
+                    Bunk Calculator · {s.present}/{s.total} sessions
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { label: '75% threshold', data: b75 },
+                      { label: '85% threshold', data: b85 },
+                    ].map(({ label, data }) => (
+                      <div key={label}
+                           className="rounded border border-slate-100 dark:border-slate-700
+                                      bg-slate-50 dark:bg-slate-700/40 px-3 py-2">
+                        <div className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">{label}</div>
+                        {data && data.canBunk > 0 ? (
+                          <div className="flex items-baseline gap-1.5">
+                            <span className="text-2xl font-bold text-green-600 dark:text-green-400">{data.canBunk}</span>
+                            <span className="text-[10px] text-slate-400">
+                              sessions to skip
+                              <span className="block">
+                                ≈ {Math.floor(data.canBunk / 8)} day{Math.floor(data.canBunk / 8) !== 1 ? 's' : ''}
+                                {data.canBunk % 8 > 0 ? ` + ${data.canBunk % 8} slot${data.canBunk % 8 !== 1 ? 's' : ''}` : ''}
+                              </span>
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="flex items-baseline gap-1.5">
+                            <span className="text-2xl font-bold text-red-600 dark:text-red-400">{data?.needAttend ?? 0}</span>
+                            <span className="text-[10px] text-slate-400">sessions to recover</span>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : d === undefined ? (
+                <div className="px-3 py-3 border-t border-slate-100 dark:border-slate-700
+                                bg-white dark:bg-slate-800 text-xs text-slate-400 animate-pulse">
+                  Loading attendance…
+                </div>
+              ) : null}
+
+              {/* ── Expanded: stats + weekly + advice ──────────────── */}
+              {isExpanded && s && (
                 <div className="px-3 pb-3 pt-2 border-t border-slate-200 dark:border-slate-600
                                 bg-white dark:bg-slate-800">
-                  {/* Stats row */}
+                  {/* Stats */}
                   <div className="grid grid-cols-3 gap-2 mb-3">
                     {[
                       { l: 'Present', v: s.present, c: 'text-green-600 dark:text-green-400' },
@@ -211,65 +250,38 @@ function CircleView({ members, stats, fetching, onAdd, onRemove, onSelect, onRef
                     ))}
                   </div>
 
-                  {/* Bunk calculator results */}
-                  <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
-                    Bunk Calculator
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 mb-3">
-                    {[
-                      { label: '75% threshold', data: b75 },
-                      { label: '85% threshold', data: b85 },
-                    ].map(({ label, data }) => (
-                      <div key={label} className="border border-slate-200 dark:border-slate-600
-                                                  bg-slate-50 dark:bg-slate-700/40 rounded p-2.5">
-                        <div className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">{label}</div>
-                        {data && data.canBunk > 0 ? (
-                          <>
-                            <div className="text-xl font-bold text-green-600 dark:text-green-400">{data.canBunk}</div>
-                            <div className="text-[10px] text-slate-400 mt-0.5">sessions to skip</div>
-                            <div className="text-[10px] text-slate-500 mt-0.5">
-                              ≈ {Math.floor(data.canBunk / 8)} day{Math.floor(data.canBunk / 8) !== 1 ? 's' : ''}
-                              {data.canBunk % 8 > 0 ? ` + ${data.canBunk % 8} slot${data.canBunk % 8 !== 1 ? 's' : ''}` : ''}
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <div className="text-xl font-bold text-red-600 dark:text-red-400">{data?.needAttend ?? 0}</div>
-                            <div className="text-[10px] text-slate-400 mt-0.5">sessions to recover</div>
-                          </>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
                   {/* Weekly */}
                   {weeks.length > 0 && (
-                    <div className="space-y-1.5 mb-3">
-                      <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
+                    <div className="mb-3">
+                      <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
                         Weekly
                       </div>
-                      {weeks.map(w => (
-                        <div key={`${w.year}-${w.week}`} className="flex items-center gap-2 text-xs">
-                          <span className="text-slate-400 w-16 shrink-0">Week {w.week}</span>
-                          <MiniBar pct={w.pct} width={60} />
-                          <span className="font-medium" style={{ color: pctColor(w.pct) }}>{w.pct}%</span>
-                          <span className="text-slate-400">{w.present}/{w.total}</span>
-                        </div>
-                      ))}
+                      <div className="space-y-1.5">
+                        {weeks.map(w => (
+                          <div key={`${w.year}-${w.week}`} className="flex items-center gap-2 text-xs">
+                            <span className="text-slate-400 w-16 shrink-0">Week {w.week}</span>
+                            <MiniBar pct={w.pct} width={60} />
+                            <span className="font-medium" style={{ color: pctColor(w.pct) }}>{w.pct}%</span>
+                            <span className="text-slate-400">{w.present}/{w.total}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
 
                   {/* Advice */}
-                  <div className="space-y-1">
-                    <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
+                  <div>
+                    <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
                       Advice
                     </div>
-                    {generateAdvice(s).map((line, i) => (
-                      <div key={i} className="flex items-start gap-2 text-xs">
-                        <span className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${ADVICE_DOT[line.type]}`} />
-                        <span className={ADVICE_STYLE[line.type]}>{line.text}</span>
-                      </div>
-                    ))}
+                    <div className="space-y-1">
+                      {generateAdvice(s).map((line, i) => (
+                        <div key={i} className="flex items-start gap-2 text-xs">
+                          <span className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${ADVICE_DOT[line.type]}`} />
+                          <span className={ADVICE_STYLE[line.type]}>{line.text}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
