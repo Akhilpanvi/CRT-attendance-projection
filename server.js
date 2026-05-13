@@ -18,17 +18,31 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// ─── MongoDB — cached connection for serverless ───────────────────────────────
+// ─── MongoDB — global cached connection (survives Vercel warm invocations) ────
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/crt_attendance';
-let _mongoReady = false;
+
+// Disable mongoose buffering so queries fail fast instead of silently queuing
+mongoose.set('bufferCommands', false);
+
+// Cache on global so the connection persists across serverless warm starts
+if (!global._mongoCache) global._mongoCache = { conn: null, promise: null };
+const cache = global._mongoCache;
+
 async function connectDB() {
-  if (_mongoReady) return;
-  await mongoose.connect(MONGO_URI);
-  _mongoReady = true;
-  console.log('✅ MongoDB connected');
+  if (cache.conn && cache.conn.connection.readyState === 1) return cache.conn;
+  if (!cache.promise) {
+    cache.promise = mongoose.connect(MONGO_URI, {
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS:          45000,
+    }).then(m => { cache.conn = m; return m; })
+      .catch(err => { cache.promise = null; throw err; });
+  }
+  await cache.promise;
   await initAdmin();
+  console.log('✅ MongoDB connected');
 }
-// Middleware: ensure DB is connected before every request
+
+// Ensure connection before every request
 app.use(async (req, res, next) => {
   try { await connectDB(); next(); }
   catch (e) { res.status(500).json({ error: 'Database connection failed: ' + e.message }); }
