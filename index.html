@@ -7,73 +7,87 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+/* ── Reset ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --purple:       #6d28d9;
-  --purple-dark:  #5b21b6;
-  --purple-light: #ede9fe;
-  --purple-mid:   #7c3aed;
-  --text:         #1f2937;
-  --text-sm:      #6b7280;
-  --border:       #e5e7eb;
-  --bg:           #f3f4f6;
-  --white:        #ffffff;
-  --green:        #16a34a;
-  --green-bg:     #dcfce7;
-  --red:          #dc2626;
-  --red-bg:       #fee2e2;
-  --amber:        #d97706;
-  --amber-bg:     #fef3c7;
-  --radius:       8px;
-  --shadow:       0 1px 4px rgba(0,0,0,0.10);
-  --shadow-md:    0 4px 16px rgba(0,0,0,0.12);
+  /* KL ERP purple palette */
+  --sidebar-bg:    #5b21b6;
+  --sidebar-hover: rgba(255,255,255,0.10);
+  --sidebar-active:rgba(255,255,255,0.18);
+  --sidebar-text:  rgba(255,255,255,0.88);
+  --sidebar-muted: rgba(255,255,255,0.50);
+  --sidebar-w:     240px;
+
+  --purple:        #6d28d9;
+  --purple-dark:   #4c1d95;
+  --purple-light:  #ede9fe;
+  --purple-btn:    #7c3aed;
+
+  --text:          #1f2937;
+  --text-sm:       #6b7280;
+  --border:        #e5e7eb;
+  --bg:            #f5f3ff;
+  --white:         #ffffff;
+
+  --green:         #16a34a;
+  --green-bg:      #dcfce7;
+  --red:           #dc2626;
+  --red-bg:        #fee2e2;
+  --amber:         #d97706;
+  --amber-bg:      #fef3c7;
+
+  --radius:        6px;
+  --shadow:        0 1px 4px rgba(0,0,0,0.08);
+  --shadow-md:     0 4px 20px rgba(0,0,0,0.13);
 }
 
 html { scroll-behavior: smooth; }
 body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
 
 /* ── Utilities ── */
-.hidden   { display: none !important; }
-.mt4      { margin-top: 4px; }
-.mt8      { margin-top: 8px; }
-.mt16     { margin-top: 16px; }
-.mt24     { margin-top: 24px; }
-.bold     { font-weight: 600; }
-.muted    { color: var(--text-sm); }
-.text-sm  { font-size: 12px; }
+.hidden      { display: none !important; }
+.muted       { color: var(--text-sm); }
+.text-sm     { font-size: 12px; }
 .text-center { text-align: center; }
+.mt8         { margin-top: 8px; }
+.mt16        { margin-top: 16px; }
 
-/* ── Inputs & Buttons ── */
-label { display: block; font-size: 12px; font-weight: 500; color: var(--text-sm); margin-bottom: 5px; letter-spacing: 0.03em; text-transform: uppercase; }
+/* ── Form elements ── */
+label {
+  display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--text-sm); margin-bottom: 5px;
+}
 input, select {
-  width: 100%; padding: 9px 12px;
+  width: 100%; padding: 8px 12px;
   border: 1px solid var(--border); border-radius: var(--radius);
-  font-family: inherit; font-size: 14px; color: var(--text);
+  font-family: inherit; font-size: 13px; color: var(--text);
   background: var(--white); outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-input:focus, select:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(109,40,217,0.12); }
-input::placeholder { color: #9ca3af; }
+input:focus, select:focus {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(109,40,217,0.12);
+}
+input::placeholder { color: #d1d5db; }
 select option { background: var(--white); }
 
+/* ── Buttons ── */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  padding: 9px 20px; border-radius: var(--radius);
-  font-family: inherit; font-size: 14px; font-weight: 600;
+  padding: 8px 18px; border-radius: var(--radius);
+  font-family: inherit; font-size: 13px; font-weight: 600;
   cursor: pointer; border: none; transition: all 0.18s; white-space: nowrap;
 }
-.btn-primary { background: var(--purple); color: #fff; }
+.btn-primary { background: var(--purple-btn); color: #fff; }
 .btn-primary:hover { background: var(--purple-dark); }
 .btn-outline { background: var(--white); color: var(--purple); border: 1.5px solid var(--purple); }
 .btn-outline:hover { background: var(--purple-light); }
-.btn-sm { padding: 6px 14px; font-size: 13px; }
+.btn-sm   { padding: 6px 14px; font-size: 12px; }
 .btn-full { width: 100%; }
-.btn:disabled { opacity: 0.45; cursor: not-allowed; }
-.btn-green  { background: var(--green);  color: #fff; }
+.btn-green { background: var(--green); color: #fff; }
 .btn-green:hover { filter: brightness(0.9); }
-.btn-red    { background: var(--red);    color: #fff; }
-.btn-red:hover   { filter: brightness(0.9); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
 /* ── Cards ── */
 .card {
@@ -82,158 +96,243 @@ select option { background: var(--white); }
   box-shadow: var(--shadow); margin-bottom: 16px;
 }
 .card-title {
-  font-size: 13px; font-weight: 600; letter-spacing: 0.06em;
-  text-transform: uppercase; color: var(--text-sm); margin-bottom: 16px;
-}
-
-/* ── Form groups ── */
-.form-row { display: grid; gap: 12px; margin-bottom: 14px; }
-.form-row.cols-2 { grid-template-columns: 1fr 1fr; }
-.form-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
-@media (max-width: 540px) {
-  .form-row.cols-2, .form-row.cols-3 { grid-template-columns: 1fr; }
-}
-
-/* ─────────────────────────────────────────────
-   LOGIN SCREEN
-───────────────────────────────────────────── */
-#screen-login {
-  min-height: 100vh; display: flex; align-items: center; justify-content: center;
-  padding: 20px;
-  background: linear-gradient(135deg, #6d28d9 0%, #4c1d95 100%);
-}
-.login-box {
-  width: 100%; max-width: 400px;
-  background: var(--white); border-radius: 14px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.25); overflow: hidden;
-}
-.login-header {
-  background: linear-gradient(135deg, #6d28d9, #4c1d95);
-  padding: 28px 32px 24px; text-align: center; color: #fff;
-}
-.login-logo {
-  width: 52px; height: 52px; border-radius: 14px;
-  background: rgba(255,255,255,0.2); display: flex; align-items: center;
-  justify-content: center; font-size: 24px; font-weight: 800; margin: 0 auto 14px;
-  border: 2px solid rgba(255,255,255,0.3);
-}
-.login-title { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
-.login-sub   { font-size: 12px; opacity: 0.8; margin-top: 4px; }
-.login-body  { padding: 28px 32px 32px; }
-.login-body .form-row { margin-bottom: 12px; }
-.login-body .form-row:last-of-type { margin-bottom: 20px; }
-.login-footer { text-align: center; margin-top: 18px; font-size: 12px; color: var(--text-sm); }
-
-/* ─────────────────────────────────────────────
-   CHANGE PASSWORD SCREEN
-───────────────────────────────────────────── */
-#screen-changepw {
-  min-height: 100vh; display: flex; align-items: center; justify-content: center;
-  padding: 20px;
-  background: linear-gradient(135deg, #6d28d9 0%, #4c1d95 100%);
-}
-.changepw-box {
-  width: 100%; max-width: 400px;
-  background: var(--white); border-radius: 14px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.25); padding: 32px;
-}
-.changepw-box h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
-.changepw-box p  { font-size: 13px; color: var(--text-sm); margin-bottom: 24px; }
-.changepw-box .form-row { margin-bottom: 12px; }
-
-/* ─────────────────────────────────────────────
-   MAIN LAYOUT (admin + student)
-───────────────────────────────────────────── */
-#screen-admin, #screen-student { display: flex; flex-direction: column; min-height: 100vh; }
-
-/* Top navbar */
-.navbar {
-  background: var(--purple); color: #fff;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 20px; height: 56px; position: sticky; top: 0; z-index: 100;
-  box-shadow: 0 2px 8px rgba(109,40,217,0.3);
-}
-.navbar-brand { display: flex; align-items: center; gap: 10px; }
-.navbar-icon {
-  width: 34px; height: 34px; border-radius: 8px;
-  background: rgba(255,255,255,0.2); display: flex; align-items: center;
-  justify-content: center; font-size: 16px; font-weight: 800;
-  border: 1.5px solid rgba(255,255,255,0.3);
-}
-.navbar-title { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
-.navbar-title span { opacity: 0.7; font-weight: 400; font-size: 13px; margin-left: 6px; }
-.navbar-user {
+  font-size: 15px; font-weight: 700; color: var(--text);
+  margin-bottom: 16px; padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
   display: flex; align-items: center; gap: 8px;
-  cursor: pointer; background: rgba(255,255,255,0.15);
-  border-radius: 20px; padding: 5px 14px 5px 8px;
-  font-size: 13px; font-weight: 500; transition: background 0.2s;
-  border: none; color: #fff; font-family: inherit;
-}
-.navbar-user:hover { background: rgba(255,255,255,0.25); }
-.navbar-avatar {
-  width: 26px; height: 26px; border-radius: 50%;
-  background: rgba(255,255,255,0.3); display: flex; align-items: center;
-  justify-content: center; font-size: 11px; font-weight: 700;
 }
 
-/* Sub-header / tab strip */
-.tab-strip {
+/* ── Form grid ── */
+.form-row { display: grid; gap: 12px; margin-bottom: 14px; }
+.cols-2 { grid-template-columns: 1fr 1fr; }
+.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+@media (max-width: 640px) {
+  .cols-2, .cols-3, .cols-4 { grid-template-columns: 1fr; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   AUTH SCREENS (login + change password) — Centered card
+══════════════════════════════════════════════════════════════ */
+.auth-screen {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  background: linear-gradient(160deg, #4c1d95 0%, #6d28d9 50%, #7c3aed 100%);
+}
+.auth-box {
+  width: 100%; max-width: 420px;
+  background: var(--white); border-radius: 14px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.28); overflow: hidden;
+}
+.auth-header {
+  background: linear-gradient(135deg, #4c1d95, #7c3aed);
+  padding: 30px 32px 26px; text-align: center; color: #fff;
+}
+.auth-logo {
+  width: 56px; height: 56px; border-radius: 14px;
+  background: rgba(255,255,255,0.18); margin: 0 auto 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; font-weight: 800; border: 2px solid rgba(255,255,255,0.3);
+  letter-spacing: -1px;
+}
+.auth-title { font-size: 20px; font-weight: 700; }
+.auth-sub   { font-size: 12px; opacity: 0.75; margin-top: 4px; line-height: 1.4; }
+.auth-body  { padding: 28px 32px 32px; }
+.auth-body .form-row { margin-bottom: 14px; }
+.auth-hint  { text-align: center; margin-top: 16px; font-size: 12px; color: var(--text-sm); line-height: 1.5; }
+.err-msg    { color: var(--red); font-size: 12px; margin-top: 6px; min-height: 16px; text-align: center; }
+
+/* ══════════════════════════════════════════════════════════════
+   ADMIN LAYOUT — Sidebar + Top bar + Content
+══════════════════════════════════════════════════════════════ */
+#screen-admin, #screen-student {
+  display: flex; min-height: 100vh;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: var(--sidebar-w); background: var(--sidebar-bg);
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; bottom: 0; z-index: 200;
+  overflow-y: auto; transition: transform 0.28s ease;
+  scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.15) transparent;
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+
+.sidebar-brand {
+  padding: 18px 16px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  display: flex; align-items: center; gap: 10px;
+}
+.sidebar-logo {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: rgba(255,255,255,0.18); display: flex;
+  align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 800; color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.28); flex-shrink: 0;
+  letter-spacing: -1px;
+}
+.sidebar-brand-text { color: #fff; }
+.sidebar-brand-text .t1 { font-size: 14px; font-weight: 700; display: block; }
+.sidebar-brand-text .t2 { font-size: 10px; opacity: 0.6; display: block; margin-top: 1px; }
+
+.sidebar-section {
+  padding: 16px 0 0;
+  flex: 1;
+}
+.sidebar-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--sidebar-muted);
+  padding: 0 18px 6px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 18px; color: var(--sidebar-text);
+  cursor: pointer; border: none; background: none;
+  font-family: inherit; font-size: 13px; font-weight: 500;
+  text-align: left; width: 100%; transition: background 0.15s;
+  border-left: 3px solid transparent;
+  text-decoration: none;
+}
+.nav-item:hover   { background: var(--sidebar-hover); }
+.nav-item.active  { background: var(--sidebar-active); border-left-color: #e9d5ff; color: #fff; font-weight: 600; }
+.nav-icon { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
+
+.sidebar-footer {
+  padding: 12px 16px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+}
+.user-chip {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: var(--radius);
+  background: rgba(255,255,255,0.1); margin-bottom: 8px;
+}
+.user-av {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(255,255,255,0.25); display: flex;
+  align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.user-info .u-name { font-size: 12px; font-weight: 600; color: #fff; }
+.user-info .u-role { font-size: 10px; color: var(--sidebar-muted); }
+.btn-logout {
+  width: 100%; padding: 7px; border-radius: var(--radius);
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+  color: #fff; font-family: inherit; font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: background 0.15s;
+}
+.btn-logout:hover { background: rgba(255,255,255,0.2); }
+
+/* Sidebar overlay (mobile) */
+.sidebar-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5); z-index: 190;
+}
+
+/* ── Main wrapper (right of sidebar) ── */
+.main-wrap {
+  flex: 1; margin-left: var(--sidebar-w);
+  display: flex; flex-direction: column; min-height: 100vh;
+}
+
+/* ── Top bar ── */
+.topbar {
   background: var(--white); border-bottom: 1px solid var(--border);
-  display: flex; gap: 0; overflow-x: auto; padding: 0 16px;
-  scrollbar-width: none;
+  height: 52px; display: flex; align-items: center;
+  padding: 0 20px; gap: 12px; position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
-.tab-strip::-webkit-scrollbar { display: none; }
-.tab-btn {
-  padding: 14px 20px; font-family: inherit; font-size: 13px; font-weight: 500;
-  color: var(--text-sm); background: none; border: none; cursor: pointer;
-  border-bottom: 2.5px solid transparent; white-space: nowrap;
-  transition: all 0.18s; letter-spacing: 0.01em;
+.topbar-hamburger {
+  display: none; background: none; border: none; cursor: pointer;
+  font-size: 20px; color: var(--text); padding: 4px; border-radius: 4px;
 }
-.tab-btn:hover  { color: var(--purple); }
-.tab-btn.active { color: var(--purple); border-bottom-color: var(--purple); font-weight: 600; }
+.topbar-hamburger:hover { background: var(--bg); }
+.topbar-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.topbar-sub   { font-size: 12px; color: var(--text-sm); margin-left: 8px; }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
 
-/* Content wrapper */
-.content { flex: 1; padding: 20px; max-width: 1100px; margin: 0 auto; width: 100%; }
+/* ── Content ── */
+.content { padding: 20px; flex: 1; }
+.page-header { margin-bottom: 18px; }
+.page-title { font-size: 18px; font-weight: 700; }
+.page-sub   { font-size: 12px; color: var(--text-sm); margin-top: 3px; }
 
-/* ── Table ── */
-.table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+/* ══════════════════════════════════════════════════════════════
+   STATS BOXES
+══════════════════════════════════════════════════════════════ */
+.stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 18px; }
+@media (max-width: 640px) { .stats-row { grid-template-columns: repeat(2,1fr); } }
+.stat-box {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px 14px; text-align: center;
+  box-shadow: var(--shadow);
+}
+.stat-val { font-size: 26px; font-weight: 700; line-height: 1.1; }
+.stat-lbl { font-size: 10px; color: var(--text-sm); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+.stat-box.s-purple .stat-val { color: var(--purple); }
+.stat-box.s-green  .stat-val { color: var(--green); }
+.stat-box.s-red    .stat-val { color: var(--red); }
+.stat-box.s-amber  .stat-val { color: var(--amber); }
+
+/* ══════════════════════════════════════════════════════════════
+   TABLES — KL ERP style
+══════════════════════════════════════════════════════════════ */
+.table-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden;
+  margin-bottom: 16px;
+}
+.table-toolbar {
+  padding: 12px 16px; display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid var(--border); flex-wrap: wrap;
+}
+.table-toolbar-title { font-size: 14px; font-weight: 700; flex: 1; min-width: 120px; }
+.search-box {
+  position: relative; min-width: 220px;
+}
+.search-box input { padding-left: 32px; }
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 13px; color: var(--text-sm); pointer-events: none; }
+.showing-txt { font-size: 12px; color: var(--text-sm); padding: 8px 16px; border-bottom: 1px solid var(--border); }
+
+.tbl-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 thead th {
-  background: var(--purple); color: #fff; padding: 11px 14px;
-  font-weight: 600; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase;
-  text-align: left; white-space: nowrap;
+  background: var(--purple); color: #fff; padding: 9px 12px;
+  font-weight: 600; font-size: 11px; letter-spacing: 0.06em;
+  text-transform: uppercase; text-align: left; white-space: nowrap;
+  position: sticky; top: 0;
 }
-thead th:first-child { border-radius: 0; }
-tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+.filter-row th {
+  background: #f9fafb; padding: 5px 6px; border-bottom: 1px solid var(--border);
+}
+.filter-row input {
+  padding: 4px 8px; font-size: 12px; border-radius: 4px;
+  border: 1px solid var(--border); background: var(--white);
+}
+tbody tr { border-bottom: 1px solid var(--border); transition: background 0.13s; }
 tbody tr:last-child { border-bottom: none; }
-tbody tr:hover { background: #f9f7ff; }
-tbody td { padding: 10px 14px; white-space: nowrap; vertical-align: middle; }
-.td-center { text-align: center; }
-.tr-clickable { cursor: pointer; }
+tbody tr:hover { background: #f5f3ff; }
+tbody td { padding: 9px 12px; white-space: nowrap; vertical-align: middle; }
+.td-c { text-align: center; }
+.tr-link { cursor: pointer; }
 
 /* ── Badges ── */
 .badge {
   display: inline-flex; align-items: center; justify-content: center;
-  padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; min-width: 28px;
+  padding: 2px 10px; border-radius: 20px; font-size: 12px; font-weight: 700;
 }
-.badge-present { background: var(--green-bg); color: var(--green); }
-.badge-absent  { background: var(--red-bg);   color: var(--red); }
-.badge-dash    { background: #f3f4f6; color: #9ca3af; }
-.badge-purple  { background: var(--purple-light); color: var(--purple); }
+.b-present { background: var(--green-bg); color: var(--green); }
+.b-absent  { background: var(--red-bg);   color: var(--red); }
+.b-dash    { background: #f3f4f6;  color: #9ca3af; }
+.b-purple  { background: var(--purple-light); color: var(--purple); }
+.b-amber   { background: var(--amber-bg); color: var(--amber); }
 
-/* ── Stats row ── */
-.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
-@media (max-width: 640px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
-.stat-box {
-  background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 16px; text-align: center; box-shadow: var(--shadow);
-}
-.stat-val  { font-size: 28px; font-weight: 700; line-height: 1; }
-.stat-lbl  { font-size: 11px; color: var(--text-sm); margin-top: 5px; text-transform: uppercase; letter-spacing: 0.06em; }
-.stat-box.good   .stat-val { color: var(--green); }
-.stat-box.bad    .stat-val { color: var(--red); }
-.stat-box.warn   .stat-val { color: var(--amber); }
-.stat-box.purple .stat-val { color: var(--purple); }
+/* ── Pct bar ── */
+.pct-wrap { display: flex; align-items: center; gap: 7px; min-width: 110px; }
+.pct-track { flex: 1; height: 7px; background: #e5e7eb; border-radius: 4px; overflow: hidden; }
+.pct-fill  { height: 100%; border-radius: 4px; transition: width 0.4s; }
+.pct-num   { font-size: 12px; font-weight: 700; min-width: 36px; text-align: right; }
 
 /* ── Profile bar ── */
 .profile-bar {
@@ -241,391 +340,482 @@ tbody td { padding: 10px 14px; white-space: nowrap; vertical-align: middle; }
   padding: 14px 18px; display: flex; align-items: center; gap: 14px;
   box-shadow: var(--shadow); margin-bottom: 16px; flex-wrap: wrap;
 }
-.p-avatar {
-  width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
+.p-av {
+  width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0;
   background: linear-gradient(135deg, var(--purple), #a855f7);
   display: flex; align-items: center; justify-content: center;
   font-weight: 700; font-size: 16px; color: #fff;
 }
-.p-name  { font-weight: 600; font-size: 15px; }
-.p-meta  { font-size: 12px; color: var(--text-sm); margin-top: 2px; }
-.p-roll  { margin-left: auto; font-size: 13px; font-weight: 600; color: var(--purple); background: var(--purple-light); padding: 4px 12px; border-radius: 20px; }
+.p-name { font-weight: 600; font-size: 15px; }
+.p-meta { font-size: 12px; color: var(--text-sm); margin-top: 2px; }
+.p-roll { margin-left: auto; font-size: 13px; font-weight: 600; color: var(--purple); background: var(--purple-light); padding: 4px 12px; border-radius: 20px; }
 
-/* ── Alert ── */
-.alert { padding: 11px 15px; border-radius: var(--radius); font-size: 13px; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 8px; }
-.alert-warn    { background: var(--amber-bg);  border: 1px solid #fcd34d; color: #92400e; }
-.alert-success { background: var(--green-bg);  border: 1px solid #86efac; color: #14532d; }
-.alert-danger  { background: var(--red-bg);    border: 1px solid #fca5a5; color: #7f1d1d; }
-.alert-info    { background: var(--purple-light); border: 1px solid #c4b5fd; color: #4c1d95; }
+/* ── Alerts ── */
+.alert { padding: 10px 14px; border-radius: var(--radius); font-size: 13px; margin-bottom: 14px; display: flex; align-items: flex-start; gap: 8px; }
+.a-success { background: var(--green-bg);    border: 1px solid #86efac; color: #14532d; }
+.a-warn    { background: var(--amber-bg);    border: 1px solid #fcd34d; color: #92400e; }
+.a-danger  { background: var(--red-bg);      border: 1px solid #fca5a5; color: #7f1d1d; }
+.a-info    { background: var(--purple-light); border: 1px solid #c4b5fd; color: #4c1d95; }
 
 /* ── Upload zone ── */
 .upload-zone {
   border: 2px dashed var(--border); border-radius: var(--radius);
-  padding: 32px 20px; text-align: center; cursor: pointer;
-  transition: all 0.2s; background: #fafafa;
+  padding: 30px 20px; text-align: center; cursor: pointer;
+  transition: all 0.2s; background: #fafafa; margin: 4px 0 16px;
 }
 .upload-zone:hover, .upload-zone.drag { border-color: var(--purple); background: var(--purple-light); }
-.upload-icon { font-size: 36px; margin-bottom: 10px; }
-.upload-zone p  { color: var(--text-sm); font-size: 13px; margin-top: 6px; }
-.upload-zone strong { color: var(--purple); }
+.upload-zone .uz-icon { font-size: 38px; margin-bottom: 8px; }
+.upload-zone .uz-main { font-weight: 600; color: var(--purple); }
+.upload-zone .uz-sub  { font-size: 12px; color: var(--text-sm); margin-top: 4px; }
 #file-input { display: none; }
 
-/* ── Search box ── */
-.search-wrap { position: relative; margin-bottom: 14px; }
-.search-wrap input { padding-left: 36px; }
-.search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); font-size: 15px; color: var(--text-sm); pointer-events: none; }
+/* ── Weekly rows ── */
+.week-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.week-row:last-child { border-bottom: none; }
+.wk-label { font-size: 12px; color: var(--text-sm); min-width: 80px; }
+.wk-pct   { font-size: 12px; font-weight: 700; min-width: 40px; text-align: right; }
+
+/* ── Modal ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 500; padding: 16px;
+  animation: fadeIn 0.2s;
+}
+.modal {
+  background: var(--white); border-radius: 12px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+  width: 100%; max-width: 900px; max-height: 90vh;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.modal-head {
+  padding: 14px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-head h3 { font-size: 15px; font-weight: 700; }
+.modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-sm); }
+.modal-close:hover { color: var(--red); }
+.modal-body { padding: 20px; overflow-y: auto; flex: 1; }
 
 /* ── Toast ── */
 #toast {
-  position: fixed; bottom: 24px; right: 20px; z-index: 9999;
-  background: var(--text); color: #fff; padding: 11px 20px;
+  position: fixed; bottom: 20px; right: 20px; z-index: 9999;
+  background: #1f2937; color: #fff; padding: 10px 18px;
   border-radius: var(--radius); font-size: 13px; font-weight: 500;
   box-shadow: var(--shadow-md); transform: translateY(80px); opacity: 0;
-  transition: all 0.3s cubic-bezier(.4,0,.2,1); max-width: 320px; pointer-events: none;
+  transition: all 0.3s cubic-bezier(.4,0,.2,1); max-width: 320px;
 }
 #toast.show { transform: translateY(0); opacity: 1; }
 #toast.t-success { background: var(--green); }
 #toast.t-error   { background: var(--red); }
+#toast.t-info    { background: var(--purple); }
 
 /* ── Spinner ── */
 .spin {
-  width: 16px; height: 16px; border-radius: 50%;
+  width: 15px; height: 15px; border-radius: 50%;
   border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
   animation: spin 0.6s linear infinite; display: inline-block; vertical-align: middle;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin    { to { transform: rotate(360deg); } }
+@keyframes fadeIn  { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-/* ── Modal ── */
-.modal-bg {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.45);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 500; padding: 16px; animation: fadeIn 0.2s ease;
-}
-.modal {
-  background: var(--white); border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-  width: 100%; max-width: 860px; max-height: 90vh;
-  display: flex; flex-direction: column; overflow: hidden;
-}
-.modal-head {
-  padding: 16px 20px; border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-}
-.modal-head h3 { font-size: 16px; font-weight: 700; }
-.modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-sm); padding: 2px 6px; border-radius: 4px; }
-.modal-close:hover { background: var(--bg); }
-.modal-body { padding: 20px; overflow-y: auto; flex: 1; }
-
-/* ── Pct bar ── */
-.pct-bar-wrap { height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden; }
-.pct-bar { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
-
-@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-/* ── Weekly breakdown ── */
-.week-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
-.week-row:last-child { border-bottom: none; }
-.week-label { font-size: 12px; color: var(--text-sm); min-width: 60px; }
-.week-pct   { font-size: 13px; font-weight: 600; min-width: 44px; text-align: right; }
-
-/* ── Divider ── */
-.divider { height: 1px; background: var(--border); margin: 16px 0; }
-
-/* ── Responsive helpers ── */
-@media (max-width: 480px) {
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE — Mobile
+══════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-overlay.open { display: block; }
+  .main-wrap { margin-left: 0; }
+  .topbar-hamburger { display: flex; }
   .content { padding: 12px; }
-  .navbar-title span { display: none; }
-  .card { padding: 14px; }
+  .stats-row { grid-template-columns: repeat(2,1fr); }
+  .topbar-sub { display: none; }
+  .search-box { min-width: 140px; }
+}
+@media (max-width: 480px) {
+  .auth-body { padding: 20px; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .table-toolbar { flex-direction: column; align-items: flex-start; }
+  .search-box { width: 100%; }
+  .btn-sm { padding: 5px 10px; }
 }
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════
+<!-- ══════════════════════════════════════════════════════════
      LOGIN SCREEN
-════════════════════════════════════════════════════ -->
-<div id="screen-login">
-  <div class="login-box">
-    <div class="login-header">
-      <div class="login-logo">C</div>
-      <div class="login-title">CRT Attendance Portal</div>
-      <div class="login-sub">2023-27 Batch Y-23 · Summer CRT Training · KL University</div>
+══════════════════════════════════════════════════════════ -->
+<div id="screen-login" class="auth-screen">
+  <div class="auth-box">
+    <div class="auth-header">
+      <div class="auth-logo">KL</div>
+      <div class="auth-title">CRT Attendance Portal</div>
+      <div class="auth-sub">2023-27 Batch · Y-23 Summer CRT Training<br>KL University</div>
     </div>
-    <div class="login-body">
+    <div class="auth-body">
       <div class="form-row">
         <div>
           <label>Username / Reg. No.</label>
-          <input type="text" id="login-user" placeholder="Enter username" autocomplete="username">
+          <input type="text" id="login-user" placeholder="e.g. CRT or 2300040011" autocomplete="username">
         </div>
       </div>
       <div class="form-row">
         <div>
           <label>Password</label>
-          <input type="password" id="login-pass" placeholder="Enter password" autocomplete="current-password">
+          <input type="password" id="login-pass" placeholder="Enter your password" autocomplete="current-password">
         </div>
       </div>
-      <button class="btn btn-primary btn-full" onclick="doLogin()" id="login-btn">Sign In</button>
-      <div id="login-err" class="mt8" style="color:var(--red); font-size:13px; min-height:18px; text-align:center;"></div>
-      <div class="login-footer">
-        Admin login: <strong>CRT</strong> / <strong>CRT999</strong><br>
-        Students: Reg.No as username & password (first login requires password change)
+      <button class="btn btn-primary btn-full" id="login-btn" onclick="doLogin()">Sign In →</button>
+      <div class="err-msg" id="login-err"></div>
+      <div class="auth-hint">
+        Admin — <strong>CRT</strong> / <strong>CRT999</strong><br>
+        Students — Reg.No as username &amp; default password (change required on first login)
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════
+<!-- ══════════════════════════════════════════════════════════
      CHANGE PASSWORD SCREEN
-════════════════════════════════════════════════════ -->
-<div id="screen-changepw" class="hidden">
-  <div class="changepw-box">
-    <h2>🔐 Change Your Password</h2>
-    <p>For security, you must set a new password before continuing. Password must be at least 6 characters.</p>
-    <div class="form-row">
-      <div>
-        <label>New Password</label>
-        <input type="password" id="cp-new" placeholder="Enter new password">
-      </div>
+══════════════════════════════════════════════════════════ -->
+<div id="screen-changepw" class="auth-screen hidden">
+  <div class="auth-box">
+    <div class="auth-header">
+      <div class="auth-logo">🔐</div>
+      <div class="auth-title">Set New Password</div>
+      <div class="auth-sub">Your account requires a password change before you can continue.</div>
     </div>
-    <div class="form-row">
-      <div>
-        <label>Confirm Password</label>
-        <input type="password" id="cp-confirm" placeholder="Re-enter new password">
+    <div class="auth-body">
+      <div class="form-row">
+        <div>
+          <label>New Password <span style="color:var(--text-sm);text-transform:none;font-weight:400">(min 6 characters)</span></label>
+          <input type="password" id="cp-new" placeholder="Enter new password">
+        </div>
       </div>
+      <div class="form-row">
+        <div>
+          <label>Confirm Password</label>
+          <input type="password" id="cp-confirm" placeholder="Re-enter new password">
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" id="cp-btn" onclick="doChangePassword()">Set Password & Continue</button>
+      <div class="err-msg" id="cp-err"></div>
     </div>
-    <button class="btn btn-primary btn-full mt8" onclick="doChangePassword()" id="cp-btn">Set Password & Continue</button>
-    <div id="cp-err" class="mt8" style="color:var(--red); font-size:13px; min-height:18px; text-align:center;"></div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════
+<!-- ══════════════════════════════════════════════════════════
      ADMIN DASHBOARD
-════════════════════════════════════════════════════ -->
+══════════════════════════════════════════════════════════ -->
 <div id="screen-admin" class="hidden">
-  <nav class="navbar">
-    <div class="navbar-brand">
-      <div class="navbar-icon">C</div>
-      <div class="navbar-title">CRT Attendance Portal <span>Admin</span></div>
-    </div>
-    <button class="navbar-user" onclick="logout()">
-      <div class="navbar-avatar" id="admin-avatar">A</div>
-      <span id="admin-name">CRT</span>
-      &nbsp;· Logout
-    </button>
-  </nav>
 
-  <div class="tab-strip">
-    <button class="tab-btn active" onclick="adminTab('upload')"   id="atab-upload">⬆ Upload CSV</button>
-    <button class="tab-btn"        onclick="adminTab('students')" id="atab-students">👥 All Students</button>
-    <button class="tab-btn"        onclick="adminTab('mark')"     id="atab-mark">✏️ Mark Attendance</button>
-  </div>
+  <!-- Sidebar overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
-  <div class="content">
-
-    <!-- ── Upload CSV ── -->
-    <div id="apane-upload">
-      <div class="card">
-        <div class="card-title">Upload Attendance CSV</div>
-        <p class="muted text-sm" style="margin-bottom:16px; line-height:1.6;">
-          Upload the daily CRT attendance sheet. The CSV must have columns:<br>
-          <strong>S.NO, NAME, BRANCH, DEPT, CLUSTER, CRT SEC, CRT ROOM, REGD.NO</strong>
-          followed by 8 time-slot columns (09:20-10:10 … 04:30-5:30) with <strong>P</strong> or <strong>A</strong> values.
-        </p>
-
-        <div class="form-row cols-2" style="margin-bottom:16px;">
-          <div>
-            <label>Attendance Date</label>
-            <input type="date" id="upload-date">
-          </div>
-          <div style="display:flex; align-items:flex-end;">
-            <button class="btn btn-outline btn-full" onclick="document.getElementById('file-input').click()">
-              📂 Browse CSV File
-            </button>
-            <input type="file" id="file-input" accept=".csv" onchange="onFileSelect(this)">
-          </div>
-        </div>
-
-        <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()"
-             ondragover="event.preventDefault(); this.classList.add('drag')"
-             ondragleave="this.classList.remove('drag')"
-             ondrop="onFileDrop(event)">
-          <div class="upload-icon">📄</div>
-          <div id="upload-filename" style="font-weight:600; color:var(--purple);">No file selected</div>
-          <p>Click to browse or drag & drop your CSV here</p>
-        </div>
-
-        <button class="btn btn-primary mt16" id="upload-btn" onclick="uploadCSV()" disabled>
-          ⬆ Upload & Import
-        </button>
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-logo">KL</div>
+      <div class="sidebar-brand-text">
+        <span class="t1">CRT Portal</span>
+        <span class="t2">KL University</span>
       </div>
+    </div>
 
-      <div id="upload-result" class="hidden">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigation</div>
+      <button class="nav-item active" id="nav-upload"   onclick="adminPane('upload')">
+        <span class="nav-icon">⬆</span> Upload CSV
+      </button>
+      <button class="nav-item" id="nav-students" onclick="adminPane('students')">
+        <span class="nav-icon">👥</span> All Students
+      </button>
+      <button class="nav-item" id="nav-mark"     onclick="adminPane('mark')">
+        <span class="nav-icon">✏️</span> Mark Attendance
+      </button>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-av" id="admin-av">A</div>
+        <div class="user-info">
+          <div class="u-name" id="admin-uname">CRT</div>
+          <div class="u-role">Administrator</div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="logout()">⏏ Sign Out</button>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <div class="main-wrap">
+    <div class="topbar">
+      <button class="topbar-hamburger" onclick="toggleSidebar()">☰</button>
+      <span class="topbar-title" id="topbar-heading">Upload CSV</span>
+      <span class="topbar-sub" id="topbar-sub">Import daily attendance sheet</span>
+    </div>
+
+    <div class="content">
+
+      <!-- ── Upload Pane ── -->
+      <div id="apane-upload">
+        <div class="page-header">
+          <div class="page-title">Upload Attendance CSV</div>
+          <div class="page-sub">Import the daily CRT attendance sheet from the report</div>
+        </div>
+
         <div class="card">
-          <div class="card-title">Import Result</div>
-          <div id="upload-result-body"></div>
-        </div>
-      </div>
-    </div>
+          <div class="card-title">📄 CSV Format &amp; Upload</div>
 
-    <!-- ── All Students ── -->
-    <div id="apane-students" class="hidden">
-      <div class="card" style="padding:14px 20px;">
-        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-          <div class="search-wrap" style="flex:1; min-width:200px; margin-bottom:0;">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="student-search" placeholder="Search by name or reg. no…" oninput="filterStudents()">
+          <div class="a-info alert" style="margin-bottom:16px;">
+            <span>ℹ️</span>
+            <div>
+              Expected columns: <strong>S.NO · NAME · BRANCH · DEPT · CLUSTER · CRT SEC · CRT ROOM · REGD.NO</strong>
+              followed by 8 time-slot columns with <strong>P</strong> (Present) or <strong>A</strong> (Absent) values.
+              <br><span class="text-sm" style="margin-top:3px; display:block; opacity:0.8;">Time slots: 09:20-10:10 · 10:10-11:00 · 11:10-12:00 · 12:00-12:50 · 01:50-02:40 · 02:40-03:40 · 03:50-04:30 · 04:30-5:30</span>
+            </div>
           </div>
-          <button class="btn btn-outline btn-sm" onclick="loadAdminStudents()">↺ Refresh</button>
-        </div>
-      </div>
 
-      <div id="students-loading" class="text-center muted" style="padding:40px;">Loading students…</div>
-      <div id="students-table-wrap" class="hidden">
-        <div class="table-wrap">
-          <table id="students-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Branch</th>
-                <th>Dept</th>
-                <th>Cluster</th>
-                <th>CRT Sec</th>
-                <th>Room</th>
-                <th>Reg. No.</th>
-                <th>Present</th>
-                <th>Total</th>
-                <th>Attendance %</th>
-              </tr>
-            </thead>
-            <tbody id="students-tbody"></tbody>
-          </table>
-        </div>
-        <div id="students-count" class="text-sm muted mt8"></div>
-      </div>
-    </div>
-
-    <!-- ── Mark Attendance ── -->
-    <div id="apane-mark" class="hidden">
-      <div class="card">
-        <div class="card-title">Look Up Student</div>
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <div style="flex:1; min-width:180px;">
-            <label>Reg. No. / Roll Number</label>
-            <input type="text" id="mark-roll" placeholder="e.g. 2300040011" oninput="this.value=this.value.toUpperCase()">
+          <div class="form-row cols-2">
+            <div>
+              <label>Attendance Date</label>
+              <input type="date" id="upload-date">
+            </div>
+            <div style="display:flex; align-items:flex-end; gap:8px;">
+              <button class="btn btn-outline btn-full" onclick="downloadSampleCSV()" style="flex:1;">
+                ⬇ Sample CSV
+              </button>
+            </div>
           </div>
-          <div style="align-self:flex-end;">
-            <button class="btn btn-outline" onclick="lookupForMark()">Look Up →</button>
+
+          <div class="upload-zone" id="upload-zone"
+               onclick="document.getElementById('file-input').click()"
+               ondragover="event.preventDefault(); this.classList.add('drag')"
+               ondragleave="this.classList.remove('drag')"
+               ondrop="onFileDrop(event)">
+            <div class="uz-icon">📂</div>
+            <div class="uz-main" id="upload-filename">Click to browse or drag &amp; drop</div>
+            <div class="uz-sub">Accepts .csv files only</div>
+          </div>
+          <input type="file" id="file-input" accept=".csv" onchange="onFileSelect(this)">
+
+          <button class="btn btn-primary" id="upload-btn" onclick="uploadCSV()" disabled>
+            ⬆ Upload &amp; Import
+          </button>
+        </div>
+
+        <div id="upload-result" class="hidden"></div>
+      </div>
+
+      <!-- ── Students Pane ── -->
+      <div id="apane-students" class="hidden">
+        <div class="page-header">
+          <div class="page-title">All Students</div>
+          <div class="page-sub">Click any row to view full attendance detail</div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-toolbar">
+            <span class="table-toolbar-title">Student List</span>
+            <div class="search-box">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="stu-search" placeholder="Search name or reg. no…" oninput="filterStudents()">
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="loadStudents()">↺ Refresh</button>
+          </div>
+          <div class="showing-txt" id="stu-count">Loading…</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Branch</th>
+                  <th>Dept</th>
+                  <th>Cluster</th>
+                  <th>CRT Sec</th>
+                  <th>Room</th>
+                  <th>Reg. No.</th>
+                  <th class="td-c">Present</th>
+                  <th class="td-c">Total</th>
+                  <th>Attendance %</th>
+                </tr>
+                <tr class="filter-row">
+                  <th></th>
+                  <th><input type="text" placeholder="Filter…" oninput="filterStudents()" id="f-name"></th>
+                  <th><input type="text" placeholder="Filter…" oninput="filterStudents()" id="f-branch"></th>
+                  <th><input type="text" placeholder="Filter…" oninput="filterStudents()" id="f-dept"></th>
+                  <th><input type="text" placeholder="Filter…" oninput="filterStudents()" id="f-cluster"></th>
+                  <th><input type="text" placeholder="Filter…" oninput="filterStudents()" id="f-sec"></th>
+                  <th><input type="text" placeholder="Filter…" oninput="filterStudents()" id="f-room"></th>
+                  <th><input type="text" placeholder="Filter…" oninput="filterStudents()" id="f-roll"></th>
+                  <th></th><th></th><th></th>
+                </tr>
+              </thead>
+              <tbody id="stu-tbody">
+                <tr><td colspan="11" class="text-center muted" style="padding:32px;">Loading…</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
 
-      <div id="mark-form" class="hidden">
-        <div class="profile-bar" id="mark-profile"></div>
+      <!-- ── Mark Attendance Pane ── -->
+      <div id="apane-mark" class="hidden">
+        <div class="page-header">
+          <div class="page-title">Mark Attendance</div>
+          <div class="page-sub">Look up a student and record a session</div>
+        </div>
+
         <div class="card">
-          <div class="card-title">Mark Attendance</div>
-          <div class="form-row cols-3">
-            <div>
-              <label>Date</label>
-              <input type="date" id="mark-date">
+          <div class="card-title">🔍 Look Up Student</div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:180px;">
+              <label>Reg. No. / Roll Number</label>
+              <input type="text" id="mark-roll" placeholder="e.g. 2300040011"
+                     oninput="this.value=this.value.toUpperCase()"
+                     onkeydown="if(event.key==='Enter') lookupForMark()">
             </div>
-            <div>
-              <label>Time Slot</label>
-              <select id="mark-slot">
-                <option value="">— Select slot —</option>
-                <option>09:20-10:10</option>
-                <option>10:10-11:00</option>
-                <option>11:10-12:00</option>
-                <option>12:00-12:50</option>
-                <option>01:50-02:40</option>
-                <option>02:40-03:40</option>
-                <option>03:50-04:30</option>
-                <option>04:30-05:30</option>
-              </select>
-            </div>
-            <div>
-              <label>Status</label>
-              <select id="mark-status">
-                <option value="">— Select status —</option>
-                <option value="present">Present (P)</option>
-                <option value="absent">Absent (A)</option>
-              </select>
+            <div style="align-self:flex-end;">
+              <button class="btn btn-outline" onclick="lookupForMark()">Look Up →</button>
             </div>
           </div>
-          <button class="btn btn-primary" onclick="submitMark()" id="mark-btn">Mark Attendance</button>
+        </div>
+
+        <div id="mark-student-card" class="hidden">
+          <div class="profile-bar" id="mark-profile"></div>
+          <div class="card">
+            <div class="card-title">✏️ Record Attendance</div>
+            <div class="form-row cols-3">
+              <div>
+                <label>Date</label>
+                <input type="date" id="mark-date">
+              </div>
+              <div>
+                <label>Time Slot</label>
+                <select id="mark-slot">
+                  <option value="">— Select slot —</option>
+                  <option>09:20-10:10</option>
+                  <option>10:10-11:00</option>
+                  <option>11:10-12:00</option>
+                  <option>12:00-12:50</option>
+                  <option>01:50-02:40</option>
+                  <option>02:40-03:40</option>
+                  <option>03:50-04:30</option>
+                  <option>04:30-05:30</option>
+                </select>
+              </div>
+              <div>
+                <label>Status</label>
+                <select id="mark-status">
+                  <option value="">— Select status —</option>
+                  <option value="present">✅ Present (P)</option>
+                  <option value="absent">❌ Absent (A)</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-primary" id="mark-btn" onclick="submitMark()">Mark Attendance</button>
+          </div>
         </div>
       </div>
-    </div>
 
-  </div><!-- /content -->
+    </div><!-- /content -->
+  </div><!-- /main-wrap -->
 </div><!-- /screen-admin -->
 
-<!-- ═══════════════════════════════════════════════════
+<!-- ══════════════════════════════════════════════════════════
      STUDENT DASHBOARD
-════════════════════════════════════════════════════ -->
+══════════════════════════════════════════════════════════ -->
 <div id="screen-student" class="hidden">
-  <nav class="navbar">
-    <div class="navbar-brand">
-      <div class="navbar-icon">C</div>
-      <div class="navbar-title">CRT Attendance Portal <span>Student</span></div>
+  <aside class="sidebar" id="stu-sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-logo">KL</div>
+      <div class="sidebar-brand-text">
+        <span class="t1">CRT Portal</span>
+        <span class="t2">KL University</span>
+      </div>
     </div>
-    <button class="navbar-user" onclick="logout()">
-      <div class="navbar-avatar" id="stu-avatar">S</div>
-      <span id="stu-name">Student</span>
-      &nbsp;· Logout
-    </button>
-  </nav>
-
-  <div class="content">
-    <div id="stu-loading" class="text-center muted" style="padding:40px;">Loading your attendance…</div>
-
-    <div id="stu-main" class="hidden">
-      <div class="profile-bar" id="stu-profile"></div>
-
-      <div id="stu-alert"></div>
-
-      <div class="stats-row">
-        <div class="stat-box purple">
-          <div class="stat-val" id="stu-total">—</div>
-          <div class="stat-lbl">Total Sessions</div>
-        </div>
-        <div class="stat-box good">
-          <div class="stat-val" id="stu-present">—</div>
-          <div class="stat-lbl">Present</div>
-        </div>
-        <div class="stat-box bad">
-          <div class="stat-val" id="stu-absent">—</div>
-          <div class="stat-lbl">Absent</div>
-        </div>
-        <div class="stat-box" id="stu-pct-box">
-          <div class="stat-val" id="stu-pct">—%</div>
-          <div class="stat-lbl">Attendance %</div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">My Account</div>
+      <button class="nav-item active">
+        <span class="nav-icon">📊</span> My Attendance
+      </button>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-av" id="stu-av">S</div>
+        <div class="user-info">
+          <div class="u-name" id="stu-uname">Student</div>
+          <div class="u-role">Student</div>
         </div>
       </div>
+      <button class="btn-logout" onclick="logout()">⏏ Sign Out</button>
+    </div>
+  </aside>
 
-      <!-- Weekly breakdown -->
-      <div class="card">
-        <div class="card-title">Weekly Breakdown</div>
-        <div id="stu-weeks"></div>
-      </div>
+  <div class="sidebar-overlay" id="stu-overlay" onclick="toggleStudentSidebar()"></div>
 
-      <!-- Attendance log table -->
-      <div class="card">
-        <div class="card-title">Attendance Log</div>
-        <div id="stu-table-wrap"></div>
+  <div class="main-wrap">
+    <div class="topbar">
+      <button class="topbar-hamburger" onclick="toggleStudentSidebar()">☰</button>
+      <span class="topbar-title">My Attendance</span>
+      <span class="topbar-sub">2023-27 Batch · Y-23 Summer CRT Training</span>
+    </div>
+
+    <div class="content" id="stu-content">
+      <div class="text-center muted" id="stu-loading" style="padding:50px;">Loading your attendance…</div>
+
+      <div id="stu-main" class="hidden">
+        <div class="profile-bar" id="stu-profile"></div>
+        <div id="stu-alert"></div>
+
+        <div class="stats-row">
+          <div class="stat-box s-purple">
+            <div class="stat-val" id="s-total">—</div>
+            <div class="stat-lbl">Total Sessions</div>
+          </div>
+          <div class="stat-box s-green">
+            <div class="stat-val" id="s-present">—</div>
+            <div class="stat-lbl">Present</div>
+          </div>
+          <div class="stat-box s-red">
+            <div class="stat-val" id="s-absent">—</div>
+            <div class="stat-lbl">Absent</div>
+          </div>
+          <div class="stat-box" id="s-pct-box">
+            <div class="stat-val" id="s-pct">—%</div>
+            <div class="stat-lbl">Attendance %</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📅 Weekly Breakdown</div>
+          <div id="stu-weeks"></div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-toolbar">
+            <span class="table-toolbar-title">📋 Attendance Log</span>
+          </div>
+          <div class="tbl-wrap" id="stu-tbl-wrap">
+            <div class="text-center muted" style="padding:30px;">Loading…</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════
-     STUDENT DETAIL MODAL (admin)
-════════════════════════════════════════════════════ -->
-<div id="modal-bg" class="hidden">
-  <div class="modal-bg" onclick="closeModal(event)">
-    <div class="modal" onclick="event.stopPropagation()">
+<!-- ══════════════════════════════════════════════════════════
+     STUDENT DETAIL MODAL (Admin view)
+══════════════════════════════════════════════════════════ -->
+<div id="modal-wrap" class="hidden">
+  <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
       <div class="modal-head">
-        <h3 id="modal-title">Student Attendance</h3>
+        <h3 id="modal-title">Student Attendance Detail</h3>
         <button class="modal-close" onclick="closeModal()">✕</button>
       </div>
       <div class="modal-body" id="modal-body">Loading…</div>
@@ -636,57 +826,71 @@ tbody td { padding: 10px 14px; white-space: nowrap; vertical-align: middle; }
 <!-- Toast -->
 <div id="toast"></div>
 
+<!-- ══════════════════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════════════ -->
 <script>
 const API = window.location.origin + '/api';
-let TOKEN = localStorage.getItem('crt_token') || '';
+let TOKEN   = localStorage.getItem('crt_token')   || '';
 let SESSION = JSON.parse(localStorage.getItem('crt_session') || 'null');
 let allStudents = [];
 let selectedFile = null;
 
-// ── Helpers ────────────────────────────────────────────────────────────────────
+// ── Helpers ──────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+function show(id) { $(id).classList.remove('hidden'); }
+function hide(id) { $(id).classList.add('hidden');    }
+function showScreen(id) {
+  ['screen-login','screen-changepw','screen-admin','screen-student'].forEach(s =>
+    $(s).classList.toggle('hidden', s !== id)
+  );
+}
 function toast(msg, type = 'success') {
-  const el = document.getElementById('toast');
+  const el = $('toast');
   el.textContent = msg;
   el.className = 'show t-' + type;
   clearTimeout(el._t);
   el._t = setTimeout(() => el.classList.remove('show'), 3500);
 }
-
-function show(id)  { document.getElementById(id).classList.remove('hidden'); }
-function hide(id)  { document.getElementById(id).classList.add('hidden'); }
-function initials(name) { return (name || '??').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2); }
-function today()   { return new Date().toISOString().split('T')[0]; }
-function fmtDate(d){ return d.split('-').reverse().join('.'); }
-function pctColor(p){ return p >= 75 ? 'var(--green)' : p >= 60 ? 'var(--amber)' : 'var(--red)'; }
+function initials(name) {
+  return (name || '??').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+}
+function today() { return new Date().toISOString().split('T')[0]; }
+function fmtDate(d) { return d ? d.split('-').reverse().join('.') : '—'; }
+function pctColor(p) { return p >= 75 ? 'var(--green)' : p >= 60 ? 'var(--amber)' : 'var(--red)'; }
 function apiFetch(url, opts = {}) {
-  opts.headers = { ...(opts.headers || {}), Authorization: 'Bearer ' + TOKEN };
-  return fetch(API + url, opts);
+  return fetch(API + url, {
+    ...opts,
+    headers: { 'Authorization': 'Bearer ' + TOKEN, ...(opts.headers || {}) }
+  });
 }
 
-// ── Screens ───────────────────────────────────────────────────────────────────
-function showScreen(id) {
-  ['screen-login','screen-changepw','screen-admin','screen-student'].forEach(s => {
-    document.getElementById(s).classList.toggle('hidden', s !== id);
-  });
+// ── Sidebar toggle (mobile) ───────────────────────────────────────────────────
+function toggleSidebar() {
+  $('sidebar').classList.toggle('open');
+  $('sidebar-overlay').classList.toggle('open');
+}
+function toggleStudentSidebar() {
+  $('stu-sidebar').classList.toggle('open');
+  $('stu-overlay').classList.toggle('open');
 }
 
 // ── Startup ───────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('upload-date').value = today();
-  document.getElementById('mark-date').value   = today();
-  document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
-  document.getElementById('login-user').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
-  if (TOKEN && SESSION) {
-    resumeSession();
-  } else {
-    showScreen('screen-login');
-  }
+  $('upload-date').value = today();
+  $('mark-date').value   = today();
+  $('login-pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  $('login-user').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  if (TOKEN && SESSION) { resumeSession(); }
+  else { showScreen('screen-login'); }
 });
 
 async function resumeSession() {
-  // Quick token validation
   try {
-    const r = await apiFetch(SESSION.role === 'admin' ? '/admin/students' : `/students/${SESSION.rollNumber}`);
+    const url = SESSION.role === 'admin' ? '/admin/students' : `/students/${SESSION.rollNumber}`;
+    const r   = await apiFetch(url);
     if (!r.ok) throw new Error();
     enterDashboard(SESSION);
   } catch {
@@ -697,17 +901,16 @@ async function resumeSession() {
   }
 }
 
-// ── Login ─────────────────────────────────────────────────────────────────────
+// ── LOGIN ─────────────────────────────────────────────────────────────────────
 async function doLogin() {
-  const username = document.getElementById('login-user').value.trim();
-  const password = document.getElementById('login-pass').value;
-  const errEl    = document.getElementById('login-err');
-  const btn      = document.getElementById('login-btn');
-  if (!username || !password) { errEl.textContent = 'Please enter username and password.'; return; }
+  const username = $('login-user').value.trim();
+  const password = $('login-pass').value;
+  $('login-err').textContent = '';
+  if (!username || !password) { $('login-err').textContent = 'Enter username and password.'; return; }
 
+  const btn = $('login-btn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spin"></span> Signing in…';
-  errEl.textContent = '';
 
   try {
     const r = await fetch(API + '/auth/login', {
@@ -716,41 +919,25 @@ async function doLogin() {
     });
     const d = await r.json();
     if (!r.ok) throw new Error(d.error);
-
     TOKEN = d.token;
     localStorage.setItem('crt_token', TOKEN);
-
-    if (d.mustChangePassword) {
-      SESSION = d;
-      showScreen('screen-changepw');
-      return;
-    }
-
+    if (d.mustChangePassword) { SESSION = d; showScreen('screen-changepw'); return; }
     SESSION = d;
     localStorage.setItem('crt_session', JSON.stringify(d));
     enterDashboard(d);
-  } catch(e) {
-    errEl.textContent = e.message;
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Sign In';
-  }
+  } catch (e) { $('login-err').textContent = e.message; }
+  finally { btn.disabled = false; btn.textContent = 'Sign In →'; }
 }
 
-// ── Change Password ────────────────────────────────────────────────────────────
+// ── CHANGE PASSWORD ───────────────────────────────────────────────────────────
 async function doChangePassword() {
-  const np  = document.getElementById('cp-new').value;
-  const cp  = document.getElementById('cp-confirm').value;
-  const err = document.getElementById('cp-err');
-  const btn = document.getElementById('cp-btn');
-  err.textContent = '';
+  const np = $('cp-new').value, cp = $('cp-confirm').value;
+  $('cp-err').textContent = '';
+  if (!np || np.length < 6) { $('cp-err').textContent = 'Password must be at least 6 characters.'; return; }
+  if (np !== cp)            { $('cp-err').textContent = 'Passwords do not match.'; return; }
 
-  if (!np || np.length < 6) { err.textContent = 'Password must be at least 6 characters.'; return; }
-  if (np !== cp)            { err.textContent = 'Passwords do not match.'; return; }
-
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spin"></span> Saving…';
-
+  const btn = $('cp-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Saving…';
   try {
     const r = await apiFetch('/auth/change-password', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -758,31 +945,26 @@ async function doChangePassword() {
     });
     const d = await r.json();
     if (!r.ok) throw new Error(d.error);
-
-    toast('Password changed successfully!');
+    toast('Password changed!');
     SESSION.mustChangePassword = false;
     localStorage.setItem('crt_session', JSON.stringify(SESSION));
     enterDashboard(SESSION);
-  } catch(e) {
-    err.textContent = e.message;
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Set Password & Continue';
-  }
+  } catch (e) { $('cp-err').textContent = e.message; }
+  finally { btn.disabled = false; btn.textContent = 'Set Password & Continue'; }
 }
 
-// ── Enter Dashboard ────────────────────────────────────────────────────────────
-function enterDashboard(session) {
-  if (session.role === 'admin') {
-    document.getElementById('admin-avatar').textContent = initials(session.username);
-    document.getElementById('admin-name').textContent   = session.username;
+// ── ENTER DASHBOARD ───────────────────────────────────────────────────────────
+function enterDashboard(s) {
+  if (s.role === 'admin') {
+    $('admin-av').textContent    = initials(s.username);
+    $('admin-uname').textContent = s.username;
     showScreen('screen-admin');
-    adminTab('upload');
+    adminPane('upload');
   } else {
-    document.getElementById('stu-avatar').textContent = initials(session.rollNumber);
-    document.getElementById('stu-name').textContent   = session.rollNumber;
+    $('stu-av').textContent    = initials(s.rollNumber);
+    $('stu-uname').textContent = s.rollNumber;
     showScreen('screen-student');
-    loadStudentDashboard(session.rollNumber);
+    loadStudentDashboard(s.rollNumber);
   }
 }
 
@@ -791,42 +973,70 @@ function logout() {
   localStorage.removeItem('crt_token');
   localStorage.removeItem('crt_session');
   showScreen('screen-login');
-  document.getElementById('login-user').value = '';
-  document.getElementById('login-pass').value = '';
-  document.getElementById('login-err').textContent = '';
+  $('login-user').value = ''; $('login-pass').value = ''; $('login-err').textContent = '';
 }
 
-// ══════════════════════════════════════════════════════
-// ADMIN — Upload Tab
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+// ADMIN — Pane switching
+// ══════════════════════════════════════════════════════════════
+const paneInfo = {
+  upload:   { title: 'Upload CSV',       sub: 'Import daily attendance sheet' },
+  students: { title: 'All Students',     sub: 'Browse and filter student records' },
+  mark:     { title: 'Mark Attendance',  sub: 'Record attendance for a student' }
+};
+function adminPane(p) {
+  ['upload','students','mark'].forEach(id => {
+    $('apane-' + id).classList.toggle('hidden', id !== p);
+    $('nav-'  + id).classList.toggle('active',  id === p);
+  });
+  $('topbar-heading').textContent = paneInfo[p].title;
+  $('topbar-sub').textContent     = paneInfo[p].sub;
+  // Close sidebar on mobile after nav
+  $('sidebar').classList.remove('open');
+  $('sidebar-overlay').classList.remove('open');
+  if (p === 'students' && !allStudents.length) loadStudents();
+}
+
+// ══════════════════════════════════════════════════════════════
+// ADMIN — Upload CSV
+// ══════════════════════════════════════════════════════════════
 function onFileSelect(input) {
-  const file = input.files[0];
-  if (!file) return;
-  selectedFile = file;
-  document.getElementById('upload-filename').textContent = file.name;
-  document.getElementById('upload-btn').disabled = false;
-  document.getElementById('upload-zone').classList.add('drag');
-  setTimeout(() => document.getElementById('upload-zone').classList.remove('drag'), 300);
+  const f = input.files[0]; if (!f) return;
+  selectedFile = f;
+  $('upload-filename').textContent = '📄 ' + f.name;
+  $('upload-btn').disabled = false;
+}
+function onFileDrop(e) {
+  e.preventDefault(); $('upload-zone').classList.remove('drag');
+  const f = e.dataTransfer.files[0];
+  if (!f || !f.name.toLowerCase().endsWith('.csv')) { toast('Please drop a .csv file', 'error'); return; }
+  selectedFile = f;
+  $('upload-filename').textContent = '📄 ' + f.name;
+  $('upload-btn').disabled = false;
 }
 
-function onFileDrop(e) {
-  e.preventDefault();
-  document.getElementById('upload-zone').classList.remove('drag');
-  const file = e.dataTransfer.files[0];
-  if (!file || !file.name.endsWith('.csv')) { toast('Please drop a .csv file', 'error'); return; }
-  selectedFile = file;
-  document.getElementById('upload-filename').textContent = file.name;
-  document.getElementById('upload-btn').disabled = false;
+function downloadSampleCSV() {
+  const hdr = 'S.NO,NAME,BRANCH,DEPT,CLUSTER,CRT SEC,CRT ROOM,REGD.NO,09:20-10:10,10:10-11:00,11:10-12:00,12:00-12:50,01:50-02:40,02:40-03:40,03:50-04:30,04:30-5:30';
+  const rows = [
+    '1,VINAY KUMAR,ECE,ECE,C2,IS205,C008,2300040011,P,P,P,P,P,P,P,P',
+    '2,TIPALLIVI SWAMY,ECE,ECE,C2,IS205,C008,2300040031,P,P,P,P,P,P,A,A',
+    '3,HARSHA VARDHAN,ECE,ECE,C2,IS205,C008,2300040041,P,P,A,A,P,P,P,P',
+    '4,RI CHAITANYA,ECE,ECE,C2,IS205,C008,2300040047,P,P,P,P,A,A,A,A',
+    '5,EVIDYA HARINI,ECE,ECE,C2,IS205,C008,2300040053,A,A,A,A,A,A,A,A',
+  ];
+  const blob = new Blob([[hdr, ...rows].join('\n')], { type: 'text/csv' });
+  const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: 'sample_crt_attendance.csv' });
+  a.click(); URL.revokeObjectURL(a.href);
+  toast('Sample CSV downloaded', 'info');
 }
 
 async function uploadCSV() {
-  if (!selectedFile) { toast('Please select a CSV file first', 'error'); return; }
-  const date = document.getElementById('upload-date').value;
-  if (!date) { toast('Please select the attendance date', 'error'); return; }
+  if (!selectedFile) { toast('Select a CSV file first', 'error'); return; }
+  const date = $('upload-date').value;
+  if (!date) { toast('Select attendance date', 'error'); return; }
 
-  const btn = document.getElementById('upload-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spin"></span> Uploading…';
+  const btn = $('upload-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Importing…';
 
   const form = new FormData();
   form.append('csv', selectedFile);
@@ -837,154 +1047,122 @@ async function uploadCSV() {
     const d = await r.json();
     if (!r.ok) throw new Error(d.error);
 
-    hide('upload-result');
-    document.getElementById('upload-result-body').innerHTML = `
-      <div class="alert alert-success">
-        ✅ Import complete for <strong>${fmtDate(date)}</strong>
-      </div>
-      <div class="form-row cols-3" style="margin-bottom:0;">
-        <div class="stat-box good"  style="margin-bottom:0;"><div class="stat-val">${d.created}</div><div class="stat-lbl">New Students</div></div>
-        <div class="stat-box purple" style="margin-bottom:0;"><div class="stat-val">${d.updated}</div><div class="stat-lbl">Updated</div></div>
-        <div class="stat-box" style="margin-bottom:0;"><div class="stat-val">${d.attendanceCount}</div><div class="stat-lbl">Attendance Records</div></div>
-      </div>
-      ${d.slotCols && d.slotCols.length ? `<div class="text-sm muted mt8">Slots imported: <strong>${d.slotCols.join(', ')}</strong></div>` : ''}
-      ${d.errors && d.errors.length ? `<div class="alert alert-warn mt8">⚠️ ${d.errors.length} row(s) had issues: ${d.errors.slice(0,3).join('; ')}</div>` : ''}
-      <div class="text-sm muted mt8">
-        Student accounts created with <strong>Reg.No as username and default password</strong>. Students must change password on first login.
-      </div>
-    `;
+    $('upload-result').innerHTML = `
+      <div class="card">
+        <div class="card-title">✅ Import Complete — ${fmtDate(date)}</div>
+        <div class="stats-row" style="margin-bottom:14px;">
+          <div class="stat-box s-green"  style="margin:0;"><div class="stat-val">${d.created}</div><div class="stat-lbl">New Students</div></div>
+          <div class="stat-box s-purple" style="margin:0;"><div class="stat-val">${d.updated}</div><div class="stat-lbl">Updated</div></div>
+          <div class="stat-box"          style="margin:0;"><div class="stat-val">${d.attendanceCount}</div><div class="stat-lbl">Att. Records</div></div>
+          <div class="stat-box"          style="margin:0;"><div class="stat-val">${d.total}</div><div class="stat-lbl">Total Rows</div></div>
+        </div>
+        ${d.slotCols?.length ? `<div class="a-info alert"><span>📋</span><span>Slots imported: <strong>${d.slotCols.join(' · ')}</strong></span></div>` : ''}
+        ${d.errors?.length   ? `<div class="a-warn alert"><span>⚠️</span><span>${d.errors.length} row(s) had errors. First few: ${d.errors.slice(0,3).join('; ')}</span></div>` : ''}
+        <div class="text-sm muted">Student accounts created — username &amp; default password = Reg.No. Students must change password on first login.</div>
+      </div>`;
     show('upload-result');
-    toast(`Imported ${d.total} students, ${d.attendanceCount} attendance records`);
-  } catch(e) {
-    toast(e.message, 'error');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '⬆ Upload & Import';
-  }
+    toast(`Imported ${d.total} students · ${d.attendanceCount} records`);
+    allStudents = [];
+  } catch (e) { toast(e.message, 'error'); }
+  finally { btn.disabled = false; btn.textContent = '⬆ Upload & Import'; }
 }
 
-// ══════════════════════════════════════════════════════
-// ADMIN — Students Tab
-// ══════════════════════════════════════════════════════
-async function loadAdminStudents() {
-  hide('students-table-wrap');
-  show('students-loading');
-  document.getElementById('students-loading').textContent = 'Loading students…';
-
+// ══════════════════════════════════════════════════════════════
+// ADMIN — Students Table
+// ══════════════════════════════════════════════════════════════
+async function loadStudents() {
+  $('stu-tbody').innerHTML = '<tr><td colspan="11" class="text-center muted" style="padding:30px;">Loading…</td></tr>';
+  $('stu-count').textContent = 'Loading…';
   try {
     const r = await apiFetch('/admin/students');
     const d = await r.json();
     if (!r.ok) throw new Error(d.error);
     allStudents = d;
-    renderStudentsTable(allStudents);
-  } catch(e) {
-    document.getElementById('students-loading').textContent = 'Error: ' + e.message;
+    renderStudents(allStudents);
+  } catch (e) {
+    $('stu-tbody').innerHTML = `<tr><td colspan="11" class="text-center" style="padding:30px; color:var(--red);">Error: ${e.message}</td></tr>`;
   }
 }
 
 function filterStudents() {
-  const q = document.getElementById('student-search').value.toLowerCase().trim();
-  const filtered = q ? allStudents.filter(s =>
-    s.name.toLowerCase().includes(q) || s.rollNumber.toLowerCase().includes(q)
-  ) : allStudents;
-  renderStudentsTable(filtered);
+  const q       = $('stu-search').value.toLowerCase();
+  const fName   = $('f-name').value.toLowerCase();
+  const fBranch = $('f-branch').value.toLowerCase();
+  const fDept   = $('f-dept').value.toLowerCase();
+  const fClust  = $('f-cluster').value.toLowerCase();
+  const fSec    = $('f-sec').value.toLowerCase();
+  const fRoom   = $('f-room').value.toLowerCase();
+  const fRoll   = $('f-roll').value.toLowerCase();
+  const res = allStudents.filter(s =>
+    (!q       || s.name.toLowerCase().includes(q) || s.rollNumber.toLowerCase().includes(q)) &&
+    (!fName   || s.name.toLowerCase().includes(fName)) &&
+    (!fBranch || (s.branch||'').toLowerCase().includes(fBranch)) &&
+    (!fDept   || (s.dept||'').toLowerCase().includes(fDept)) &&
+    (!fClust  || (s.cluster||'').toLowerCase().includes(fClust)) &&
+    (!fSec    || (s.crtSec||'').toLowerCase().includes(fSec)) &&
+    (!fRoom   || (s.crtRoom||'').toLowerCase().includes(fRoom)) &&
+    (!fRoll   || s.rollNumber.toLowerCase().includes(fRoll))
+  );
+  renderStudents(res);
 }
 
-function renderStudentsTable(students) {
-  hide('students-loading');
-  show('students-table-wrap');
-
-  const tbody = document.getElementById('students-tbody');
-  if (!students.length) {
-    tbody.innerHTML = '<tr><td colspan="11" class="text-center muted" style="padding:30px;">No students found.</td></tr>';
-    document.getElementById('students-count').textContent = '';
+function renderStudents(list) {
+  $('stu-count').textContent = `Showing ${list.length} of ${allStudents.length} student${allStudents.length !== 1 ? 's' : ''}`;
+  if (!list.length) {
+    $('stu-tbody').innerHTML = '<tr><td colspan="11" class="text-center muted" style="padding:30px;">No matching students.</td></tr>';
     return;
   }
-
-  tbody.innerHTML = students.map((s, i) => {
-    const pct   = s.stats?.overallPct ?? 0;
-    const color = pctColor(pct);
-    return `
-      <tr class="tr-clickable" onclick="openStudentModal('${s.rollNumber}', '${s.name.replace(/'/g,"\\'")}')">
-        <td class="td-center">${s.sno || i + 1}</td>
-        <td><strong>${s.name}</strong></td>
-        <td>${s.branch || '—'}</td>
-        <td>${s.dept || '—'}</td>
-        <td>${s.cluster || '—'}</td>
-        <td>${s.crtSec || '—'}</td>
-        <td>${s.crtRoom || '—'}</td>
-        <td><span class="badge badge-purple">${s.rollNumber}</span></td>
-        <td class="td-center" style="color:var(--green); font-weight:600;">${s.stats?.present ?? 0}</td>
-        <td class="td-center">${s.stats?.total ?? 0}</td>
-        <td>
-          <div style="display:flex; align-items:center; gap:8px; min-width:120px;">
-            <div class="pct-bar-wrap" style="flex:1;">
-              <div class="pct-bar" style="width:${pct}%; background:${color};"></div>
-            </div>
-            <span style="color:${color}; font-weight:700; font-size:13px; min-width:38px;">${pct}%</span>
-          </div>
-        </td>
-      </tr>`;
+  $('stu-tbody').innerHTML = list.map((s, i) => {
+    const pct = s.stats?.overallPct ?? 0;
+    const col = pctColor(pct);
+    return `<tr class="tr-link" onclick="openModal('${s.rollNumber}','${s.name.replace(/'/g,"\\'")}')">
+      <td class="td-c">${s.sno || i+1}</td>
+      <td><strong>${s.name}</strong></td>
+      <td>${s.branch||'—'}</td>
+      <td>${s.dept||'—'}</td>
+      <td>${s.cluster||'—'}</td>
+      <td>${s.crtSec||'—'}</td>
+      <td>${s.crtRoom||'—'}</td>
+      <td><span class="badge b-purple">${s.rollNumber}</span></td>
+      <td class="td-c" style="color:var(--green);font-weight:600;">${s.stats?.present??0}</td>
+      <td class="td-c">${s.stats?.total??0}</td>
+      <td>
+        <div class="pct-wrap">
+          <div class="pct-track"><div class="pct-fill" style="width:${pct}%;background:${col};"></div></div>
+          <span class="pct-num" style="color:${col};">${pct}%</span>
+        </div>
+      </td>
+    </tr>`;
   }).join('');
-
-  document.getElementById('students-count').textContent =
-    `Showing ${students.length} student${students.length !== 1 ? 's' : ''}`;
 }
 
-// ── Student Detail Modal ────────────────────────────────────────────────────────
-async function openStudentModal(roll, name) {
-  document.getElementById('modal-title').textContent = name + ' — Attendance Detail';
-  document.getElementById('modal-body').innerHTML = '<div class="text-center muted" style="padding:30px;">Loading…</div>';
-  show('modal-bg');
-
-  try {
-    const r = await apiFetch('/students/' + roll);
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.error);
-    document.getElementById('modal-body').innerHTML = buildStudentDetail(d);
-  } catch(e) {
-    document.getElementById('modal-body').innerHTML = `<div class="alert alert-danger">Error: ${e.message}</div>`;
-  }
-}
-
-function closeModal(e) {
-  if (!e || e.target === e.currentTarget) hide('modal-bg');
-}
-
-// ══════════════════════════════════════════════════════
-// ADMIN — Mark Attendance Tab
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+// ADMIN — Mark Attendance
+// ══════════════════════════════════════════════════════════════
 async function lookupForMark() {
-  const roll = document.getElementById('mark-roll').value.trim().toUpperCase();
+  const roll = $('mark-roll').value.trim().toUpperCase();
   if (!roll) { toast('Enter a Reg. No.', 'error'); return; }
   try {
     const r = await apiFetch('/students/' + roll);
     const d = await r.json();
     if (!r.ok) throw new Error(d.error);
     const s = d.student;
-    document.getElementById('mark-profile').innerHTML = `
-      <div class="p-avatar">${initials(s.name)}</div>
-      <div>
-        <div class="p-name">${s.name}</div>
-        <div class="p-meta">${s.branch} · ${s.crtSec} · Room: ${s.crtRoom}</div>
-      </div>
-      <div class="p-roll">${s.rollNumber}</div>
-    `;
-    show('mark-form');
-  } catch(e) { toast(e.message, 'error'); }
+    $('mark-profile').innerHTML = `
+      <div class="p-av">${initials(s.name)}</div>
+      <div><div class="p-name">${s.name}</div><div class="p-meta">${s.branch||''} · ${s.crtSec||''} · Room ${s.crtRoom||''}</div></div>
+      <div class="p-roll">${s.rollNumber}</div>`;
+    show('mark-student-card');
+  } catch (e) { toast(e.message, 'error'); }
 }
 
 async function submitMark() {
-  const roll   = document.getElementById('mark-roll').value.trim().toUpperCase();
-  const slot   = document.getElementById('mark-slot').value;
-  const status = document.getElementById('mark-status').value;
-  const date   = document.getElementById('mark-date').value;
+  const roll   = $('mark-roll').value.trim().toUpperCase();
+  const slot   = $('mark-slot').value;
+  const status = $('mark-status').value;
+  const date   = $('mark-date').value;
   if (!slot || !status || !date) { toast('Fill all fields', 'error'); return; }
-
-  const btn = document.getElementById('mark-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spin"></span>';
-
+  const btn = $('mark-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span>';
   try {
     const r = await apiFetch('/attendance/mark', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -992,174 +1170,131 @@ async function submitMark() {
     });
     const d = await r.json();
     if (!r.ok) throw new Error(d.error);
-    toast(`✅ Marked ${slot} as ${status} for ${roll}`);
-    document.getElementById('mark-slot').value = '';
-    document.getElementById('mark-status').value = '';
-  } catch(e) { toast(e.message, 'error'); }
-  finally {
-    btn.disabled = false;
-    btn.textContent = 'Mark Attendance';
-  }
+    toast(`Marked ${slot} → ${status} for ${roll}`);
+    $('mark-slot').value = ''; $('mark-status').value = '';
+  } catch (e) { toast(e.message, 'error'); }
+  finally { btn.disabled = false; btn.textContent = 'Mark Attendance'; }
 }
 
-// ══════════════════════════════════════════════════════
-// ADMIN — Tab switching
-// ══════════════════════════════════════════════════════
-function adminTab(tab) {
-  ['upload','students','mark'].forEach(t => {
-    document.getElementById('apane-' + t).classList.toggle('hidden', t !== tab);
-    document.getElementById('atab-' + t).classList.toggle('active', t === tab);
-  });
-  if (tab === 'students' && !allStudents.length) loadAdminStudents();
-}
-
-// ══════════════════════════════════════════════════════
-// STUDENT DASHBOARD
-// ══════════════════════════════════════════════════════
-async function loadStudentDashboard(roll) {
-  show('stu-loading');
-  hide('stu-main');
+// ══════════════════════════════════════════════════════════════
+// ADMIN — Student Detail Modal
+// ══════════════════════════════════════════════════════════════
+async function openModal(roll, name) {
+  $('modal-title').textContent = name + ' — Full Attendance';
+  $('modal-body').innerHTML = '<div class="text-center muted" style="padding:30px;">Loading…</div>';
+  show('modal-wrap');
   try {
     const r = await apiFetch('/students/' + roll);
     const d = await r.json();
     if (!r.ok) throw new Error(d.error);
+    $('modal-body').innerHTML = buildDetailHTML(d);
+  } catch (e) {
+    $('modal-body').innerHTML = `<div class="a-danger alert">Error: ${e.message}</div>`;
+  }
+}
+function closeModal() { hide('modal-wrap'); }
 
+// ══════════════════════════════════════════════════════════════
+// STUDENT DASHBOARD
+// ══════════════════════════════════════════════════════════════
+async function loadStudentDashboard(roll) {
+  show('stu-loading'); hide('stu-main');
+  try {
+    const r = await apiFetch('/students/' + roll);
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
     const { student: s, stats } = d;
-
-    // Update navbar
-    document.getElementById('stu-avatar').textContent = initials(s.name);
-    document.getElementById('stu-name').textContent   = s.name;
-
-    // Profile
-    document.getElementById('stu-profile').innerHTML = `
-      <div class="p-avatar">${initials(s.name)}</div>
+    $('stu-av').textContent    = initials(s.name);
+    $('stu-uname').textContent = s.name;
+    $('stu-profile').innerHTML = `
+      <div class="p-av">${initials(s.name)}</div>
       <div>
         <div class="p-name">${s.name}</div>
-        <div class="p-meta">${s.branch} · ${s.dept} · Cluster ${s.cluster} · ${s.crtSec} · Room ${s.crtRoom}</div>
+        <div class="p-meta">${[s.branch,s.dept,`Cluster ${s.cluster}`,s.crtSec,`Room ${s.crtRoom}`].filter(Boolean).join(' · ')}</div>
       </div>
-      <div class="p-roll">${s.rollNumber}</div>
-    `;
-
-    // Alert
+      <div class="p-roll">${s.rollNumber}</div>`;
     const pct = stats.overallPct;
-    const alertEl = document.getElementById('stu-alert');
-    if (pct < 60) {
-      alertEl.innerHTML = `<div class="alert alert-danger">🚨 <strong>Critical:</strong> Your attendance is ${pct}%. Immediate improvement required.</div>`;
-    } else if (pct < 75) {
-      alertEl.innerHTML = `<div class="alert alert-warn">⚠️ <strong>Warning:</strong> Your attendance is ${pct}%, below the 75% threshold.</div>`;
-    } else {
-      alertEl.innerHTML = `<div class="alert alert-success">✅ Your attendance is <strong>${pct}%</strong> — you're on track!</div>`;
-    }
-
-    // Stats
-    document.getElementById('stu-total').textContent   = stats.total;
-    document.getElementById('stu-present').textContent = stats.present;
-    document.getElementById('stu-absent').textContent  = stats.absent;
-    document.getElementById('stu-pct').textContent     = pct + '%';
-    const pctBox = document.getElementById('stu-pct-box');
-    pctBox.classList.remove('good','bad','warn');
-    pctBox.classList.add(pct >= 75 ? 'good' : pct >= 60 ? 'warn' : 'bad');
-    document.getElementById('stu-pct').style.color = pctColor(pct);
-
-    // Weekly breakdown
-    const weeksEl = document.getElementById('stu-weeks');
-    if (!stats.weeks || !stats.weeks.length) {
-      weeksEl.innerHTML = '<div class="muted text-sm">No data yet.</div>';
-    } else {
-      weeksEl.innerHTML = stats.weeks.map(w => `
-        <div class="week-row">
-          <div class="week-label">Week ${w.week}, ${w.year}</div>
-          <div class="pct-bar-wrap" style="flex:1;">
-            <div class="pct-bar" style="width:${w.pct}%; background:${pctColor(w.pct)};"></div>
-          </div>
-          <div class="week-pct" style="color:${pctColor(w.pct)};">${w.pct}%</div>
-          <span class="badge ${w.safe ? 'badge-present' : 'badge-absent'}">${w.safe ? '✓ Safe' : '✗ Risk'}</span>
-        </div>
-      `).join('');
-    }
-
-    // Attendance table
-    document.getElementById('stu-table-wrap').innerHTML = buildAttendanceTable(stats);
-
-    hide('stu-loading');
-    show('stu-main');
-  } catch(e) {
-    document.getElementById('stu-loading').textContent = 'Error: ' + e.message;
+    $('stu-alert').innerHTML = pct < 60
+      ? `<div class="a-danger alert">🚨 <strong>Critical:</strong> Attendance ${pct}% — immediate improvement required.</div>`
+      : pct < 75
+        ? `<div class="a-warn alert">⚠️ <strong>Warning:</strong> Attendance ${pct}% is below the 75% threshold.</div>`
+        : `<div class="a-success alert">✅ Attendance <strong>${pct}%</strong> — you're on track!</div>`;
+    $('s-total').textContent   = stats.total;
+    $('s-present').textContent = stats.present;
+    $('s-absent').textContent  = stats.absent;
+    $('s-pct').textContent     = pct + '%';
+    $('s-pct').style.color     = pctColor(pct);
+    const pb = $('s-pct-box');
+    pb.className = 'stat-box ' + (pct >= 75 ? 's-green' : pct >= 60 ? 's-amber' : 's-red');
+    $('stu-weeks').innerHTML = buildWeeks(stats.weeks);
+    $('stu-tbl-wrap').innerHTML = buildAttTable(stats);
+    hide('stu-loading'); show('stu-main');
+  } catch (e) {
+    $('stu-loading').textContent = 'Error: ' + e.message;
   }
 }
 
-// ── Shared: build attendance table ─────────────────────────────────────────────
-function buildStudentDetail(data) {
-  const { student: s, stats } = data;
+// ══════════════════════════════════════════════════════════════
+// Shared builders
+// ══════════════════════════════════════════════════════════════
+function buildDetailHTML({ student: s, stats }) {
   const pct = stats.overallPct;
   return `
-    <div class="profile-bar" style="margin-bottom:16px;">
-      <div class="p-avatar">${initials(s.name)}</div>
-      <div>
-        <div class="p-name">${s.name}</div>
-        <div class="p-meta">${s.branch} · ${s.dept} · Cluster ${s.cluster} · ${s.crtSec} · Room ${s.crtRoom}</div>
-      </div>
+    <div class="profile-bar" style="margin-bottom:14px;">
+      <div class="p-av">${initials(s.name)}</div>
+      <div><div class="p-name">${s.name}</div>
+      <div class="p-meta">${[s.branch,s.dept,'Cluster '+s.cluster,s.crtSec,'Room '+s.crtRoom].filter(Boolean).join(' · ')}</div></div>
       <div class="p-roll">${s.rollNumber}</div>
     </div>
-    <div class="stats-row" style="margin-bottom:16px;">
-      <div class="stat-box purple" style="margin-bottom:0;"><div class="stat-val">${stats.total}</div><div class="stat-lbl">Total</div></div>
-      <div class="stat-box good"   style="margin-bottom:0;"><div class="stat-val">${stats.present}</div><div class="stat-lbl">Present</div></div>
-      <div class="stat-box bad"    style="margin-bottom:0;"><div class="stat-val">${stats.absent}</div><div class="stat-lbl">Absent</div></div>
-      <div class="stat-box ${pct >= 75 ? 'good' : pct >= 60 ? 'warn' : 'bad'}" style="margin-bottom:0;">
-        <div class="stat-val" style="color:${pctColor(pct)};">${pct}%</div>
-        <div class="stat-lbl">Attendance</div>
+    <div class="stats-row" style="margin-bottom:14px;">
+      <div class="stat-box s-purple" style="margin:0;"><div class="stat-val">${stats.total}</div><div class="stat-lbl">Total</div></div>
+      <div class="stat-box s-green"  style="margin:0;"><div class="stat-val">${stats.present}</div><div class="stat-lbl">Present</div></div>
+      <div class="stat-box s-red"    style="margin:0;"><div class="stat-val">${stats.absent}</div><div class="stat-lbl">Absent</div></div>
+      <div class="stat-box ${pct>=75?'s-green':pct>=60?'s-amber':'s-red'}" style="margin:0;">
+        <div class="stat-val" style="color:${pctColor(pct)}">${pct}%</div><div class="stat-lbl">Attendance</div>
       </div>
     </div>
-    ${buildAttendanceTable(stats)}
-  `;
+    ${buildAttTable(stats)}`;
 }
 
-function buildAttendanceTable(stats) {
+function buildWeeks(weeks) {
+  if (!weeks?.length) return '<div class="muted text-sm">No weekly data yet.</div>';
+  return weeks.map(w => {
+    const col = pctColor(w.pct);
+    return `<div class="week-row">
+      <div class="wk-label">Wk ${w.week} / ${w.year}</div>
+      <div class="pct-track" style="flex:1;"><div class="pct-fill" style="width:${w.pct}%;background:${col};"></div></div>
+      <div class="wk-pct" style="color:${col};">${w.pct}%</div>
+      <span class="badge ${w.safe?'b-present':'b-absent'}">${w.safe?'✓ Safe':'✗ Risk'}</span>
+    </div>`;
+  }).join('');
+}
+
+function buildAttTable(stats) {
   const byDate = stats.byDate || {};
   const slots  = stats.slots  || [];
   const dates  = Object.keys(byDate).sort().reverse();
+  if (!dates.length) return '<div class="muted text-sm" style="padding:20px;">No attendance records yet.</div>';
 
-  if (!dates.length) return '<div class="muted text-sm">No attendance records yet.</div>';
+  const thead = `<tr>
+    <th>Date</th>
+    ${slots.map(s => `<th class="td-c" style="font-size:10px;">${s}</th>`).join('')}
+    <th class="td-c">P / Total</th>
+  </tr>`;
 
-  const hdrCols = slots.map(s => `<th class="td-center">${s}</th>`).join('');
   const rows = dates.map(dt => {
-    const dayCells = slots.map(s => {
+    const cells = slots.map(s => {
       const v = byDate[dt][s];
-      if (!v) return `<td class="td-center"><span class="badge badge-dash">—</span></td>`;
-      return `<td class="td-center"><span class="badge badge-${v}">${v === 'present' ? 'P' : 'A'}</span></td>`;
+      return `<td class="td-c">${v ? `<span class="badge ${v==='present'?'b-present':'b-absent'}">${v==='present'?'P':'A'}</span>` : '<span class="badge b-dash">—</span>'}</td>`;
     }).join('');
-    const dayPresent = slots.filter(s => byDate[dt][s] === 'present').length;
-    const dayTotal   = slots.filter(s => !!byDate[dt][s]).length;
-    const dayPct     = dayTotal > 0 ? Math.round((dayPresent / dayTotal) * 100) : 0;
-    return `
-      <tr>
-        <td><strong>${fmtDate(dt)}</strong></td>
-        ${dayCells}
-        <td class="td-center" style="color:${pctColor(dayPct)}; font-weight:600;">${dayPresent}/${dayTotal}</td>
-      </tr>`;
+    const p = slots.filter(s => byDate[dt][s] === 'present').length;
+    const t = slots.filter(s => !!byDate[dt][s]).length;
+    const c = pctColor(t ? Math.round(p/t*100) : 0);
+    return `<tr><td><strong>${fmtDate(dt)}</strong></td>${cells}<td class="td-c" style="font-weight:700;color:${c};">${p}/${t}</td></tr>`;
   }).join('');
 
-  return `
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            ${hdrCols}
-            <th class="td-center">P/Total</th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>`;
+  return `<div class="tbl-wrap"><table><thead>${thead}</thead><tbody>${rows}</tbody></table></div>`;
 }
-
-// ── Enter key for mark attendance roll input ───────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeModal();
-  });
-});
 </script>
 </body>
 </html>
