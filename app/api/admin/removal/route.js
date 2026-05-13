@@ -4,11 +4,14 @@ import Student from '@/lib/models/Student';
 import Attendance from '@/lib/models/Attendance';
 import { getSession } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(request) {
   try {
     const session = await getSession();
     if (!session || session.role !== 'admin')
       return NextResponse.json({ error: 'Admin only' }, { status: 403 });
+
+    const { searchParams } = new URL(request.url);
+    const threshold = Math.min(100, Math.max(0, parseInt(searchParams.get('threshold') || '85', 10)));
 
     await connectDB();
     const [students, statsAgg] = await Promise.all([
@@ -31,7 +34,7 @@ export async function GET() {
         const pct = st.total > 0 ? Math.round((st.present / st.total) * 100) : 0;
         return { ...s, stats: { total: st.total, present: st.present, absent: st.total - st.present, pct } };
       })
-      .filter(s => s.stats.pct < 85 && s.stats.total > 0)
+      .filter(s => s.stats.pct < threshold && s.stats.total > 0)
       .sort((a, b) => a.stats.pct - b.stats.pct);
 
     return NextResponse.json(result);
