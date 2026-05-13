@@ -4,6 +4,14 @@ import { useRouter } from 'next/navigation';
 import { fmtDate, pctColor } from '@/lib/helpers';
 import ThemeToggle from '@/components/ThemeToggle';
 
+function calcBunk(present, total, threshold = 75) {
+  if (!total) return { canBunk: 0, needAttend: 0 };
+  const t = threshold / 100;
+  const pct = Math.round((present / total) * 100);
+  if (pct >= threshold) return { canBunk: Math.max(0, Math.floor((present - t * total) / t)), needAttend: 0 };
+  return { canBunk: 0, needAttend: Math.ceil((t * total - present) / (1 - t)) };
+}
+
 function PctBar({ pct }) {
   const color = pctColor(pct);
   return (
@@ -48,7 +56,9 @@ export default function StudentPage() {
   );
 
   const { student: s, stats } = data;
-  const pct = stats.overallPct;
+  const pct  = stats.overallPct;
+  const b75  = calcBunk(stats.present, stats.total, 75);
+  const b85  = calcBunk(stats.present, stats.total, 85);
   const dates = Object.keys(stats.byDate || {}).sort().reverse();
 
   return (
@@ -117,6 +127,46 @@ export default function StudentPage() {
             </div>
           ))}
         </div>
+
+        {/* Bunk Calculator */}
+        {stats.total > 0 && (
+          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-4">
+            <div className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-1">Bunk Calculator</div>
+            <div className="text-xs text-slate-400 dark:text-slate-500 mb-3">
+              {stats.present} present out of {stats.total} sessions
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label: '75% Threshold', data: b75 },
+                { label: '85% Threshold', data: b85 },
+              ].map(({ label, data }) => (
+                <div key={label}
+                     className="border border-slate-200 dark:border-slate-600
+                                bg-slate-50 dark:bg-slate-700/40 rounded-lg p-4">
+                  <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">{label}</div>
+                  {data.canBunk > 0 ? (
+                    <>
+                      <div className="text-3xl font-bold text-green-600 dark:text-green-400">{data.canBunk}</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">sessions you can skip</div>
+                      <div className="text-xs text-slate-400 dark:text-slate-500 mt-1.5">
+                        ≈ {Math.floor(data.canBunk / 8)} day{Math.floor(data.canBunk / 8) !== 1 ? 's' : ''}
+                        {data.canBunk % 8 > 0 ? ` + ${data.canBunk % 8} slot${data.canBunk % 8 !== 1 ? 's' : ''}` : ''}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-3xl font-bold text-red-600 dark:text-red-400">{data.needAttend}</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">sessions to recover</div>
+                      <div className="text-xs text-slate-400 dark:text-slate-500 mt-1.5">
+                        ≈ {Math.ceil(data.needAttend / 8)} week{data.needAttend > 8 ? 's' : ''} of full attendance
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Attendance log */}
         <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
