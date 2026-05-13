@@ -225,7 +225,7 @@ export default function StudentsPage() {
               {paged.map((s, i) => (
                 <tr key={s.rollNumber} className="tbl-row cursor-pointer"
                     onClick={() => setModal({ roll: s.rollNumber, name: s.name })}>
-                  <td className="tbl-cell text-center text-gray-400">{s.sno || (page - 1) * PAGE_SIZE + i + 1}</td>
+                  <td className="tbl-cell text-center text-gray-400">{(page - 1) * PAGE_SIZE + i + 1}</td>
                   <td className="tbl-cell font-medium text-gray-900">{s.name}</td>
                   <td className="tbl-cell">{s.branch || '—'}</td>
                   <td className="tbl-cell">{s.dept    || '—'}</td>
