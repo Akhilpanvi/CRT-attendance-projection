@@ -11,6 +11,10 @@ const fs = require('fs');
 
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || 'crt-kl-secret-2024';
+
+// Ensure uploads dir exists (needed on platforms with ephemeral filesystems)
+if (!fs.existsSync('uploads')) fs.mkdirSync('uploads');
+
 const upload = multer({ dest: 'uploads/' });
 
 app.use(cors());
