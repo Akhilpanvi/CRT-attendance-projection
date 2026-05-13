@@ -11,7 +11,7 @@ export async function GET(request, { params }) {
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const roll = params.rollNumber.toUpperCase();
-    if (session.role !== 'admin' && session.rollNumber !== roll)
+    if (session.role !== 'admin' && session.role !== 'aprameya' && session.rollNumber !== roll)
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
 
     await connectDB();
