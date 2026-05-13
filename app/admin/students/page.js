@@ -3,6 +3,29 @@ import { useState, useEffect, useMemo } from 'react';
 import { fmtDate, pctColor } from '@/lib/helpers';
 import { useToast, Toast } from '@/components/Toast';
 
+function downloadAttendanceReport(students) {
+  import('xlsx').then(XLSX => {
+    const rows = students.map((s, i) => ({
+      '#':             i + 1,
+      'Name':          s.name,
+      'Reg. No.':      s.rollNumber,
+      'Branch':        s.branch  || '',
+      'Department':    s.dept    || '',
+      'Cluster':       s.cluster || '',
+      'CRT Section':   s.crtSec  || '',
+      'CRT Room':      s.crtRoom || '',
+      'Present':       s.stats?.present ?? 0,
+      'Total':         s.stats?.total   ?? 0,
+      'Absent':        s.stats?.absent  ?? 0,
+      'Attendance %':  s.stats?.overallPct ?? 0,
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Attendance Report');
+    XLSX.writeFile(wb, `attendance_report_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  });
+}
+
 const PAGE_SIZE = 50;
 
 function PctBar({ pct }) {
@@ -17,9 +40,11 @@ function PctBar({ pct }) {
   );
 }
 
-function Modal({ roll, name, onClose }) {
-  const [data, setData] = useState(null);
-  const [err, setErr]   = useState('');
+function Modal({ roll, name, onClose, showToast }) {
+  const [data, setData]         = useState(null);
+  const [err, setErr]           = useState('');
+  const [resetting, setResetting] = useState(false);
+  const [resetDone, setResetDone] = useState(false);
 
   useEffect(() => {
     fetch(`/api/students/${roll}`)
@@ -27,6 +52,23 @@ function Modal({ roll, name, onClose }) {
       .then(d => { if (d.error) setErr(d.error); else setData(d); })
       .catch(e => setErr(e.message));
   }, [roll]);
+
+  async function resetPassword() {
+    if (!confirm(`Reset password for ${name} (${roll}) back to their Reg. No.?`)) return;
+    setResetting(true);
+    try {
+      const r = await fetch('/api/admin/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rollNumber: roll }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error);
+      setResetDone(true);
+      showToast(`Password reset for ${roll}`);
+    } catch (e) { showToast(e.message, 'error'); }
+    finally { setResetting(false); }
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
@@ -37,12 +79,24 @@ function Modal({ roll, name, onClose }) {
           <h3 className="font-semibold text-slate-900 dark:text-slate-100 text-sm">
             {name} — Attendance Detail
           </h3>
-          <button onClick={onClose}
-                  className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-lg
-                             leading-none font-bold w-6 h-6 flex items-center justify-center
-                             rounded hover:bg-slate-100 dark:hover:bg-slate-700">
-            &#10005;
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={resetPassword}
+              disabled={resetting}
+              title="Reset password to Reg. No."
+              className={`text-xs font-medium px-3 py-1.5 rounded border transition-colors
+                ${resetDone
+                  ? 'border-green-300 text-green-600 dark:text-green-400 dark:border-green-700'
+                  : 'border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-red-300 hover:text-red-600 dark:hover:text-red-400'}`}>
+              {resetting ? 'Resetting…' : resetDone ? 'Password Reset' : 'Reset Password'}
+            </button>
+            <button onClick={onClose}
+                    className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-lg
+                               leading-none font-bold w-6 h-6 flex items-center justify-center
+                               rounded hover:bg-slate-100 dark:hover:bg-slate-700">
+              &#10005;
+            </button>
+          </div>
         </div>
         <div className="overflow-y-auto p-5 flex-1">
           {err   && <div className="alert-danger">{err}</div>}
@@ -171,7 +225,7 @@ export default function StudentsPage() {
   return (
     <div>
       <Toast toast={toast} />
-      {modal && <Modal roll={modal.roll} name={modal.name} onClose={() => setModal(null)} />}
+      {modal && <Modal roll={modal.roll} name={modal.name} onClose={() => setModal(null)} showToast={show} />}
 
       <div className="mb-4 flex items-center gap-3 flex-wrap">
         <div>
@@ -185,6 +239,12 @@ export default function StudentsPage() {
             value={q}
             onChange={e => { setQ(e.target.value); setPage(1); }}
           />
+          <button
+            className="btn-outline btn-sm"
+            disabled={loading || all.length === 0}
+            onClick={() => downloadAttendanceReport(filtered)}>
+            Download Report
+          </button>
           <button
             className="btn-outline btn-sm"
             onClick={() => {

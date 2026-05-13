@@ -120,6 +120,8 @@ function CircleView({ members, stats, onAdd, onRemove, onSelect, selected }) {
           const weeks = (s?.weeks || []).slice(0, 3);
           const isSelected = selected === roll;
 
+          const b85  = s ? calcBunk(s.present, s.total, 85) : null;
+
           return (
             <div key={roll}
                  className={`border rounded-lg overflow-hidden transition-colors cursor-pointer
@@ -167,10 +169,11 @@ function CircleView({ members, stats, onAdd, onRemove, onSelect, selected }) {
                 </button>
               </div>
 
-              {/* Expanded weekly view */}
+              {/* Expanded detail */}
               {isSelected && s && (
                 <div className="px-3 pb-3 pt-2 border-t border-slate-200 dark:border-slate-600
                                 bg-white dark:bg-slate-800">
+                  {/* Stats row */}
                   <div className="grid grid-cols-3 gap-2 mb-3">
                     {[
                       { l: 'Present', v: s.present, c: 'text-green-600 dark:text-green-400' },
@@ -185,6 +188,38 @@ function CircleView({ members, stats, onAdd, onRemove, onSelect, selected }) {
                     ))}
                   </div>
 
+                  {/* Bunk calculator results */}
+                  <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
+                    Bunk Calculator
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 mb-3">
+                    {[
+                      { label: '75% threshold', data: b75 },
+                      { label: '85% threshold', data: b85 },
+                    ].map(({ label, data }) => (
+                      <div key={label} className="border border-slate-200 dark:border-slate-600
+                                                  bg-slate-50 dark:bg-slate-700/40 rounded p-2.5">
+                        <div className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">{label}</div>
+                        {data && data.canBunk > 0 ? (
+                          <>
+                            <div className="text-xl font-bold text-green-600 dark:text-green-400">{data.canBunk}</div>
+                            <div className="text-[10px] text-slate-400 mt-0.5">sessions to skip</div>
+                            <div className="text-[10px] text-slate-500 mt-0.5">
+                              ≈ {Math.floor(data.canBunk / 8)} day{Math.floor(data.canBunk / 8) !== 1 ? 's' : ''}
+                              {data.canBunk % 8 > 0 ? ` + ${data.canBunk % 8} slot${data.canBunk % 8 !== 1 ? 's' : ''}` : ''}
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="text-xl font-bold text-red-600 dark:text-red-400">{data?.needAttend ?? 0}</div>
+                            <div className="text-[10px] text-slate-400 mt-0.5">sessions to recover</div>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Weekly */}
                   {weeks.length > 0 && (
                     <div className="space-y-1.5 mb-3">
                       <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">

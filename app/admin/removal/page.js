@@ -3,6 +3,29 @@ import { useEffect, useState } from 'react';
 import { useToast, Toast } from '@/components/Toast';
 import { pctColor } from '@/lib/helpers';
 
+function downloadExcel(students) {
+  import('xlsx').then(XLSX => {
+    const rows = students.map((s, i) => ({
+      '#':             i + 1,
+      'Name':          s.name,
+      'Reg. No.':      s.rollNumber,
+      'Branch':        s.branch  || '',
+      'Department':    s.dept    || '',
+      'CRT Section':   s.crtSec  || '',
+      'CRT Room':      s.crtRoom || '',
+      'Present':       s.stats.present,
+      'Total':         s.stats.total,
+      'Absent':        s.stats.absent,
+      'Attendance %':  s.stats.pct,
+      'Status':        s.stats.pct < 75 ? 'Critical' : 'Warning',
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Removal List');
+    XLSX.writeFile(wb, `removal_list_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  });
+}
+
 function PctBar({ pct }) {
   const color = pctColor(pct);
   return (
@@ -47,13 +70,19 @@ export default function RemovalPage() {
             Students with attendance below 85%
           </p>
         </div>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
           <input
             className="form-input text-xs w-52"
             placeholder="Search name or reg. no."
             value={q}
             onChange={e => setQ(e.target.value)}
           />
+          <button
+            className="btn-outline btn-sm shrink-0"
+            disabled={loading || students.length === 0}
+            onClick={() => downloadExcel(filtered)}>
+            Download Excel
+          </button>
         </div>
       </div>
 
