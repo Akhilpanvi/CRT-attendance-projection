@@ -1,0 +1,21 @@
+{
+  "name": "crt-attendance-portal",
+  "version": "2.0.0",
+  "private": true,
+  "description": "CRT Attendance Portal — 2023-27 Batch Y-23 Summer CRT Training",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "csv-parse": "^5.5.6",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.11.0",
+    "multer": "^1.4.5-lts.1"
+  }
+}

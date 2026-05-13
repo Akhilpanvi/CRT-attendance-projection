@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRT Attendance Portal — KL University</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --purple:       #6d28d9;
+  --purple-dark:  #5b21b6;
+  --purple-light: #ede9fe;
+  --purple-mid:   #7c3aed;
+  --text:         #1f2937;
+  --text-sm:      #6b7280;
+  --border:       #e5e7eb;
+  --bg:           #f3f4f6;
+  --white:        #ffffff;
+  --green:        #16a34a;
+  --green-bg:     #dcfce7;
+  --red:          #dc2626;
+  --red-bg:       #fee2e2;
+  --amber:        #d97706;
+  --amber-bg:     #fef3c7;
+  --radius:       8px;
+  --shadow:       0 1px 4px rgba(0,0,0,0.10);
+  --shadow-md:    0 4px 16px rgba(0,0,0,0.12);
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
+
+/* ── Utilities ── */
+.hidden   { display: none !important; }
+.mt4      { margin-top: 4px; }
+.mt8      { margin-top: 8px; }
+.mt16     { margin-top: 16px; }
+.mt24     { margin-top: 24px; }
+.bold     { font-weight: 600; }
+.muted    { color: var(--text-sm); }
+.text-sm  { font-size: 12px; }
+.text-center { text-align: center; }
+
+/* ── Inputs & Buttons ── */
+label { display: block; font-size: 12px; font-weight: 500; color: var(--text-sm); margin-bottom: 5px; letter-spacing: 0.03em; text-transform: uppercase; }
+input, select {
+  width: 100%; padding: 9px 12px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  font-family: inherit; font-size: 14px; color: var(--text);
+  background: var(--white); outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+input:focus, select:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(109,40,217,0.12); }
+input::placeholder { color: #9ca3af; }
+select option { background: var(--white); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 9px 20px; border-radius: var(--radius);
+  font-family: inherit; font-size: 14px; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.18s; white-space: nowrap;
+}
+.btn-primary { background: var(--purple); color: #fff; }
+.btn-primary:hover { background: var(--purple-dark); }
+.btn-outline { background: var(--white); color: var(--purple); border: 1.5px solid var(--purple); }
+.btn-outline:hover { background: var(--purple-light); }
+.btn-sm { padding: 6px 14px; font-size: 13px; }
+.btn-full { width: 100%; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-green  { background: var(--green);  color: #fff; }
+.btn-green:hover { filter: brightness(0.9); }
+.btn-red    { background: var(--red);    color: #fff; }
+.btn-red:hover   { filter: brightness(0.9); }
+
+/* ── Cards ── */
+.card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px;
+  box-shadow: var(--shadow); margin-bottom: 16px;
+}
+.card-title {
+  font-size: 13px; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--text-sm); margin-bottom: 16px;
+}
+
+/* ── Form groups ── */
+.form-row { display: grid; gap: 12px; margin-bottom: 14px; }
+.form-row.cols-2 { grid-template-columns: 1fr 1fr; }
+.form-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+@media (max-width: 540px) {
+  .form-row.cols-2, .form-row.cols-3 { grid-template-columns: 1fr; }
+}
+
+/* ─────────────────────────────────────────────
+   LOGIN SCREEN
+───────────────────────────────────────────── */
+#screen-login {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #6d28d9 0%, #4c1d95 100%);
+}
+.login-box {
+  width: 100%; max-width: 400px;
+  background: var(--white); border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25); overflow: hidden;
+}
+.login-header {
+  background: linear-gradient(135deg, #6d28d9, #4c1d95);
+  padding: 28px 32px 24px; text-align: center; color: #fff;
+}
+.login-logo {
+  width: 52px; height: 52px; border-radius: 14px;
+  background: rgba(255,255,255,0.2); display: flex; align-items: center;
+  justify-content: center; font-size: 24px; font-weight: 800; margin: 0 auto 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+}
+.login-title { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+.login-sub   { font-size: 12px; opacity: 0.8; margin-top: 4px; }
+.login-body  { padding: 28px 32px 32px; }
+.login-body .form-row { margin-bottom: 12px; }
+.login-body .form-row:last-of-type { margin-bottom: 20px; }
+.login-footer { text-align: center; margin-top: 18px; font-size: 12px; color: var(--text-sm); }
+
+/* ─────────────────────────────────────────────
+   CHANGE PASSWORD SCREEN
+───────────────────────────────────────────── */
+#screen-changepw {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #6d28d9 0%, #4c1d95 100%);
+}
+.changepw-box {
+  width: 100%; max-width: 400px;
+  background: var(--white); border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25); padding: 32px;
+}
+.changepw-box h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.changepw-box p  { font-size: 13px; color: var(--text-sm); margin-bottom: 24px; }
+.changepw-box .form-row { margin-bottom: 12px; }
+
+/* ─────────────────────────────────────────────
+   MAIN LAYOUT (admin + student)
+───────────────────────────────────────────── */
+#screen-admin, #screen-student { display: flex; flex-direction: column; min-height: 100vh; }
+
+/* Top navbar */
+.navbar {
+  background: var(--purple); color: #fff;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px; height: 56px; position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 8px rgba(109,40,217,0.3);
+}
+.navbar-brand { display: flex; align-items: center; gap: 10px; }
+.navbar-icon {
+  width: 34px; height: 34px; border-radius: 8px;
+  background: rgba(255,255,255,0.2); display: flex; align-items: center;
+  justify-content: center; font-size: 16px; font-weight: 800;
+  border: 1.5px solid rgba(255,255,255,0.3);
+}
+.navbar-title { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
+.navbar-title span { opacity: 0.7; font-weight: 400; font-size: 13px; margin-left: 6px; }
+.navbar-user {
+  display: flex; align-items: center; gap: 8px;
+  cursor: pointer; background: rgba(255,255,255,0.15);
+  border-radius: 20px; padding: 5px 14px 5px 8px;
+  font-size: 13px; font-weight: 500; transition: background 0.2s;
+  border: none; color: #fff; font-family: inherit;
+}
+.navbar-user:hover { background: rgba(255,255,255,0.25); }
+.navbar-avatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: rgba(255,255,255,0.3); display: flex; align-items: center;
+  justify-content: center; font-size: 11px; font-weight: 700;
+}
+
+/* Sub-header / tab strip */
+.tab-strip {
+  background: var(--white); border-bottom: 1px solid var(--border);
+  display: flex; gap: 0; overflow-x: auto; padding: 0 16px;
+  scrollbar-width: none;
+}
+.tab-strip::-webkit-scrollbar { display: none; }
+.tab-btn {
+  padding: 14px 20px; font-family: inherit; font-size: 13px; font-weight: 500;
+  color: var(--text-sm); background: none; border: none; cursor: pointer;
+  border-bottom: 2.5px solid transparent; white-space: nowrap;
+  transition: all 0.18s; letter-spacing: 0.01em;
+}
+.tab-btn:hover  { color: var(--purple); }
+.tab-btn.active { color: var(--purple); border-bottom-color: var(--purple); font-weight: 600; }
+
+/* Content wrapper */
+.content { flex: 1; padding: 20px; max-width: 1100px; margin: 0 auto; width: 100%; }
+
+/* ── Table ── */
+.table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th {
+  background: var(--purple); color: #fff; padding: 11px 14px;
+  font-weight: 600; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase;
+  text-align: left; white-space: nowrap;
+}
+thead th:first-child { border-radius: 0; }
+tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: #f9f7ff; }
+tbody td { padding: 10px 14px; white-space: nowrap; vertical-align: middle; }
+.td-center { text-align: center; }
+.tr-clickable { cursor: pointer; }
+
+/* ── Badges ── */
+.badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; min-width: 28px;
+}
+.badge-present { background: var(--green-bg); color: var(--green); }
+.badge-absent  { background: var(--red-bg);   color: var(--red); }
+.badge-dash    { background: #f3f4f6; color: #9ca3af; }
+.badge-purple  { background: var(--purple-light); color: var(--purple); }
+
+/* ── Stats row ── */
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+@media (max-width: 640px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+.stat-box {
+  background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 16px; text-align: center; box-shadow: var(--shadow);
+}
+.stat-val  { font-size: 28px; font-weight: 700; line-height: 1; }
+.stat-lbl  { font-size: 11px; color: var(--text-sm); margin-top: 5px; text-transform: uppercase; letter-spacing: 0.06em; }
+.stat-box.good   .stat-val { color: var(--green); }
+.stat-box.bad    .stat-val { color: var(--red); }
+.stat-box.warn   .stat-val { color: var(--amber); }
+.stat-box.purple .stat-val { color: var(--purple); }
+
+/* ── Profile bar ── */
+.profile-bar {
+  background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px 18px; display: flex; align-items: center; gap: 14px;
+  box-shadow: var(--shadow); margin-bottom: 16px; flex-wrap: wrap;
+}
+.p-avatar {
+  width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--purple), #a855f7);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 16px; color: #fff;
+}
+.p-name  { font-weight: 600; font-size: 15px; }
+.p-meta  { font-size: 12px; color: var(--text-sm); margin-top: 2px; }
+.p-roll  { margin-left: auto; font-size: 13px; font-weight: 600; color: var(--purple); background: var(--purple-light); padding: 4px 12px; border-radius: 20px; }
+
+/* ── Alert ── */
+.alert { padding: 11px 15px; border-radius: var(--radius); font-size: 13px; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 8px; }
+.alert-warn    { background: var(--amber-bg);  border: 1px solid #fcd34d; color: #92400e; }
+.alert-success { background: var(--green-bg);  border: 1px solid #86efac; color: #14532d; }
+.alert-danger  { background: var(--red-bg);    border: 1px solid #fca5a5; color: #7f1d1d; }
+.alert-info    { background: var(--purple-light); border: 1px solid #c4b5fd; color: #4c1d95; }
+
+/* ── Upload zone ── */
+.upload-zone {
+  border: 2px dashed var(--border); border-radius: var(--radius);
+  padding: 32px 20px; text-align: center; cursor: pointer;
+  transition: all 0.2s; background: #fafafa;
+}
+.upload-zone:hover, .upload-zone.drag { border-color: var(--purple); background: var(--purple-light); }
+.upload-icon { font-size: 36px; margin-bottom: 10px; }
+.upload-zone p  { color: var(--text-sm); font-size: 13px; margin-top: 6px; }
+.upload-zone strong { color: var(--purple); }
+#file-input { display: none; }
+
+/* ── Search box ── */
+.search-wrap { position: relative; margin-bottom: 14px; }
+.search-wrap input { padding-left: 36px; }
+.search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); font-size: 15px; color: var(--text-sm); pointer-events: none; }
+
+/* ── Toast ── */
+#toast {
+  position: fixed; bottom: 24px; right: 20px; z-index: 9999;
+  background: var(--text); color: #fff; padding: 11px 20px;
+  border-radius: var(--radius); font-size: 13px; font-weight: 500;
+  box-shadow: var(--shadow-md); transform: translateY(80px); opacity: 0;
+  transition: all 0.3s cubic-bezier(.4,0,.2,1); max-width: 320px; pointer-events: none;
+}
+#toast.show { transform: translateY(0); opacity: 1; }
+#toast.t-success { background: var(--green); }
+#toast.t-error   { background: var(--red); }
+
+/* ── Spinner ── */
+.spin {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+  animation: spin 0.6s linear infinite; display: inline-block; vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Modal ── */
+.modal-bg {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 500; padding: 16px; animation: fadeIn 0.2s ease;
+}
+.modal {
+  background: var(--white); border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  width: 100%; max-width: 860px; max-height: 90vh;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.modal-head {
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-head h3 { font-size: 16px; font-weight: 700; }
+.modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-sm); padding: 2px 6px; border-radius: 4px; }
+.modal-close:hover { background: var(--bg); }
+.modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+
+/* ── Pct bar ── */
+.pct-bar-wrap { height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden; }
+.pct-bar { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── Weekly breakdown ── */
+.week-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.week-row:last-child { border-bottom: none; }
+.week-label { font-size: 12px; color: var(--text-sm); min-width: 60px; }
+.week-pct   { font-size: 13px; font-weight: 600; min-width: 44px; text-align: right; }
+
+/* ── Divider ── */
+.divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+/* ── Responsive helpers ── */
+@media (max-width: 480px) {
+  .content { padding: 12px; }
+  .navbar-title span { display: none; }
+  .card { padding: 14px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     LOGIN SCREEN
+════════════════════════════════════════════════════ -->
+<div id="screen-login">
+  <div class="login-box">
+    <div class="login-header">
+      <div class="login-logo">C</div>
+      <div class="login-title">CRT Attendance Portal</div>
+      <div class="login-sub">2023-27 Batch Y-23 · Summer CRT Training · KL University</div>
+    </div>
+    <div class="login-body">
+      <div class="form-row">
+        <div>
+          <label>Username / Reg. No.</label>
+          <input type="text" id="login-user" placeholder="Enter username" autocomplete="username">
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label>Password</label>
+          <input type="password" id="login-pass" placeholder="Enter password" autocomplete="current-password">
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="doLogin()" id="login-btn">Sign In</button>
+      <div id="login-err" class="mt8" style="color:var(--red); font-size:13px; min-height:18px; text-align:center;"></div>
+      <div class="login-footer">
+        Admin login: <strong>CRT</strong> / <strong>CRT999</strong><br>
+        Students: Reg.No as username & password (first login requires password change)
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     CHANGE PASSWORD SCREEN
+════════════════════════════════════════════════════ -->
+<div id="screen-changepw" class="hidden">
+  <div class="changepw-box">
+    <h2>🔐 Change Your Password</h2>
+    <p>For security, you must set a new password before continuing. Password must be at least 6 characters.</p>
+    <div class="form-row">
+      <div>
+        <label>New Password</label>
+        <input type="password" id="cp-new" placeholder="Enter new password">
+      </div>
+    </div>
+    <div class="form-row">
+      <div>
+        <label>Confirm Password</label>
+        <input type="password" id="cp-confirm" placeholder="Re-enter new password">
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full mt8" onclick="doChangePassword()" id="cp-btn">Set Password & Continue</button>
+    <div id="cp-err" class="mt8" style="color:var(--red); font-size:13px; min-height:18px; text-align:center;"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     ADMIN DASHBOARD
+════════════════════════════════════════════════════ -->
+<div id="screen-admin" class="hidden">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <div class="navbar-icon">C</div>
+      <div class="navbar-title">CRT Attendance Portal <span>Admin</span></div>
+    </div>
+    <button class="navbar-user" onclick="logout()">
+      <div class="navbar-avatar" id="admin-avatar">A</div>
+      <span id="admin-name">CRT</span>
+      &nbsp;· Logout
+    </button>
+  </nav>
+
+  <div class="tab-strip">
+    <button class="tab-btn active" onclick="adminTab('upload')"   id="atab-upload">⬆ Upload CSV</button>
+    <button class="tab-btn"        onclick="adminTab('students')" id="atab-students">👥 All Students</button>
+    <button class="tab-btn"        onclick="adminTab('mark')"     id="atab-mark">✏️ Mark Attendance</button>
+  </div>
+
+  <div class="content">
+
+    <!-- ── Upload CSV ── -->
+    <div id="apane-upload">
+      <div class="card">
+        <div class="card-title">Upload Attendance CSV</div>
+        <p class="muted text-sm" style="margin-bottom:16px; line-height:1.6;">
+          Upload the daily CRT attendance sheet. The CSV must have columns:<br>
+          <strong>S.NO, NAME, BRANCH, DEPT, CLUSTER, CRT SEC, CRT ROOM, REGD.NO</strong>
+          followed by 8 time-slot columns (09:20-10:10 … 04:30-5:30) with <strong>P</strong> or <strong>A</strong> values.
+        </p>
+
+        <div class="form-row cols-2" style="margin-bottom:16px;">
+          <div>
+            <label>Attendance Date</label>
+            <input type="date" id="upload-date">
+          </div>
+          <div style="display:flex; align-items:flex-end;">
+            <button class="btn btn-outline btn-full" onclick="document.getElementById('file-input').click()">
+              📂 Browse CSV File
+            </button>
+            <input type="file" id="file-input" accept=".csv" onchange="onFileSelect(this)">
+          </div>
+        </div>
+
+        <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()"
+             ondragover="event.preventDefault(); this.classList.add('drag')"
+             ondragleave="this.classList.remove('drag')"
+             ondrop="onFileDrop(event)">
+          <div class="upload-icon">📄</div>
+          <div id="upload-filename" style="font-weight:600; color:var(--purple);">No file selected</div>
+          <p>Click to browse or drag & drop your CSV here</p>
+        </div>
+
+        <button class="btn btn-primary mt16" id="upload-btn" onclick="uploadCSV()" disabled>
+          ⬆ Upload & Import
+        </button>
+      </div>
+
+      <div id="upload-result" class="hidden">
+        <div class="card">
+          <div class="card-title">Import Result</div>
+          <div id="upload-result-body"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── All Students ── -->
+    <div id="apane-students" class="hidden">
+      <div class="card" style="padding:14px 20px;">
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <div class="search-wrap" style="flex:1; min-width:200px; margin-bottom:0;">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="student-search" placeholder="Search by name or reg. no…" oninput="filterStudents()">
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="loadAdminStudents()">↺ Refresh</button>
+        </div>
+      </div>
+
+      <div id="students-loading" class="text-center muted" style="padding:40px;">Loading students…</div>
+      <div id="students-table-wrap" class="hidden">
+        <div class="table-wrap">
+          <table id="students-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Branch</th>
+                <th>Dept</th>
+                <th>Cluster</th>
+                <th>CRT Sec</th>
+                <th>Room</th>
+                <th>Reg. No.</th>
+                <th>Present</th>
+                <th>Total</th>
+                <th>Attendance %</th>
+              </tr>
+            </thead>
+            <tbody id="students-tbody"></tbody>
+          </table>
+        </div>
+        <div id="students-count" class="text-sm muted mt8"></div>
+      </div>
+    </div>
+
+    <!-- ── Mark Attendance ── -->
+    <div id="apane-mark" class="hidden">
+      <div class="card">
+        <div class="card-title">Look Up Student</div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <div style="flex:1; min-width:180px;">
+            <label>Reg. No. / Roll Number</label>
+            <input type="text" id="mark-roll" placeholder="e.g. 2300040011" oninput="this.value=this.value.toUpperCase()">
+          </div>
+          <div style="align-self:flex-end;">
+            <button class="btn btn-outline" onclick="lookupForMark()">Look Up →</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="mark-form" class="hidden">
+        <div class="profile-bar" id="mark-profile"></div>
+        <div class="card">
+          <div class="card-title">Mark Attendance</div>
+          <div class="form-row cols-3">
+            <div>
+              <label>Date</label>
+              <input type="date" id="mark-date">
+            </div>
+            <div>
+              <label>Time Slot</label>
+              <select id="mark-slot">
+                <option value="">— Select slot —</option>
+                <option>09:20-10:10</option>
+                <option>10:10-11:00</option>
+                <option>11:10-12:00</option>
+                <option>12:00-12:50</option>
+                <option>01:50-02:40</option>
+                <option>02:40-03:40</option>
+                <option>03:50-04:30</option>
+                <option>04:30-05:30</option>
+              </select>
+            </div>
+            <div>
+              <label>Status</label>
+              <select id="mark-status">
+                <option value="">— Select status —</option>
+                <option value="present">Present (P)</option>
+                <option value="absent">Absent (A)</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="submitMark()" id="mark-btn">Mark Attendance</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /screen-admin -->
+
+<!-- ═══════════════════════════════════════════════════
+     STUDENT DASHBOARD
+════════════════════════════════════════════════════ -->
+<div id="screen-student" class="hidden">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <div class="navbar-icon">C</div>
+      <div class="navbar-title">CRT Attendance Portal <span>Student</span></div>
+    </div>
+    <button class="navbar-user" onclick="logout()">
+      <div class="navbar-avatar" id="stu-avatar">S</div>
+      <span id="stu-name">Student</span>
+      &nbsp;· Logout
+    </button>
+  </nav>
+
+  <div class="content">
+    <div id="stu-loading" class="text-center muted" style="padding:40px;">Loading your attendance…</div>
+
+    <div id="stu-main" class="hidden">
+      <div class="profile-bar" id="stu-profile"></div>
+
+      <div id="stu-alert"></div>
+
+      <div class="stats-row">
+        <div class="stat-box purple">
+          <div class="stat-val" id="stu-total">—</div>
+          <div class="stat-lbl">Total Sessions</div>
+        </div>
+        <div class="stat-box good">
+          <div class="stat-val" id="stu-present">—</div>
+          <div class="stat-lbl">Present</div>
+        </div>
+        <div class="stat-box bad">
+          <div class="stat-val" id="stu-absent">—</div>
+          <div class="stat-lbl">Absent</div>
+        </div>
+        <div class="stat-box" id="stu-pct-box">
+          <div class="stat-val" id="stu-pct">—%</div>
+          <div class="stat-lbl">Attendance %</div>
+        </div>
+      </div>
+
+      <!-- Weekly breakdown -->
+      <div class="card">
+        <div class="card-title">Weekly Breakdown</div>
+        <div id="stu-weeks"></div>
+      </div>
+
+      <!-- Attendance log table -->
+      <div class="card">
+        <div class="card-title">Attendance Log</div>
+        <div id="stu-table-wrap"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     STUDENT DETAIL MODAL (admin)
+════════════════════════════════════════════════════ -->
+<div id="modal-bg" class="hidden">
+  <div class="modal-bg" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-head">
+        <h3 id="modal-title">Student Attendance</h3>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body" id="modal-body">Loading…</div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+const API = window.location.origin + '/api';
+let TOKEN = localStorage.getItem('crt_token') || '';
+let SESSION = JSON.parse(localStorage.getItem('crt_session') || 'null');
+let allStudents = [];
+let selectedFile = null;
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+function toast(msg, type = 'success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show t-' + type;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+function show(id)  { document.getElementById(id).classList.remove('hidden'); }
+function hide(id)  { document.getElementById(id).classList.add('hidden'); }
+function initials(name) { return (name || '??').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2); }
+function today()   { return new Date().toISOString().split('T')[0]; }
+function fmtDate(d){ return d.split('-').reverse().join('.'); }
+function pctColor(p){ return p >= 75 ? 'var(--green)' : p >= 60 ? 'var(--amber)' : 'var(--red)'; }
+function apiFetch(url, opts = {}) {
+  opts.headers = { ...(opts.headers || {}), Authorization: 'Bearer ' + TOKEN };
+  return fetch(API + url, opts);
+}
+
+// ── Screens ───────────────────────────────────────────────────────────────────
+function showScreen(id) {
+  ['screen-login','screen-changepw','screen-admin','screen-student'].forEach(s => {
+    document.getElementById(s).classList.toggle('hidden', s !== id);
+  });
+}
+
+// ── Startup ───────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('upload-date').value = today();
+  document.getElementById('mark-date').value   = today();
+  document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+  document.getElementById('login-user').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+  if (TOKEN && SESSION) {
+    resumeSession();
+  } else {
+    showScreen('screen-login');
+  }
+});
+
+async function resumeSession() {
+  // Quick token validation
+  try {
+    const r = await apiFetch(SESSION.role === 'admin' ? '/admin/students' : `/students/${SESSION.rollNumber}`);
+    if (!r.ok) throw new Error();
+    enterDashboard(SESSION);
+  } catch {
+    TOKEN = ''; SESSION = null;
+    localStorage.removeItem('crt_token');
+    localStorage.removeItem('crt_session');
+    showScreen('screen-login');
+  }
+}
+
+// ── Login ─────────────────────────────────────────────────────────────────────
+async function doLogin() {
+  const username = document.getElementById('login-user').value.trim();
+  const password = document.getElementById('login-pass').value;
+  const errEl    = document.getElementById('login-err');
+  const btn      = document.getElementById('login-btn');
+  if (!username || !password) { errEl.textContent = 'Please enter username and password.'; return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Signing in…';
+  errEl.textContent = '';
+
+  try {
+    const r = await fetch(API + '/auth/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+
+    TOKEN = d.token;
+    localStorage.setItem('crt_token', TOKEN);
+
+    if (d.mustChangePassword) {
+      SESSION = d;
+      showScreen('screen-changepw');
+      return;
+    }
+
+    SESSION = d;
+    localStorage.setItem('crt_session', JSON.stringify(d));
+    enterDashboard(d);
+  } catch(e) {
+    errEl.textContent = e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+  }
+}
+
+// ── Change Password ────────────────────────────────────────────────────────────
+async function doChangePassword() {
+  const np  = document.getElementById('cp-new').value;
+  const cp  = document.getElementById('cp-confirm').value;
+  const err = document.getElementById('cp-err');
+  const btn = document.getElementById('cp-btn');
+  err.textContent = '';
+
+  if (!np || np.length < 6) { err.textContent = 'Password must be at least 6 characters.'; return; }
+  if (np !== cp)            { err.textContent = 'Passwords do not match.'; return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Saving…';
+
+  try {
+    const r = await apiFetch('/auth/change-password', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ newPassword: np })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+
+    toast('Password changed successfully!');
+    SESSION.mustChangePassword = false;
+    localStorage.setItem('crt_session', JSON.stringify(SESSION));
+    enterDashboard(SESSION);
+  } catch(e) {
+    err.textContent = e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Set Password & Continue';
+  }
+}
+
+// ── Enter Dashboard ────────────────────────────────────────────────────────────
+function enterDashboard(session) {
+  if (session.role === 'admin') {
+    document.getElementById('admin-avatar').textContent = initials(session.username);
+    document.getElementById('admin-name').textContent   = session.username;
+    showScreen('screen-admin');
+    adminTab('upload');
+  } else {
+    document.getElementById('stu-avatar').textContent = initials(session.rollNumber);
+    document.getElementById('stu-name').textContent   = session.rollNumber;
+    showScreen('screen-student');
+    loadStudentDashboard(session.rollNumber);
+  }
+}
+
+function logout() {
+  TOKEN = ''; SESSION = null;
+  localStorage.removeItem('crt_token');
+  localStorage.removeItem('crt_session');
+  showScreen('screen-login');
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-err').textContent = '';
+}
+
+// ══════════════════════════════════════════════════════
+// ADMIN — Upload Tab
+// ══════════════════════════════════════════════════════
+function onFileSelect(input) {
+  const file = input.files[0];
+  if (!file) return;
+  selectedFile = file;
+  document.getElementById('upload-filename').textContent = file.name;
+  document.getElementById('upload-btn').disabled = false;
+  document.getElementById('upload-zone').classList.add('drag');
+  setTimeout(() => document.getElementById('upload-zone').classList.remove('drag'), 300);
+}
+
+function onFileDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (!file || !file.name.endsWith('.csv')) { toast('Please drop a .csv file', 'error'); return; }
+  selectedFile = file;
+  document.getElementById('upload-filename').textContent = file.name;
+  document.getElementById('upload-btn').disabled = false;
+}
+
+async function uploadCSV() {
+  if (!selectedFile) { toast('Please select a CSV file first', 'error'); return; }
+  const date = document.getElementById('upload-date').value;
+  if (!date) { toast('Please select the attendance date', 'error'); return; }
+
+  const btn = document.getElementById('upload-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Uploading…';
+
+  const form = new FormData();
+  form.append('csv', selectedFile);
+  form.append('date', date);
+
+  try {
+    const r = await apiFetch('/admin/upload-csv', { method: 'POST', body: form });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+
+    hide('upload-result');
+    document.getElementById('upload-result-body').innerHTML = `
+      <div class="alert alert-success">
+        ✅ Import complete for <strong>${fmtDate(date)}</strong>
+      </div>
+      <div class="form-row cols-3" style="margin-bottom:0;">
+        <div class="stat-box good"  style="margin-bottom:0;"><div class="stat-val">${d.created}</div><div class="stat-lbl">New Students</div></div>
+        <div class="stat-box purple" style="margin-bottom:0;"><div class="stat-val">${d.updated}</div><div class="stat-lbl">Updated</div></div>
+        <div class="stat-box" style="margin-bottom:0;"><div class="stat-val">${d.attendanceCount}</div><div class="stat-lbl">Attendance Records</div></div>
+      </div>
+      ${d.slotCols && d.slotCols.length ? `<div class="text-sm muted mt8">Slots imported: <strong>${d.slotCols.join(', ')}</strong></div>` : ''}
+      ${d.errors && d.errors.length ? `<div class="alert alert-warn mt8">⚠️ ${d.errors.length} row(s) had issues: ${d.errors.slice(0,3).join('; ')}</div>` : ''}
+      <div class="text-sm muted mt8">
+        Student accounts created with <strong>Reg.No as username and default password</strong>. Students must change password on first login.
+      </div>
+    `;
+    show('upload-result');
+    toast(`Imported ${d.total} students, ${d.attendanceCount} attendance records`);
+  } catch(e) {
+    toast(e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⬆ Upload & Import';
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// ADMIN — Students Tab
+// ══════════════════════════════════════════════════════
+async function loadAdminStudents() {
+  hide('students-table-wrap');
+  show('students-loading');
+  document.getElementById('students-loading').textContent = 'Loading students…';
+
+  try {
+    const r = await apiFetch('/admin/students');
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+    allStudents = d;
+    renderStudentsTable(allStudents);
+  } catch(e) {
+    document.getElementById('students-loading').textContent = 'Error: ' + e.message;
+  }
+}
+
+function filterStudents() {
+  const q = document.getElementById('student-search').value.toLowerCase().trim();
+  const filtered = q ? allStudents.filter(s =>
+    s.name.toLowerCase().includes(q) || s.rollNumber.toLowerCase().includes(q)
+  ) : allStudents;
+  renderStudentsTable(filtered);
+}
+
+function renderStudentsTable(students) {
+  hide('students-loading');
+  show('students-table-wrap');
+
+  const tbody = document.getElementById('students-tbody');
+  if (!students.length) {
+    tbody.innerHTML = '<tr><td colspan="11" class="text-center muted" style="padding:30px;">No students found.</td></tr>';
+    document.getElementById('students-count').textContent = '';
+    return;
+  }
+
+  tbody.innerHTML = students.map((s, i) => {
+    const pct   = s.stats?.overallPct ?? 0;
+    const color = pctColor(pct);
+    return `
+      <tr class="tr-clickable" onclick="openStudentModal('${s.rollNumber}', '${s.name.replace(/'/g,"\\'")}')">
+        <td class="td-center">${s.sno || i + 1}</td>
+        <td><strong>${s.name}</strong></td>
+        <td>${s.branch || '—'}</td>
+        <td>${s.dept || '—'}</td>
+        <td>${s.cluster || '—'}</td>
+        <td>${s.crtSec || '—'}</td>
+        <td>${s.crtRoom || '—'}</td>
+        <td><span class="badge badge-purple">${s.rollNumber}</span></td>
+        <td class="td-center" style="color:var(--green); font-weight:600;">${s.stats?.present ?? 0}</td>
+        <td class="td-center">${s.stats?.total ?? 0}</td>
+        <td>
+          <div style="display:flex; align-items:center; gap:8px; min-width:120px;">
+            <div class="pct-bar-wrap" style="flex:1;">
+              <div class="pct-bar" style="width:${pct}%; background:${color};"></div>
+            </div>
+            <span style="color:${color}; font-weight:700; font-size:13px; min-width:38px;">${pct}%</span>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+
+  document.getElementById('students-count').textContent =
+    `Showing ${students.length} student${students.length !== 1 ? 's' : ''}`;
+}
+
+// ── Student Detail Modal ────────────────────────────────────────────────────────
+async function openStudentModal(roll, name) {
+  document.getElementById('modal-title').textContent = name + ' — Attendance Detail';
+  document.getElementById('modal-body').innerHTML = '<div class="text-center muted" style="padding:30px;">Loading…</div>';
+  show('modal-bg');
+
+  try {
+    const r = await apiFetch('/students/' + roll);
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+    document.getElementById('modal-body').innerHTML = buildStudentDetail(d);
+  } catch(e) {
+    document.getElementById('modal-body').innerHTML = `<div class="alert alert-danger">Error: ${e.message}</div>`;
+  }
+}
+
+function closeModal(e) {
+  if (!e || e.target === e.currentTarget) hide('modal-bg');
+}
+
+// ══════════════════════════════════════════════════════
+// ADMIN — Mark Attendance Tab
+// ══════════════════════════════════════════════════════
+async function lookupForMark() {
+  const roll = document.getElementById('mark-roll').value.trim().toUpperCase();
+  if (!roll) { toast('Enter a Reg. No.', 'error'); return; }
+  try {
+    const r = await apiFetch('/students/' + roll);
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+    const s = d.student;
+    document.getElementById('mark-profile').innerHTML = `
+      <div class="p-avatar">${initials(s.name)}</div>
+      <div>
+        <div class="p-name">${s.name}</div>
+        <div class="p-meta">${s.branch} · ${s.crtSec} · Room: ${s.crtRoom}</div>
+      </div>
+      <div class="p-roll">${s.rollNumber}</div>
+    `;
+    show('mark-form');
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function submitMark() {
+  const roll   = document.getElementById('mark-roll').value.trim().toUpperCase();
+  const slot   = document.getElementById('mark-slot').value;
+  const status = document.getElementById('mark-status').value;
+  const date   = document.getElementById('mark-date').value;
+  if (!slot || !status || !date) { toast('Fill all fields', 'error'); return; }
+
+  const btn = document.getElementById('mark-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>';
+
+  try {
+    const r = await apiFetch('/attendance/mark', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rollNumber: roll, slot, status, date })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+    toast(`✅ Marked ${slot} as ${status} for ${roll}`);
+    document.getElementById('mark-slot').value = '';
+    document.getElementById('mark-status').value = '';
+  } catch(e) { toast(e.message, 'error'); }
+  finally {
+    btn.disabled = false;
+    btn.textContent = 'Mark Attendance';
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// ADMIN — Tab switching
+// ══════════════════════════════════════════════════════
+function adminTab(tab) {
+  ['upload','students','mark'].forEach(t => {
+    document.getElementById('apane-' + t).classList.toggle('hidden', t !== tab);
+    document.getElementById('atab-' + t).classList.toggle('active', t === tab);
+  });
+  if (tab === 'students' && !allStudents.length) loadAdminStudents();
+}
+
+// ══════════════════════════════════════════════════════
+// STUDENT DASHBOARD
+// ══════════════════════════════════════════════════════
+async function loadStudentDashboard(roll) {
+  show('stu-loading');
+  hide('stu-main');
+  try {
+    const r = await apiFetch('/students/' + roll);
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+
+    const { student: s, stats } = d;
+
+    // Update navbar
+    document.getElementById('stu-avatar').textContent = initials(s.name);
+    document.getElementById('stu-name').textContent   = s.name;
+
+    // Profile
+    document.getElementById('stu-profile').innerHTML = `
+      <div class="p-avatar">${initials(s.name)}</div>
+      <div>
+        <div class="p-name">${s.name}</div>
+        <div class="p-meta">${s.branch} · ${s.dept} · Cluster ${s.cluster} · ${s.crtSec} · Room ${s.crtRoom}</div>
+      </div>
+      <div class="p-roll">${s.rollNumber}</div>
+    `;
+
+    // Alert
+    const pct = stats.overallPct;
+    const alertEl = document.getElementById('stu-alert');
+    if (pct < 60) {
+      alertEl.innerHTML = `<div class="alert alert-danger">🚨 <strong>Critical:</strong> Your attendance is ${pct}%. Immediate improvement required.</div>`;
+    } else if (pct < 75) {
+      alertEl.innerHTML = `<div class="alert alert-warn">⚠️ <strong>Warning:</strong> Your attendance is ${pct}%, below the 75% threshold.</div>`;
+    } else {
+      alertEl.innerHTML = `<div class="alert alert-success">✅ Your attendance is <strong>${pct}%</strong> — you're on track!</div>`;
+    }
+
+    // Stats
+    document.getElementById('stu-total').textContent   = stats.total;
+    document.getElementById('stu-present').textContent = stats.present;
+    document.getElementById('stu-absent').textContent  = stats.absent;
+    document.getElementById('stu-pct').textContent     = pct + '%';
+    const pctBox = document.getElementById('stu-pct-box');
+    pctBox.classList.remove('good','bad','warn');
+    pctBox.classList.add(pct >= 75 ? 'good' : pct >= 60 ? 'warn' : 'bad');
+    document.getElementById('stu-pct').style.color = pctColor(pct);
+
+    // Weekly breakdown
+    const weeksEl = document.getElementById('stu-weeks');
+    if (!stats.weeks || !stats.weeks.length) {
+      weeksEl.innerHTML = '<div class="muted text-sm">No data yet.</div>';
+    } else {
+      weeksEl.innerHTML = stats.weeks.map(w => `
+        <div class="week-row">
+          <div class="week-label">Week ${w.week}, ${w.year}</div>
+          <div class="pct-bar-wrap" style="flex:1;">
+            <div class="pct-bar" style="width:${w.pct}%; background:${pctColor(w.pct)};"></div>
+          </div>
+          <div class="week-pct" style="color:${pctColor(w.pct)};">${w.pct}%</div>
+          <span class="badge ${w.safe ? 'badge-present' : 'badge-absent'}">${w.safe ? '✓ Safe' : '✗ Risk'}</span>
+        </div>
+      `).join('');
+    }
+
+    // Attendance table
+    document.getElementById('stu-table-wrap').innerHTML = buildAttendanceTable(stats);
+
+    hide('stu-loading');
+    show('stu-main');
+  } catch(e) {
+    document.getElementById('stu-loading').textContent = 'Error: ' + e.message;
+  }
+}
+
+// ── Shared: build attendance table ─────────────────────────────────────────────
+function buildStudentDetail(data) {
+  const { student: s, stats } = data;
+  const pct = stats.overallPct;
+  return `
+    <div class="profile-bar" style="margin-bottom:16px;">
+      <div class="p-avatar">${initials(s.name)}</div>
+      <div>
+        <div class="p-name">${s.name}</div>
+        <div class="p-meta">${s.branch} · ${s.dept} · Cluster ${s.cluster} · ${s.crtSec} · Room ${s.crtRoom}</div>
+      </div>
+      <div class="p-roll">${s.rollNumber}</div>
+    </div>
+    <div class="stats-row" style="margin-bottom:16px;">
+      <div class="stat-box purple" style="margin-bottom:0;"><div class="stat-val">${stats.total}</div><div class="stat-lbl">Total</div></div>
+      <div class="stat-box good"   style="margin-bottom:0;"><div class="stat-val">${stats.present}</div><div class="stat-lbl">Present</div></div>
+      <div class="stat-box bad"    style="margin-bottom:0;"><div class="stat-val">${stats.absent}</div><div class="stat-lbl">Absent</div></div>
+      <div class="stat-box ${pct >= 75 ? 'good' : pct >= 60 ? 'warn' : 'bad'}" style="margin-bottom:0;">
+        <div class="stat-val" style="color:${pctColor(pct)};">${pct}%</div>
+        <div class="stat-lbl">Attendance</div>
+      </div>
+    </div>
+    ${buildAttendanceTable(stats)}
+  `;
+}
+
+function buildAttendanceTable(stats) {
+  const byDate = stats.byDate || {};
+  const slots  = stats.slots  || [];
+  const dates  = Object.keys(byDate).sort().reverse();
+
+  if (!dates.length) return '<div class="muted text-sm">No attendance records yet.</div>';
+
+  const hdrCols = slots.map(s => `<th class="td-center">${s}</th>`).join('');
+  const rows = dates.map(dt => {
+    const dayCells = slots.map(s => {
+      const v = byDate[dt][s];
+      if (!v) return `<td class="td-center"><span class="badge badge-dash">—</span></td>`;
+      return `<td class="td-center"><span class="badge badge-${v}">${v === 'present' ? 'P' : 'A'}</span></td>`;
+    }).join('');
+    const dayPresent = slots.filter(s => byDate[dt][s] === 'present').length;
+    const dayTotal   = slots.filter(s => !!byDate[dt][s]).length;
+    const dayPct     = dayTotal > 0 ? Math.round((dayPresent / dayTotal) * 100) : 0;
+    return `
+      <tr>
+        <td><strong>${fmtDate(dt)}</strong></td>
+        ${dayCells}
+        <td class="td-center" style="color:${pctColor(dayPct)}; font-weight:600;">${dayPresent}/${dayTotal}</td>
+      </tr>`;
+  }).join('');
+
+  return `
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            ${hdrCols}
+            <th class="td-center">P/Total</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+// ── Enter key for mark attendance roll input ───────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+  });
+});
+</script>
+</body>
+</html>
