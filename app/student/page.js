@@ -4,56 +4,6 @@ import { useRouter } from 'next/navigation';
 import { fmtDate, pctColor } from '@/lib/helpers';
 import ThemeToggle from '@/components/ThemeToggle';
 
-// ── Bunk math ────────────────────────────────────────────────────────────────
-function calcBunk(present, total, threshold = 75) {
-  if (!total) return { pct: 0, canBunk: 0, needAttend: 0 };
-  const t = threshold / 100;
-  const pct = Math.round((present / total) * 100);
-  if (pct >= threshold) {
-    return { pct, canBunk: Math.max(0, Math.floor((present - t * total) / t)), needAttend: 0 };
-  }
-  return { pct, canBunk: 0, needAttend: Math.ceil((t * total - present) / (1 - t)) };
-}
-
-function generateAdvice(present, total, overallPct, weeks = []) {
-  const b75  = calcBunk(present, total, 75);
-  const b85  = calcBunk(present, total, 85);
-  const lines = [];
-
-  if (overallPct >= 85) {
-    lines.push({ type: 'ok',   text: `Overall ${overallPct}% — well above both thresholds. Buffer: ${b85.canBunk} sessions at 85%, ${b75.canBunk} sessions at 75%.` });
-  } else if (overallPct >= 75) {
-    lines.push({ type: 'warn', text: `Overall ${overallPct}% — safe at 75% but below 85%. Can skip ${b75.canBunk} more sessions before hitting 75%.` });
-  } else {
-    lines.push({ type: 'bad',  text: `Overall ${overallPct}% — BELOW 75%. Must attend ${b75.needAttend} consecutive sessions to recover.` });
-  }
-
-  const recent = [...weeks].sort((a, b) => b.year - a.year || b.week - a.week).slice(0, 4);
-  for (const w of recent) {
-    if (w.pct === 100)   lines.push({ type: 'ok',   text: `Week ${w.week}: Perfect — ${w.present}/${w.total} (100%).` });
-    else if (w.pct < 60) lines.push({ type: 'bad',  text: `Week ${w.week}: Very low — ${w.present}/${w.total} (${w.pct}%). This pulled your overall down.` });
-    else if (w.pct < 75) lines.push({ type: 'warn', text: `Week ${w.week}: Below threshold — ${w.present}/${w.total} (${w.pct}%). Avoid skipping this week.` });
-    else                 lines.push({ type: 'info', text: `Week ${w.week}: ${w.present}/${w.total} (${w.pct}%) — on track.` });
-  }
-
-  if (b75.canBunk >= 16)     lines.push({ type: 'tip', text: `Strategy: ${b75.canBunk} slots of buffer (≈${Math.floor(b75.canBunk / 8)} full days). Spread them — never skip more than 1 day per week.` });
-  else if (b75.canBunk >= 8) lines.push({ type: 'tip', text: `Strategy: ${b75.canBunk} slots left. Take at most 1 full day off, then attend everything for 2 weeks.` });
-  else if (b75.canBunk > 0)  lines.push({ type: 'tip', text: `Strategy: Only ${b75.canBunk} slots to spare — skip individual slots, not full days.` });
-  else if (b75.needAttend > 0) lines.push({ type: 'tip', text: `Recovery: Attend every session for the next ${Math.ceil(b75.needAttend / 8)} week${b75.needAttend > 8 ? 's' : ''} with zero skips.` });
-
-  return lines;
-}
-
-const ADVICE_STYLE = {
-  ok: 'text-green-700 dark:text-green-400', warn: 'text-amber-700 dark:text-amber-400',
-  bad: 'text-red-700 dark:text-red-400',   info: 'text-slate-600 dark:text-slate-300',
-  tip: 'text-blue-700 dark:text-blue-400',
-};
-const ADVICE_DOT = {
-  ok: 'bg-green-500', warn: 'bg-amber-500', bad: 'bg-red-500', info: 'bg-slate-400', tip: 'bg-blue-500',
-};
-
-// ── Components ───────────────────────────────────────────────────────────────
 function PctBar({ pct }) {
   const color = pctColor(pct);
   return (
@@ -66,15 +16,6 @@ function PctBar({ pct }) {
   );
 }
 
-function MiniBar({ pct }) {
-  return (
-    <div className="flex-1 h-1 bg-slate-200 dark:bg-slate-600 rounded-full overflow-hidden">
-      <div className="h-full rounded-full" style={{ width: `${pct}%`, background: pctColor(pct) }} />
-    </div>
-  );
-}
-
-// ── Page ─────────────────────────────────────────────────────────────────────
 export default function StudentPage() {
   const router = useRouter();
   const [data, setData]       = useState(null);
@@ -107,12 +48,8 @@ export default function StudentPage() {
   );
 
   const { student: s, stats } = data;
-  const pct   = stats.overallPct;
-  const b75   = calcBunk(stats.present, stats.total, 75);
-  const b85   = calcBunk(stats.present, stats.total, 85);
-  const advice = generateAdvice(stats.present, stats.total, pct, stats.weeks || []);
+  const pct = stats.overallPct;
   const dates = Object.keys(stats.byDate || {}).sort().reverse();
-  const recentWeeks = [...(stats.weeks || [])].sort((a, b) => b.year - a.year || b.week - a.week).slice(0, 6);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -140,7 +77,6 @@ export default function StudentPage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-6 space-y-4">
-
         {/* Profile */}
         <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-4">
           <div className="flex items-center gap-4">
@@ -149,7 +85,9 @@ export default function StudentPage() {
               {s.name.split(' ').map(w => w[0]).join('').slice(0, 2)}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="font-semibold text-slate-900 dark:text-slate-100 text-base leading-tight">{s.name}</div>
+              <div className="font-semibold text-slate-900 dark:text-slate-100 text-base leading-tight">
+                {s.name}
+              </div>
               <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
                 {[s.branch, s.dept, `Cluster ${s.cluster}`, s.crtSec, `Room ${s.crtRoom}`].filter(Boolean).join(' · ')}
               </div>
@@ -180,113 +118,13 @@ export default function StudentPage() {
           ))}
         </div>
 
-        {/* Bunk Calculator */}
-        {stats.total > 0 && (
-          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700">
-              <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Bunk Calculator</h2>
-              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                Based on {stats.present} present out of {stats.total} sessions
-              </p>
-            </div>
-
-            <div className="p-4 space-y-4">
-              {/* Threshold cards */}
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { label: '75% Threshold', data: b75 },
-                  { label: '85% Threshold', data: b85 },
-                ].map(({ label, data }) => (
-                  <div key={label}
-                       className="border border-slate-200 dark:border-slate-600
-                                  bg-slate-50 dark:bg-slate-700/40 rounded-lg p-4">
-                    <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                      {label}
-                    </div>
-                    {data.canBunk > 0 ? (
-                      <>
-                        <div className="text-3xl font-bold text-green-600 dark:text-green-400">
-                          {data.canBunk}
-                        </div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">sessions you can skip</div>
-                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-1.5">
-                          ≈ {Math.floor(data.canBunk / 8)} full day{Math.floor(data.canBunk / 8) !== 1 ? 's' : ''}
-                          {data.canBunk % 8 > 0 ? ` + ${data.canBunk % 8} slot${data.canBunk % 8 !== 1 ? 's' : ''}` : ''}
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="text-3xl font-bold text-red-600 dark:text-red-400">
-                          {data.needAttend}
-                        </div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">sessions needed to recover</div>
-                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-1.5">
-                          ≈ {Math.ceil(data.needAttend / 8)} week{data.needAttend > 8 ? 's' : ''} of full attendance
-                        </div>
-                      </>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {/* Weekly breakdown */}
-              {recentWeeks.length > 0 && (
-                <div>
-                  <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-                    Weekly Breakdown
-                  </div>
-                  <div className="space-y-2">
-                    {recentWeeks.map(w => (
-                      <div key={`${w.year}-${w.week}`}
-                           className="flex items-center gap-3 px-3 py-2 rounded border
-                                      border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/30">
-                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400 w-14 shrink-0">
-                          Week {w.week}
-                        </span>
-                        <MiniBar pct={w.pct} />
-                        <span className="text-xs font-bold w-10 text-right shrink-0"
-                              style={{ color: pctColor(w.pct) }}>{w.pct}%</span>
-                        <span className="text-xs text-slate-400 w-10 text-right shrink-0">
-                          {w.present}/{w.total}
-                        </span>
-                        <span className="shrink-0">
-                          {w.pct >= 85
-                            ? <span className="badge-present text-[10px]">Safe</span>
-                            : w.pct >= 75
-                              ? <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">Warn</span>
-                              : <span className="badge-absent text-[10px]">Low</span>}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Advice */}
-              <div>
-                <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-                  Advice
-                </div>
-                <div className="space-y-2">
-                  {advice.map((line, i) => (
-                    <div key={i} className="flex items-start gap-2.5 text-sm">
-                      <span className={`w-2 h-2 rounded-full mt-1 shrink-0 ${ADVICE_DOT[line.type]}`} />
-                      <span className={ADVICE_STYLE[line.type]}>{line.text}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Attendance log */}
         <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
                         rounded-lg overflow-hidden">
           <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700">
             <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Attendance Log</h2>
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-              {dates.length} date{dates.length !== 1 ? 's' : ''} recorded
+              {dates.length} session{dates.length !== 1 ? 's' : ''} recorded
             </p>
           </div>
 
@@ -331,7 +169,6 @@ export default function StudentPage() {
             </div>
           )}
         </div>
-
       </main>
     </div>
   );
