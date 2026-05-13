@@ -24,7 +24,7 @@ export default function LoginPage() {
       const d = await r.json();
       if (!r.ok) throw new Error(d.error);
       if (d.mustChangePassword) { router.push('/change-password'); return; }
-      router.push(d.role === 'admin' ? '/admin/upload' : '/student');
+      router.push(d.role === 'admin' ? '/admin/upload' : d.role === 'aprameya' ? '/aprameya' : '/student');
     } catch (e) {
       setError(e.message);
     } finally {

@@ -7,7 +7,6 @@ export async function middleware(request) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get('crt_token')?.value;
 
-  // Auth API routes always pass through
   if (pathname.startsWith('/api/auth')) return NextResponse.next();
 
   if (!token) {
@@ -18,20 +17,23 @@ export async function middleware(request) {
   try {
     const { payload } = await jwtVerify(token, secret());
 
-    // Already logged in → redirect away from login
+    // Already logged in → redirect to home
     if (pathname === '/login' || pathname === '/') {
-      const dest = payload.role === 'admin' ? '/admin/upload' : '/student';
-      return NextResponse.redirect(new URL(dest, request.url));
+      if (payload.role === 'admin')    return NextResponse.redirect(new URL('/admin/upload',  request.url));
+      if (payload.role === 'aprameya') return NextResponse.redirect(new URL('/aprameya',      request.url));
+      return NextResponse.redirect(new URL('/student', request.url));
     }
 
     // Role guards
     if (pathname.startsWith('/admin') && payload.role !== 'admin')
-      return NextResponse.redirect(new URL('/student', request.url));
+      return NextResponse.redirect(new URL(payload.role === 'aprameya' ? '/aprameya' : '/student', request.url));
 
     if (pathname.startsWith('/student') && payload.role !== 'student')
-      return NextResponse.redirect(new URL('/admin/upload', request.url));
+      return NextResponse.redirect(new URL(payload.role === 'admin' ? '/admin/upload' : payload.role === 'aprameya' ? '/aprameya' : '/login', request.url));
 
-    // Must-change-password guard
+    if (pathname.startsWith('/aprameya') && payload.role !== 'aprameya')
+      return NextResponse.redirect(new URL(payload.role === 'admin' ? '/admin/upload' : '/student', request.url));
+
     if (payload.mustChangePassword && pathname !== '/change-password')
       return NextResponse.redirect(new URL('/change-password', request.url));
 
