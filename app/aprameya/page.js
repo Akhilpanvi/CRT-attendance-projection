@@ -85,7 +85,7 @@ const ADVICE_DOT = {
 };
 
 // ── Circle view ───────────────────────────────────────────────────────────────
-function CircleView({ members, stats, onAdd, onRemove, onSelect, selected }) {
+function CircleView({ members, stats, fetching, onAdd, onRemove, onSelect, onRefresh, selected }) {
   const [input, setInput] = useState('');
 
   function add() {
@@ -95,6 +95,27 @@ function CircleView({ members, stats, onAdd, onRemove, onSelect, selected }) {
 
   return (
     <div>
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+          Private Circle
+          {members.length > 0 && <span className="ml-1.5 font-normal normal-case">({members.length})</span>}
+        </span>
+        {members.length > 0 && (
+          <button
+            onClick={onRefresh}
+            disabled={fetching}
+            className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400
+                       hover:text-slate-800 dark:hover:text-slate-200 transition-colors disabled:opacity-40">
+            <svg className={`w-3.5 h-3.5 ${fetching ? 'animate-spin' : ''}`}
+                 fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            {fetching ? 'Refreshing…' : 'Refresh'}
+          </button>
+        )}
+      </div>
+
       <div className="flex gap-2 mb-4">
         <input
           className="form-input flex-1"
@@ -142,9 +163,11 @@ function CircleView({ members, stats, onAdd, onRemove, onSelect, selected }) {
                     {d?.student?.name || roll}
                   </div>
                   <div className="text-xs text-slate-400 mt-0.5">
-                    {d?.student
-                      ? [d.student.branch, d.student.dept, d.student.crtSec].filter(Boolean).join(' · ')
-                      : 'Loading…'}
+                    {d === undefined
+                      ? 'Loading…'
+                      : d === null
+                        ? <span className="text-red-400 dark:text-red-500">Not found</span>
+                        : [d.student.branch, d.student.dept, d.student.crtSec].filter(Boolean).join(' · ')}
                   </div>
                 </div>
                 {s && (
@@ -458,8 +481,10 @@ export default function AprameYaPage() {
   const [members, setMembers] = useState(() => {
     try { return JSON.parse(localStorage.getItem('aprameya_circle') || '[]'); } catch { return []; }
   });
-  const [stats, setStats]     = useState({});
+  const [stats, setStats]       = useState({});
   const [selected, setSelected] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [fetching, setFetching] = useState(false);
 
   // All rolls to keep stats for = circle + self
   const allRolls = [...new Set([...(myRoll ? [myRoll] : []), ...members])];
@@ -469,10 +494,11 @@ export default function AprameYaPage() {
     try { localStorage.setItem('aprameya_circle', JSON.stringify(list)); } catch {}
   }, []);
 
-  // Fetch stats for any roll not yet loaded (circle + self)
+  // Fetch stats for any roll not yet loaded, or all rolls on manual refresh
   useEffect(() => {
     const toFetch = allRolls.filter(roll => stats[roll] === undefined);
     if (toFetch.length === 0) return;
+    setFetching(true);
     Promise.all(
       toFetch.map(roll =>
         fetch(`/api/students/${encodeURIComponent(roll)}`)
@@ -487,8 +513,14 @@ export default function AprameYaPage() {
         });
         return updated;
       });
+      setFetching(false);
     });
-  }, [allRolls.join(',')]);
+  }, [allRolls.join(','), refreshKey]);
+
+  function refreshAll() {
+    setStats({});
+    setRefreshKey(k => k + 1);
+  }
 
   function addMember(roll) {
     if (!members.includes(roll)) {
@@ -611,13 +643,14 @@ export default function AprameYaPage() {
 
         {tab === 'circle' && (
           <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-5">
-            <p className="card-title">Private Circle</p>
             <CircleView
               members={members}
               stats={stats}
+              fetching={fetching}
               onAdd={addMember}
               onRemove={removeMember}
               onSelect={setSelected}
+              onRefresh={refreshAll}
               selected={selected}
             />
           </div>
