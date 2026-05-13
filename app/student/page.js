@@ -12,6 +12,44 @@ function calcBunk(present, total, threshold = 75) {
   return { canBunk: 0, needAttend: Math.ceil((t * total - present) / (1 - t)) };
 }
 
+function generateAdvice(present, total, overallPct, weeks = []) {
+  const b75 = calcBunk(present, total, 75);
+  const b85 = calcBunk(present, total, 85);
+  const lines = [];
+
+  if (overallPct >= 85) {
+    lines.push({ type: 'ok',   text: `Overall ${overallPct}% — well above both thresholds. Buffer: ${b85.canBunk} sessions at 85%, ${b75.canBunk} at 75%.` });
+  } else if (overallPct >= 75) {
+    lines.push({ type: 'warn', text: `Overall ${overallPct}% — safe at 75% but below 85%. You can skip ${b75.canBunk} more sessions before hitting 75%.` });
+  } else {
+    lines.push({ type: 'bad',  text: `Overall ${overallPct}% — BELOW 75%. Attend ${b75.needAttend} consecutive sessions to recover.` });
+  }
+
+  const recent = [...weeks].sort((a, b) => b.year - a.year || b.week - a.week).slice(0, 4);
+  for (const w of recent) {
+    if (w.pct === 100)   lines.push({ type: 'ok',   text: `Week ${w.week}: Perfect — ${w.present}/${w.total} (100%).` });
+    else if (w.pct < 60) lines.push({ type: 'bad',  text: `Week ${w.week}: Very low — ${w.present}/${w.total} (${w.pct}%). This pulled your overall down.` });
+    else if (w.pct < 75) lines.push({ type: 'warn', text: `Week ${w.week}: Below threshold — ${w.present}/${w.total} (${w.pct}%). Don't skip this week.` });
+    else                 lines.push({ type: 'info', text: `Week ${w.week}: ${w.present}/${w.total} (${w.pct}%) — on track.` });
+  }
+
+  if (b75.canBunk >= 16)      lines.push({ type: 'tip', text: `Strategy: ${b75.canBunk} slots of buffer (≈${Math.floor(b75.canBunk / 8)} full days). Spread them — never skip more than 1 day per week.` });
+  else if (b75.canBunk >= 8)  lines.push({ type: 'tip', text: `Strategy: ${b75.canBunk} slots left. Take at most 1 full day off, then attend everything for 2 weeks.` });
+  else if (b75.canBunk > 0)   lines.push({ type: 'tip', text: `Strategy: Only ${b75.canBunk} slots to spare — skip individual slots, not full days.` });
+  else if (b75.needAttend > 0) lines.push({ type: 'tip', text: `Recovery: Attend every session for the next ${Math.ceil(b75.needAttend / 8)} week${b75.needAttend > 8 ? 's' : ''} with zero skips.` });
+
+  return lines;
+}
+
+const ADVICE_STYLE = {
+  ok: 'text-green-700 dark:text-green-400', warn: 'text-amber-700 dark:text-amber-400',
+  bad: 'text-red-700 dark:text-red-400',   info: 'text-slate-600 dark:text-slate-300',
+  tip: 'text-blue-700 dark:text-blue-400',
+};
+const ADVICE_DOT = {
+  ok: 'bg-green-500', warn: 'bg-amber-500', bad: 'bg-red-500', info: 'bg-slate-400', tip: 'bg-blue-500',
+};
+
 function PctBar({ pct }) {
   const color = pctColor(pct);
   return (
@@ -56,10 +94,11 @@ export default function StudentPage() {
   );
 
   const { student: s, stats } = data;
-  const pct  = stats.overallPct;
-  const b75  = calcBunk(stats.present, stats.total, 75);
-  const b85  = calcBunk(stats.present, stats.total, 85);
-  const dates = Object.keys(stats.byDate || {}).sort().reverse();
+  const pct    = stats.overallPct;
+  const b75    = calcBunk(stats.present, stats.total, 75);
+  const b85    = calcBunk(stats.present, stats.total, 85);
+  const advice = generateAdvice(stats.present, stats.total, pct, stats.weeks || []);
+  const dates  = Object.keys(stats.byDate || {}).sort().reverse();
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -165,6 +204,23 @@ export default function StudentPage() {
                 </div>
               ))}
             </div>
+
+            {/* Advice */}
+            {advice.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
+                <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                  Advice
+                </div>
+                <div className="space-y-2">
+                  {advice.map((line, i) => (
+                    <div key={i} className="flex items-start gap-2.5 text-sm">
+                      <span className={`w-2 h-2 rounded-full mt-1 shrink-0 ${ADVICE_DOT[line.type]}`} />
+                      <span className={ADVICE_STYLE[line.type]}>{line.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
