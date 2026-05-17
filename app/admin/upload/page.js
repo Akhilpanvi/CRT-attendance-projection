@@ -90,7 +90,7 @@ function UploadHistory({ refreshKey, onChanged, showToast }) {
         <table className="w-full text-sm">
           <thead>
             <tr>
-              {['Date', 'Students', 'Slots', 'Present', 'Records', 'Actions'].map(h => (
+              {['Date', 'Students', 'Slots', 'Avg Present', 'Records', 'Actions'].map(h => (
                 <th key={h} className="tbl-header">{h}</th>
               ))}
             </tr>
@@ -134,9 +134,11 @@ function UploadHistory({ refreshKey, onChanged, showToast }) {
                   <td className="tbl-cell text-center">{row.students}</td>
                   <td className="tbl-cell text-center">{row.slots}</td>
                   <td className="tbl-cell text-center">
-                    <span className="text-green-700 dark:text-green-400 font-semibold">{row.present}</span>
+                    <span className="text-green-700 dark:text-green-400 font-semibold">
+                      {row.slots > 0 ? Math.round(row.present / row.slots) : 0}
+                    </span>
                     <span className="text-slate-300 dark:text-slate-600 mx-1">/</span>
-                    <span className="text-red-600 dark:text-red-400">{absentCount}</span>
+                    <span className="text-slate-600 dark:text-slate-400">{row.students}</span>
                   </td>
                   <td className="tbl-cell text-center text-slate-500 dark:text-slate-400">{row.records}</td>
                   <td className="tbl-cell">
