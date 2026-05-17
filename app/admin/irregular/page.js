@@ -4,11 +4,12 @@ import { useToast, Toast } from '@/components/Toast';
 import { fmtDate } from '@/lib/helpers';
 
 const PATTERNS = {
-  morning_only:      { label: 'Left after morning',       color: 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800' },
-  afternoon_only:    { label: 'Afternoon only',           color: 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800' },
-  left_and_returned: { label: 'Left & returned',          color: 'bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 border-violet-200 dark:border-violet-800' },
-  left_early:        { label: 'Left early',               color: 'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-800' },
-  came_late:         { label: 'Came late',                color: 'bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400 border-sky-200 dark:border-sky-800' },
+  morning_only:        { label: 'Left after morning',     color: 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800' },
+  afternoon_only:      { label: 'Afternoon only',         color: 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800' },
+  left_and_returned:   { label: 'Left & returned',        color: 'bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 border-violet-200 dark:border-violet-800' },
+  left_early:          { label: 'Left early',             color: 'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-800' },
+  came_late:           { label: 'Came late',              color: 'bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400 border-sky-200 dark:border-sky-800' },
+  came_late_left_early:{ label: 'Came late & left early', color: 'bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-800' },
 };
 
 function PatternBadge({ pattern }) {

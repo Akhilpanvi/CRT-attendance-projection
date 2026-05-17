@@ -20,13 +20,18 @@ function detectPattern(slotMap) {
   const aP = afternoonStatuses.filter(s => s === 'present').length;
   const aA = afternoonStatuses.filter(s => s === 'absent').length;
 
-  // Morning only — attended morning, absent all afternoon
+  const firstStatus = all[0];
+  const lastStatus  = all[all.length - 1];
+  const hasPresent  = all.some(s => s === 'present');
+
+  // Morning only — all recorded morning present, all recorded afternoon absent
   if (mP > 0 && mA === 0 && aA > 0 && aP === 0) return 'morning_only';
 
-  // Afternoon only — absent all morning, present in afternoon
-  if (mA > 0 && mP === 0 && aP > 0) return 'afternoon_only';
+  // Afternoon only — all recorded morning absent, ALL recorded afternoon present
+  // (strict: aA === 0 so they stayed the whole afternoon)
+  if (mA > 0 && mP === 0 && aP > 0 && aA === 0) return 'afternoon_only';
 
-  // Left and returned — present → absent → present gap
+  // Left and returned — present → absent → present gap within the day
   let seenP = false, seenAafter = false;
   for (const s of all) {
     if (s === 'present') {
@@ -37,11 +42,15 @@ function detectPattern(slotMap) {
     }
   }
 
-  // Left early — last recorded slot is absent, had present before
-  if (all[all.length - 1] === 'absent' && all.some(s => s === 'present')) return 'left_early';
+  // Came late AND left early — first absent, last absent, some present in between
+  if (firstStatus === 'absent' && lastStatus === 'absent' && hasPresent)
+    return 'came_late_left_early';
 
-  // Came late — first recorded slot is absent, attended later
-  if (all[0] === 'absent' && all.some(s => s === 'present')) return 'came_late';
+  // Came late — first recorded slot absent, attended later slots
+  if (firstStatus === 'absent' && hasPresent) return 'came_late';
+
+  // Left early — last recorded slot absent, had present before
+  if (lastStatus === 'absent' && hasPresent) return 'left_early';
 
   return null;
 }
@@ -70,11 +79,12 @@ export async function GET() {
     }
 
     const LABELS = {
-      morning_only:      'Left after morning',
-      afternoon_only:    'Came in afternoon only',
-      left_and_returned: 'Left & returned',
-      left_early:        'Left before last session',
-      came_late:         'Came late',
+      morning_only:        'Left after morning',
+      afternoon_only:      'Came in afternoon only',
+      left_and_returned:   'Left & returned',
+      left_early:          'Left early',
+      came_late:           'Came late',
+      came_late_left_early:'Came late & left early',
     };
 
     const result = [];
