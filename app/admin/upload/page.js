@@ -1,10 +1,180 @@
 'use client';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useToast, Toast } from '@/components/Toast';
 import { fmtDate } from '@/lib/helpers';
 
 function today() { return new Date().toISOString().split('T')[0]; }
 
+// ── History table ─────────────────────────────────────────────────────────────
+function UploadHistory({ refreshKey, onChanged, showToast }) {
+  const [rows, setRows]         = useState([]);
+  const [loading, setLoading]   = useState(true);
+  const [editDate, setEditDate] = useState(null);   // { original, value }
+  const [saving, setSaving]     = useState(false);
+  const [deleting, setDeleting] = useState(null);   // date string being deleted
+
+  const load = useCallback(() => {
+    setLoading(true);
+    fetch('/api/admin/upload-history')
+      .then(r => r.json())
+      .then(d => { setRows(Array.isArray(d) ? d : []); setLoading(false); })
+      .catch(e => { showToast(e.message, 'error'); setLoading(false); });
+  }, []);
+
+  useEffect(() => { load(); }, [refreshKey]);
+
+  async function saveEdit() {
+    if (!editDate || editDate.value === editDate.original) { setEditDate(null); return; }
+    setSaving(true);
+    try {
+      const r = await fetch('/api/admin/upload-history', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fromDate: editDate.original, toDate: editDate.value }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error);
+      showToast(`Date changed to ${fmtDate(editDate.value)} · ${d.updated} records updated`);
+      setEditDate(null);
+      load();
+      onChanged();
+    } catch (e) { showToast(e.message, 'error'); }
+    finally { setSaving(false); }
+  }
+
+  async function deleteDate(date) {
+    if (!confirm(`Delete ALL attendance records for ${fmtDate(date)}? This cannot be undone.`)) return;
+    setDeleting(date);
+    try {
+      const r = await fetch('/api/admin/upload-history', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error);
+      showToast(`Deleted ${d.deleted} records for ${fmtDate(date)}`);
+      load();
+      onChanged();
+    } catch (e) { showToast(e.message, 'error'); }
+    finally { setDeleting(null); }
+  }
+
+  if (loading) return (
+    <div className="card">
+      <p className="card-title">Uploaded Dates</p>
+      <p className="text-sm text-slate-400 dark:text-slate-500 py-4 text-center">Loading…</p>
+    </div>
+  );
+
+  if (rows.length === 0) return (
+    <div className="card">
+      <p className="card-title">Uploaded Dates</p>
+      <p className="text-sm text-slate-400 dark:text-slate-500 py-4 text-center">No uploads yet.</p>
+    </div>
+  );
+
+  return (
+    <div className="card p-0 overflow-hidden">
+      <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+        <div>
+          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Uploaded Dates</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{rows.length} date{rows.length !== 1 ? 's' : ''} on record</p>
+        </div>
+        <button onClick={load} className="text-xs text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors">
+          Refresh
+        </button>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr>
+              {['Date', 'Students', 'Slots', 'Present', 'Records', 'Actions'].map(h => (
+                <th key={h} className="tbl-header">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(row => {
+              const isEditing  = editDate?.original === row.date;
+              const isDeleting = deleting === row.date;
+              const absentCount = row.records - row.present;
+              return (
+                <tr key={row.date} className="tbl-row">
+                  {/* Date cell — shows input when editing */}
+                  <td className="tbl-cell font-medium">
+                    {isEditing ? (
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="date"
+                          className="form-input text-xs py-1 w-36"
+                          value={editDate.value}
+                          onChange={e => setEditDate(ed => ({ ...ed, value: e.target.value }))}
+                          onKeyDown={e => { if (e.key === 'Enter') saveEdit(); if (e.key === 'Escape') setEditDate(null); }}
+                          autoFocus
+                        />
+                        <button
+                          onClick={saveEdit}
+                          disabled={saving}
+                          className="text-xs font-medium text-green-700 dark:text-green-400
+                                     hover:text-green-900 dark:hover:text-green-200 transition-colors">
+                          {saving ? '…' : 'Save'}
+                        </button>
+                        <button
+                          onClick={() => setEditDate(null)}
+                          className="text-xs text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors">
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-slate-900 dark:text-slate-100">{fmtDate(row.date)}</span>
+                    )}
+                  </td>
+                  <td className="tbl-cell text-center">{row.students}</td>
+                  <td className="tbl-cell text-center">{row.slots}</td>
+                  <td className="tbl-cell text-center">
+                    <span className="text-green-700 dark:text-green-400 font-semibold">{row.present}</span>
+                    <span className="text-slate-300 dark:text-slate-600 mx-1">/</span>
+                    <span className="text-red-600 dark:text-red-400">{absentCount}</span>
+                  </td>
+                  <td className="tbl-cell text-center text-slate-500 dark:text-slate-400">{row.records}</td>
+                  <td className="tbl-cell">
+                    <div className="flex items-center gap-2">
+                      {!isEditing && (
+                        <button
+                          onClick={() => setEditDate({ original: row.date, value: row.date })}
+                          className="text-xs text-slate-500 dark:text-slate-400
+                                     hover:text-slate-900 dark:hover:text-slate-100
+                                     border border-slate-200 dark:border-slate-600
+                                     hover:border-slate-400 dark:hover:border-slate-400
+                                     rounded px-2 py-0.5 transition-colors">
+                          Edit date
+                        </button>
+                      )}
+                      <button
+                        onClick={() => deleteDate(row.date)}
+                        disabled={isDeleting}
+                        className="text-xs text-red-500 dark:text-red-400
+                                   hover:text-red-700 dark:hover:text-red-300
+                                   border border-red-200 dark:border-red-800
+                                   hover:border-red-400 dark:hover:border-red-600
+                                   rounded px-2 py-0.5 transition-colors disabled:opacity-40">
+                        {isDeleting ? 'Deleting…' : 'Delete'}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// ── Main page ─────────────────────────────────────────────────────────────────
 export default function UploadPage() {
   const { toast, show } = useToast();
   const [date, setDate]       = useState(today);
@@ -12,7 +182,10 @@ export default function UploadPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult]   = useState(null);
   const [drag, setDrag]       = useState(false);
+  const [historyKey, setHistoryKey] = useState(0);
   const inputRef = useRef();
+
+  function refreshHistory() { setHistoryKey(k => k + 1); }
 
   function downloadSample() {
     const hdr  = 'S.NO,NAME,BRANCH,DEPT,CLUSTER,CRT SEC,CRT ROOM,REGD.NO,09:20-10:10,10:10-11:00,11:10-12:00,12:00-12:50,01:50-02:40,02:40-03:40,03:50-04:30,04:30-5:30';
@@ -46,7 +219,9 @@ export default function UploadPage() {
       const d = await r.json();
       if (!r.ok) throw new Error(d.error);
       setResult(d);
+      setFile(null);
       show(`Imported ${d.total} students · ${d.attendanceCount} records`);
+      refreshHistory();
     } catch (e) { show(e.message, 'error'); }
     finally { setLoading(false); }
   }
@@ -117,7 +292,7 @@ export default function UploadPage() {
           </p>
         </div>
         <input ref={inputRef} type="file" accept=".csv" className="hidden"
-               onChange={e => setFile(e.target.files[0])} />
+               onChange={e => { setFile(e.target.files[0]); e.target.value = ''; }} />
 
         <div className="flex gap-3 mt-4">
           <button className="btn-primary flex-1 justify-center py-2.5"
@@ -131,7 +306,6 @@ export default function UploadPage() {
       {result && (
         <div className="card">
           <p className="card-title">Import Complete</p>
-
           <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-700/50
                           border border-slate-200 dark:border-slate-600 rounded p-3 mb-4">
             <div className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">
@@ -139,7 +313,6 @@ export default function UploadPage() {
             </div>
             <div className="text-sm font-bold text-slate-900 dark:text-slate-100">{fmtDate(result.date)}</div>
           </div>
-
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
             {[
               { label: 'New Students',  val: result.created,         cls: 'text-green-700 dark:text-green-400' },
@@ -157,20 +330,24 @@ export default function UploadPage() {
               </div>
             ))}
           </div>
-
           {result.slotCols?.length > 0 && (
             <div className="alert-info text-xs">
               <span className="font-bold text-blue-600 dark:text-blue-400 shrink-0">i</span>
               <span>Slots imported: <strong>{result.slotCols.join(' · ')}</strong></span>
             </div>
           )}
-
           <p className="text-xs text-slate-400 dark:text-slate-500 mt-3">
             Student accounts were auto-created. Default username and password = Registration No.
-            Students must change their password on first login.
           </p>
         </div>
       )}
+
+      {/* History */}
+      <UploadHistory
+        refreshKey={historyKey}
+        onChanged={refreshHistory}
+        showToast={show}
+      />
     </div>
   );
 }
