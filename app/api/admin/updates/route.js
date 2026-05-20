@@ -23,10 +23,10 @@ export async function GET() {
 export async function POST(request) {
   try {
     if (!await adminOnly()) return NextResponse.json({ error: 'Admin only' }, { status: 403 });
-    const { title, content, type, pinned } = await request.json();
+    const { title, content, category, pinned } = await request.json();
     if (!content?.trim()) return NextResponse.json({ error: 'Content is required' }, { status: 400 });
     await connectDB();
-    const update = await Update.create({ title: title?.trim(), content: content.trim(), type, pinned });
+    const update = await Update.create({ title: title?.trim(), content: content.trim(), category, pinned });
     return NextResponse.json(update);
   } catch (e) {
     return NextResponse.json({ error: e.message }, { status: 500 });

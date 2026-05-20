@@ -115,7 +115,7 @@ export default function LoginPage() {
                   Updates
                 </p>
                 {updates.map(u => {
-                  const s = UPDATE_STYLES[u.type] || UPDATE_STYLES.info;
+                  const s = UPDATE_STYLES[u.category] || UPDATE_STYLES.info;
                   return (
                     <div key={u._id} className={`flex gap-2.5 rounded-lg border p-3 ${s.card}`}>
                       <div className={`w-0.5 shrink-0 rounded-full ${s.bar}`} />
@@ -261,7 +261,7 @@ export default function LoginPage() {
               </p>
               <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
                 {updates.map(u => {
-                  const s = UPDATE_STYLES[u.type] || UPDATE_STYLES.info;
+                  const s = UPDATE_STYLES[u.category] || UPDATE_STYLES.info;
                   return (
                     <div key={u._id} className={`flex gap-2.5 rounded-lg border p-3 ${s.card}`}>
                       <div className={`w-0.5 shrink-0 rounded-full ${s.bar}`} />

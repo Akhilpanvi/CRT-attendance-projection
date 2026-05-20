@@ -1,12 +1,12 @@
 'use client';
 import { useState, useEffect } from 'react';
 
-const TYPE_STYLES = {
+const CAT_STYLES = {
   info:      'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300',
   warning:   'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300',
   important: 'bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300',
 };
-const TYPE_LABELS = { info: 'Info', warning: 'Warning', important: 'Important' };
+const CAT_LABELS = { info: 'Info', warning: 'Warning', important: 'Important' };
 
 export default function UpdatesPage() {
   const [updates,  setUpdates]  = useState([]);
@@ -16,7 +16,7 @@ export default function UpdatesPage() {
 
   const [title,   setTitle]   = useState('');
   const [content, setContent] = useState('');
-  const [type,    setType]    = useState('info');
+  const [category, setCategory] = useState('info');
   const [pinned,  setPinned]  = useState(false);
 
   async function load() {
@@ -38,11 +38,11 @@ export default function UpdatesPage() {
       const r = await fetch('/api/admin/updates', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ title, content, type, pinned }),
+        body:    JSON.stringify({ title, content, category, pinned }),
       });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error);
-      setTitle(''); setContent(''); setType('info'); setPinned(false);
+      setTitle(''); setContent(''); setCategory('info'); setPinned(false);
       await load();
     } catch (e) {
       setError(e.message);
@@ -97,8 +97,8 @@ export default function UpdatesPage() {
           <div className="flex flex-wrap items-center gap-3">
             <select
               className="form-input w-auto"
-              value={type}
-              onChange={e => setType(e.target.value)}>
+              value={category}
+              onChange={e => setCategory(e.target.value)}>
               <option value="info">Info</option>
               <option value="warning">Warning</option>
               <option value="important">Important</option>
@@ -131,12 +131,12 @@ export default function UpdatesPage() {
           <p className="text-sm text-slate-400 text-center py-8">No updates posted yet.</p>
         ) : updates.map(u => (
           <div key={u._id}
-               className={`rounded-lg border p-4 ${TYPE_STYLES[u.type] || TYPE_STYLES.info}`}>
+               className={`rounded-lg border p-4 ${CAT_STYLES[u.category] || TYPE_STYLES.info}`}>
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap mb-1">
                   <span className="text-[10px] font-bold uppercase tracking-wider opacity-70">
-                    {TYPE_LABELS[u.type]}
+                    {CAT_LABELS[u.category]}
                   </span>
                   {u.pinned && (
                     <span className="text-[10px] font-bold uppercase tracking-wider opacity-70">· Pinned</span>
