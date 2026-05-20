@@ -122,8 +122,8 @@ export default function LoginPage() {
             {/* Mobile logo */}
             <div className="flex items-center gap-2 mb-8 lg:hidden">
               <div className="w-8 h-8 rounded flex items-center justify-center text-xs font-black text-white"
-                   style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)' }}>KL</div>
-              <span className="text-sm font-bold text-white">CRT Attendance Tracker</span>
+                   style={{ background: isDark ? 'rgba(255,255,255,0.1)' : '#1e293b', border: isDark ? '1px solid rgba(255,255,255,0.15)' : 'none' }}>KL</div>
+              <span className="text-sm font-bold" style={{ color: isDark ? '#ffffff' : '#0f172a' }}>CRT Attendance Tracker</span>
             </div>
 
             {/* Updates box — mobile only */}
@@ -146,15 +146,15 @@ export default function LoginPage() {
                     const cc = CAT_COLOR[u.category] || CAT_COLOR.info;
                     const cl = CAT_LABEL[u.category] || 'Info';
                     return (
-                      <div key={u._id} style={{ display: 'flex', gap: '10px', padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.05)', alignItems: 'flex-start' }}>
-                        <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '10px', minWidth: '14px', paddingTop: '2px' }}>{i + 1}</span>
+                      <div key={u._id} style={{ display: 'flex', gap: '10px', padding: '10px 14px', borderBottom: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid #f1f5f9', alignItems: 'flex-start' }}>
+                        <span style={{ color: isDark ? 'rgba(255,255,255,0.2)' : '#cbd5e1', fontSize: '10px', minWidth: '14px', paddingTop: '2px' }}>{i + 1}</span>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
                             <span style={{ fontSize: '9px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em', color: cc, background: `${cc}22`, padding: '1px 5px', borderRadius: '3px' }}>{u.pinned ? '📌 ' : ''}{cl}</span>
-                            <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '10px', whiteSpace: 'nowrap', flexShrink: 0 }}>{fmtDate(u.createdAt)}</span>
+                            <span style={{ color: isDark ? 'rgba(255,255,255,0.25)' : '#94a3b8', fontSize: '10px', whiteSpace: 'nowrap', flexShrink: 0 }}>{fmtDate(u.createdAt)}</span>
                           </div>
-                          {u.title && <p style={{ fontSize: '11px', fontWeight: '600', color: 'rgba(255,255,255,0.85)', marginBottom: '2px', lineHeight: '1.4' }}>{u.title}</p>}
-                          <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{u.content}</p>
+                          {u.title && <p style={{ fontSize: '11px', fontWeight: '600', color: isDark ? 'rgba(255,255,255,0.85)' : '#0f172a', marginBottom: '2px', lineHeight: '1.4' }}>{u.title}</p>}
+                          <p style={{ fontSize: '11px', color: isDark ? 'rgba(255,255,255,0.5)' : '#475569', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{u.content}</p>
                         </div>
                       </div>
                     );
@@ -163,8 +163,8 @@ export default function LoginPage() {
               </div>
             )}
 
-            <h1 className="text-xl font-bold text-white mb-1">Sign in</h1>
-            <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.5)' }}>
+            <h1 className="text-xl font-bold mb-1" style={{ color: isDark ? '#ffffff' : '#0f172a' }}>Sign in</h1>
+            <p className="text-sm mb-6" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : '#64748b' }}>
               Enter your credentials to access the tracker.
             </p>
 
@@ -217,30 +217,32 @@ export default function LoginPage() {
             {/* Forgot-password panel */}
             {fpOpen && (
               <div className="mt-4 rounded-lg p-4"
-                   style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                   style={isDark
+                     ? { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }
+                     : { background: '#f8fafc', border: '1px solid #e2e8f0' }}>
                 {fpMsg === 'sent' ? (
                   <div className="text-center">
-                    <p className="text-sm font-semibold text-green-400 mb-1">
+                    <p className="text-sm font-semibold mb-1" style={{ color: isDark ? '#4ade80' : '#16a34a' }}>
                       Check your KL University email!
                     </p>
-                    <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                    <p className="text-xs leading-relaxed" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : '#64748b' }}>
                       A password reset link has been sent to your
-                      <strong style={{ color: 'rgba(255,255,255,0.8)' }}> @kluniversity.in</strong> email.
+                      <strong style={{ color: isDark ? 'rgba(255,255,255,0.8)' : '#1e293b' }}> @kluniversity.in</strong> email.
                       The link expires in 2 minutes.
                     </p>
                     <button
                       onClick={() => { setFpOpen(false); setFpMsg(''); setFpRoll(''); }}
                       className="mt-3 text-xs transition-colors"
-                      style={{ color: 'rgba(255,255,255,0.4)' }}>
+                      style={{ color: isDark ? 'rgba(255,255,255,0.4)' : '#94a3b8' }}>
                       Close
                     </button>
                   </div>
                 ) : (
                   <form onSubmit={handleForgotPassword} className="space-y-3">
-                    <p className="text-xs font-semibold text-white">
+                    <p className="text-xs font-semibold" style={{ color: isDark ? '#ffffff' : '#0f172a' }}>
                       Reset password request
                     </p>
-                    <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                    <p className="text-xs leading-relaxed" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : '#64748b' }}>
                       Enter your registration number / username. A reset link will be sent to your KL University email.
                     </p>
                     <input
@@ -251,7 +253,7 @@ export default function LoginPage() {
                       autoFocus
                     />
                     {fpMsg && fpMsg !== 'sent' && (
-                      <p className="text-xs text-red-400">{fpMsg}</p>
+                      <p className="text-xs text-red-500">{fpMsg}</p>
                     )}
                     <div className="flex gap-2">
                       <button
@@ -264,7 +266,9 @@ export default function LoginPage() {
                         type="button"
                         onClick={() => { setFpOpen(false); setFpMsg(''); setFpRoll(''); }}
                         className="px-3 py-2 text-xs rounded-md transition-colors"
-                        style={{ border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.6)' }}>
+                        style={isDark
+                          ? { border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.6)' }
+                          : { border: '1px solid #e2e8f0', color: '#64748b' }}>
                         Cancel
                       </button>
                     </div>
@@ -273,24 +277,20 @@ export default function LoginPage() {
               </div>
             )}
 
-            <p className="text-xs mt-5 leading-relaxed" style={{ color: 'rgba(255,255,255,0.35)' }}>
+            <p className="text-xs mt-5 leading-relaxed" style={{ color: isDark ? 'rgba(255,255,255,0.35)' : '#94a3b8' }}>
               Students: use your registration number as username.<br />
               First-time login will prompt a password change.
             </p>
-            <p className="text-[10px] mt-4 leading-relaxed text-center" style={{ color: 'rgba(255,255,255,0.2)' }}>
+            <p className="text-[10px] mt-4 leading-relaxed text-center" style={{ color: isDark ? 'rgba(255,255,255,0.2)' : '#94a3b8' }}>
               Not an official KL University platform.<br />
               Made by a student of Y23 KL University with personal interest and easy tracking.
             </p>
             <div className="flex items-center justify-center gap-3 mt-3">
-              <a href="/privacy" className="text-[10px] transition-colors" style={{ color: 'rgba(255,255,255,0.25)' }}
-                 onMouseOver={e => e.target.style.color = 'rgba(255,255,255,0.6)'}
-                 onMouseOut={e => e.target.style.color = 'rgba(255,255,255,0.25)'}>
+              <a href="/privacy" className="text-[10px] transition-colors" style={{ color: isDark ? 'rgba(255,255,255,0.25)' : '#94a3b8' }}>
                 Privacy Policy
               </a>
-              <span style={{ color: 'rgba(255,255,255,0.15)', fontSize: '10px' }}>·</span>
-              <a href="/terms" className="text-[10px] transition-colors" style={{ color: 'rgba(255,255,255,0.25)' }}
-                 onMouseOver={e => e.target.style.color = 'rgba(255,255,255,0.6)'}
-                 onMouseOut={e => e.target.style.color = 'rgba(255,255,255,0.25)'}>
+              <span style={{ color: isDark ? 'rgba(255,255,255,0.15)' : '#cbd5e1', fontSize: '10px' }}>·</span>
+              <a href="/terms" className="text-[10px] transition-colors" style={{ color: isDark ? 'rgba(255,255,255,0.25)' : '#94a3b8' }}>
                 Terms of Service
               </a>
             </div>
