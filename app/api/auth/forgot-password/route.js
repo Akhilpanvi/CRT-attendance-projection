@@ -123,7 +123,7 @@ export async function POST(request) {
 
       const resend = new Resend(process.env.RESEND_API_KEY);
       const result = await resend.emails.send({
-        from:    'CRT Portal <noreply@kluniversity.me>',
+        from:    'Change Password <noreply@kluniversity.me>',
         to:      `${roll.toLowerCase()}@kluniversity.in`,
         subject,
         html,
