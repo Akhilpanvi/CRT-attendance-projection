@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
+import { Resend } from 'resend';
 import { connectDB } from '@/lib/mongodb';
 import Student from '@/lib/models/Student';
 import User from '@/lib/models/User';
@@ -120,17 +121,14 @@ export async function POST(request) {
         expiresIn:  '1 hour',
       });
 
-      const nodemailer  = await import('nodemailer');
-      const transporter = (nodemailer.default ?? nodemailer).createTransport({
-        service: 'gmail',
-        auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_PASS },
-      });
-      await transporter.sendMail({
-        from:    `"CRT Portal" <${process.env.GMAIL_USER}>`,
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      const result = await resend.emails.send({
+        from:    'CRT Portal <noreply@kluniversity.me>',
         to:      `${roll.toLowerCase()}@kluniversity.in`,
         subject,
         html,
       });
+      if (result.error) throw new Error(result.error.message);
     }
 
     return NextResponse.json({ success: true });
