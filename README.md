@@ -1,69 +1,201 @@
-# AttendX — KL University Attendance Tracker
+# CRT Attendance Tracker
 
-A full-stack attendance tracking system with MongoDB backend for KL University students. Tracks Slot A & Slot B sessions with 85% weekly attendance enforcement.
+A full-stack web application for tracking student attendance during the **Y-23 Summer CRT Training** at KL University (KLEF). Built independently by a Y-23 student for easy, real-time attendance monitoring.
+
+> **Disclaimer:** This is not an official KL University platform. It is a student-built tool for voluntary use during the Summer CRT Training programme.
+
+---
+
+## Overview
+
+The CRT Attendance Tracker provides students with a personalised dashboard to monitor their attendance across all CRT training slots, visualise weekly trends, and plan sessions ahead. The admin panel allows the CRT team to upload attendance CSVs, manage student profiles, and post notices visible to all students on the login page.
+
+**Live:** [crt.kluniversity.me](https://crt.kluniversity.me)
+
+---
 
 ## Tech Stack
-- **Frontend**: Pure HTML + CSS + Vanilla JS
-- **Backend**: Node.js + Express
-- **Database**: MongoDB (via Mongoose)
 
-## Setup
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 14 (App Router) |
+| UI | React 18 + Tailwind CSS 3 |
+| Database | MongoDB Atlas via Mongoose 8 |
+| Auth | JWT (`jose`) stored in HttpOnly cookies |
+| Password hashing | bcryptjs |
+| Email | Resend SDK (verified domain `kluniversity.me`) |
+| CSV parsing | csv-parse |
+| Excel export | SheetJS (xlsx) |
+| Deployment | Vercel |
 
-### 1. Prerequisites
-- Node.js v18+
-- MongoDB running locally (`mongod`) OR a MongoDB Atlas URI
+---
+
+## Features
+
+### Student Dashboard
+- Overall attendance percentage with colour-coded status (safe / at-risk / danger)
+- Week-by-week attendance breakdown with progress bars
+- Full session log with slot, date, and present/absent status
+- **Session Planner** — calculates how many sessions can be skipped while staying above the required threshold
+- Updates/notices banner — shows admin-posted announcements at the top of the dashboard
+
+### Admin Panel
+- **CSV Upload** — bulk-upload attendance records from CSV files; upload history with edit-date and delete
+- **Student Manager** — view all students, search by roll number, edit profiles
+- **Attendance Marking** — manually mark individual student attendance
+- **Irregular Patterns** — flag students with unusual attendance behaviour
+- **Profile Creation** — onboard new students individually
+- **Removal** — remove students from the system
+- **Notices** — post announcements (Info / Warning / Important, optional pin) visible on the login page and student dashboard
+
+### Authentication & Security
+- Role-based access: `student`, `admin`
+- JWT tokens in HttpOnly cookies — inaccessible to JavaScript (XSS-resistant)
+- All passwords hashed with bcrypt (never stored in plain text)
+- First-login forced password change
+- Token-based password reset via email — links expire in **2 minutes**, single-use
+- Password reset emails sent to `rollnumber@kluniversity.in` via Resend with SPF + DKIM
+
+### General
+- Dark / light mode toggle
+- Fully responsive — mobile and desktop
+- Login page notice board — numbered list of admin notices with category badges and dates
+- Privacy Policy (`/privacy`) and Terms of Service (`/terms`) — publicly accessible
+
+---
+
+## Pages & Routes
+
+| Route | Access | Description |
+|---|---|---|
+| `/login` | Public | Sign in page with notices panel |
+| `/change-password` | Authenticated | First-login password change |
+| `/reset-password` | Public | Token-based password reset |
+| `/student` | Student | Attendance dashboard + session planner |
+| `/admin/upload` | Admin | CSV upload + upload history |
+| `/admin/students` | Admin | Student list and search |
+| `/admin/mark` | Admin | Manual attendance marking |
+| `/admin/irregular` | Admin | Irregular pattern detection |
+| `/admin/create-profile` | Admin | Create a new student profile |
+| `/admin/removal` | Admin | Remove a student |
+| `/admin/updates` | Admin | Post / delete login page notices |
+| `/privacy` | Public | Privacy Policy |
+| `/terms` | Public | Terms of Service |
+
+---
+
+## API Routes
+
+| Method | Route | Description |
+|---|---|---|
+| POST | `/api/auth/login` | Authenticate user, set JWT cookie |
+| POST | `/api/auth/logout` | Clear session cookie |
+| POST | `/api/auth/change-password` | Update password on first login |
+| POST | `/api/auth/forgot-password` | Send password reset email |
+| POST | `/api/auth/reset-password` | Validate token and set new password |
+| GET | `/api/student/me` | Fetch authenticated student data |
+| GET | `/api/students/[rollNumber]` | Fetch a specific student's data |
+| POST | `/api/attendance/mark` | Mark attendance for a student |
+| POST | `/api/admin/upload-csv` | Bulk upload attendance from CSV |
+| GET/DELETE | `/api/admin/upload-history` | Manage upload history |
+| GET/POST/PUT | `/api/admin/students` | Manage students |
+| POST | `/api/admin/create-profile` | Create a new student account |
+| POST | `/api/admin/removal` | Remove a student |
+| GET | `/api/admin/irregular` | Get irregular attendance patterns |
+| POST | `/api/admin/reset-password` | Admin-side password reset |
+| GET/POST/DELETE | `/api/admin/updates` | Manage login page notices |
+| GET | `/api/updates` | Public — fetch notices for login page |
+
+---
+
+## Local Setup
+
+### Prerequisites
+- Node.js 18+
+- MongoDB Atlas account (or local MongoDB)
+- Resend account with a verified sending domain
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/Akhilpanvi/CRT-attendance-projection.git
+cd CRT-attendance-projection
+```
 
 ### 2. Install dependencies
 ```bash
 npm install
 ```
 
-### 3. Configure environment
-Edit `.env`:
-```
-PORT=3000
-MONGO_URI=mongodb://localhost:27017/attendance_db
-```
-For MongoDB Atlas, replace MONGO_URI with your connection string:
-```
-MONGO_URI=mongodb+srv://<user>:<pass>@cluster0.xxxxx.mongodb.net/attendance_db
+### 3. Configure environment variables
+
+Create a `.env` file in the project root:
+
+```env
+MONGO_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/crt_attendance
+JWT_SECRET=your-secret-key-here
+RESEND_API_KEY=re_your_resend_api_key
 ```
 
-### 4. Run the server
+> **Never commit `.env` to version control.** It is listed in `.gitignore`.
+
+### 4. Run the development server
 ```bash
-node server.js
+npm run dev
 ```
-Open `http://localhost:3000` in your browser.
 
-## Features
+Open [http://localhost:3000](http://localhost:3000).
 
-### 📋 Mark Attendance Tab
-- Enter your Roll Number → Look up your profile
-- Select Slot A or Slot B
-- Mark as Present or Absent
-- Re-submitting the same slot+date updates the record
+### 5. Default admin credentials
 
-### 📊 My Status Tab
-- Full attendance gauge (overall %)
-- Color-coded alert: Green ✓ / Yellow ⚠️ / Red 🚨
-- Weekly breakdown with 85% threshold bars
-- Full attendance log (last 40 records)
+On first run, the system auto-creates an admin account:
+- **Username:** `CRT`
+- **Password:** `CRT999`
 
-### ✏️ Register Tab
-- Register new students with Roll Number, Name, Section, Batch
+Change this immediately after first login.
 
-## API Endpoints
+---
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | /api/students/register | Register a new student |
-| GET  | /api/students/:rollNumber | Get student info + stats |
-| POST | /api/attendance/mark | Mark attendance |
-| GET  | /api/attendance/:rollNumber | Full attendance history |
-| GET  | /api/attendance/:rollNumber/today | Today's records |
+## Deployment (Vercel)
 
-## 85% Rule Logic
-- Each week's attendance = (present sessions) / (total sessions that week) × 100
-- Students below 85% weekly see a ⚠️ warning
-- Students below 75% overall see a 🚨 critical alert
-- Weekly bars in the status view are color-coded: Green (safe), Amber (borderline), Red (at risk)
+1. Push to GitHub.
+2. Import the repository in [Vercel](https://vercel.com).
+3. Add the following environment variables in Vercel project settings:
+   - `MONGO_URI`
+   - `JWT_SECRET`
+   - `RESEND_API_KEY`
+4. Deploy. Vercel auto-deploys on every push to `master`.
+
+---
+
+## Environment Variables
+
+| Variable | Required | Description |
+|---|---|---|
+| `MONGO_URI` | Yes | MongoDB Atlas connection string |
+| `JWT_SECRET` | Yes | Secret used to sign JWT tokens |
+| `RESEND_API_KEY` | Yes | API key from resend.com for email delivery |
+
+---
+
+## Security
+
+- Passwords hashed with **bcrypt** (salt rounds: 10) — plain-text passwords are never stored or logged
+- JWT tokens stored in **HttpOnly, Secure cookies** — not accessible via JavaScript
+- Password reset tokens generated with `crypto.randomBytes(32)` — expire in **2 minutes**
+- All database connections use **TLS** (enforced by MongoDB Atlas)
+- No third-party analytics, tracking, or advertising SDKs
+- Role-based middleware protects all authenticated routes
+
+---
+
+## Contact
+
+For questions, bug reports, or data requests:
+**support@kluniversity.me**
+
+---
+
+## License
+
+This project is not open-source and is intended solely for use within the Y-23 KL University CRT Training programme.
+© 2026 CRT Attendance Tracker — Not an official KL University platform.
