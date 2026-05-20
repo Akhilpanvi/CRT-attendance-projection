@@ -70,22 +70,22 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex bg-slate-50 dark:bg-slate-900">
+    <div className="dark min-h-screen flex" style={{ background: 'radial-gradient(ellipse at 30% 60%, rgba(29,78,216,0.12) 0%, #080d1a 55%, #050810 100%)' }}>
       {/* Left panel */}
-      <div className="hidden lg:flex flex-col justify-between w-[400px] shrink-0 p-10
-                      bg-slate-800 dark:bg-slate-950">
+      <div className="hidden lg:flex flex-col justify-between w-[400px] shrink-0 p-10"
+           style={{ background: 'rgba(255,255,255,0.03)', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
         <div>
-          <div className="w-9 h-9 rounded bg-white/15 border border-white/20 flex items-center
-                          justify-center text-sm font-black text-white mb-8">KL</div>
+          <div className="w-9 h-9 rounded flex items-center justify-center text-sm font-black text-white mb-8"
+               style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)' }}>KL</div>
           <h2 className="text-2xl font-bold text-white leading-snug">
-            CRT Attendance<br />Portal
+            CRT Attendance<br />Tracker
           </h2>
-          <p className="text-white/50 text-sm mt-2">
+          <p className="text-sm mt-2" style={{ color: 'rgba(255,255,255,0.4)' }}>
             KL University · 2023-27 Batch<br />
             Y-23 Summer CRT Training
           </p>
         </div>
-        <p className="text-white/25 text-[10px] leading-relaxed">
+        <p className="text-[10px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.2)' }}>
           Not an official KL University platform.<br />
           Made by a Y23 student with personal interest.<br />
           © {new Date().getFullYear()} KL University
@@ -103,15 +103,15 @@ export default function LoginPage() {
           <div className="w-full max-w-sm shrink-0">
             {/* Mobile logo */}
             <div className="flex items-center gap-2 mb-8 lg:hidden">
-              <div className="w-8 h-8 rounded flex items-center justify-center text-xs font-black
-                              text-white bg-slate-800 dark:bg-slate-700">KL</div>
-              <span className="text-sm font-bold text-slate-900 dark:text-slate-100">CRT Attendance Tracker</span>
+              <div className="w-8 h-8 rounded flex items-center justify-center text-xs font-black text-white"
+                   style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)' }}>KL</div>
+              <span className="text-sm font-bold text-white">CRT Attendance Tracker</span>
             </div>
 
             {/* Updates box — mobile only (shown above form on small screens) */}
             {updates.length > 0 && (
               <div className="lg:hidden mb-6 space-y-2 max-h-48 overflow-y-auto">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">
+                <p className="text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: 'rgba(255,255,255,0.35)' }}>
                   Updates
                 </p>
                 {updates.map(u => {
@@ -132,8 +132,8 @@ export default function LoginPage() {
               </div>
             )}
 
-            <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-1">Sign in</h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+            <h1 className="text-xl font-bold text-white mb-1">Sign in</h1>
+            <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.5)' }}>
               Enter your credentials to access the tracker.
             </p>
 
@@ -185,32 +185,32 @@ export default function LoginPage() {
 
             {/* Forgot-password panel */}
             {fpOpen && (
-              <div className="mt-4 rounded-lg border border-slate-200 dark:border-slate-700
-                              bg-slate-50 dark:bg-slate-800/50 p-4">
+              <div className="mt-4 rounded-lg p-4"
+                   style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
                 {fpMsg === 'sent' ? (
                   <div className="text-center">
-                    <p className="text-sm font-semibold text-green-600 dark:text-green-400 mb-1">
+                    <p className="text-sm font-semibold text-green-400 mb-1">
                       Check your KL University email!
                     </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                    <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
                       A password reset link has been sent to your
-                      <strong className="text-slate-600 dark:text-slate-300"> @kluniversity.in</strong> email.
-                      The link expires in 1 hour.
+                      <strong style={{ color: 'rgba(255,255,255,0.8)' }}> @kluniversity.in</strong> email.
+                      The link expires in 2 minutes.
                     </p>
                     <button
                       onClick={() => { setFpOpen(false); setFpMsg(''); setFpRoll(''); }}
-                      className="mt-3 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                      className="mt-3 text-xs transition-colors"
+                      style={{ color: 'rgba(255,255,255,0.4)' }}>
                       Close
                     </button>
                   </div>
                 ) : (
                   <form onSubmit={handleForgotPassword} className="space-y-3">
-                    <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    <p className="text-xs font-semibold text-white">
                       Reset password request
                     </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                      Enter your registration number / username. A reset request will be sent to your
-                      KL University email and the admin will be notified.
+                    <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                      Enter your registration number / username. A reset link will be sent to your KL University email.
                     </p>
                     <input
                       className="form-input"
@@ -220,7 +220,7 @@ export default function LoginPage() {
                       autoFocus
                     />
                     {fpMsg && fpMsg !== 'sent' && (
-                      <p className="text-xs text-red-500 dark:text-red-400">{fpMsg}</p>
+                      <p className="text-xs text-red-400">{fpMsg}</p>
                     )}
                     <div className="flex gap-2">
                       <button
@@ -232,9 +232,8 @@ export default function LoginPage() {
                       <button
                         type="button"
                         onClick={() => { setFpOpen(false); setFpMsg(''); setFpRoll(''); }}
-                        className="px-3 py-2 text-xs rounded-md border border-slate-200 dark:border-slate-600
-                                   text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700
-                                   transition-colors">
+                        className="px-3 py-2 text-xs rounded-md transition-colors"
+                        style={{ border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.6)' }}>
                         Cancel
                       </button>
                     </div>
@@ -243,11 +242,11 @@ export default function LoginPage() {
               </div>
             )}
 
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-5 leading-relaxed">
+            <p className="text-xs mt-5 leading-relaxed" style={{ color: 'rgba(255,255,255,0.35)' }}>
               Students: use your registration number as username.<br />
               First-time login will prompt a password change.
             </p>
-            <p className="text-[10px] text-slate-300 dark:text-slate-600 mt-4 leading-relaxed text-center">
+            <p className="text-[10px] mt-4 leading-relaxed text-center" style={{ color: 'rgba(255,255,255,0.2)' }}>
               Not an official KL University platform.<br />
               Made by a student of Y23 KL University with personal interest and easy tracking.
             </p>
@@ -256,7 +255,7 @@ export default function LoginPage() {
           {/* Updates panel — desktop only, right of form */}
           {updates.length > 0 && (
             <div className="hidden lg:flex flex-col w-72 shrink-0 self-center">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">
+              <p className="text-[10px] font-semibold uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.35)' }}>
                 Updates
               </p>
               <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">

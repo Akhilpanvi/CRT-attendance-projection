@@ -73,8 +73,11 @@ function resetEmailTemplate({ name, rollNumber, resetLink, expiresIn }) {
         <!-- Footer -->
         <tr>
           <td style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:16px 32px;">
-            <p style="margin:0;font-size:11px;color:#94a3b8;text-align:center;">
+            <p style="margin:0 0 4px;font-size:11px;color:#94a3b8;text-align:center;">
               KL University · CRT Attendance Tracker · Y-23 Summer CRT Training
+            </p>
+            <p style="margin:0;font-size:10px;color:#cbd5e1;text-align:center;">
+              Not an official KL University platform. Made by a Y23 student with personal interest.
             </p>
           </td>
         </tr>
