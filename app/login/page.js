@@ -4,9 +4,9 @@ import { useRouter } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
 
 const UPDATE_STYLES = {
-  info:      { bar: 'bg-blue-400',  text: 'text-blue-200',  label: 'Info' },
-  warning:   { bar: 'bg-amber-400', text: 'text-amber-200', label: 'Warning' },
-  important: { bar: 'bg-rose-400',  text: 'text-rose-200',  label: 'Important' },
+  info:      { bar: 'bg-blue-400',  card: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800',  label: 'text-blue-500 dark:text-blue-400',  title: 'text-blue-800 dark:text-blue-200',  body: 'text-blue-700 dark:text-blue-300',  labelText: 'Info' },
+  warning:   { bar: 'bg-amber-400', card: 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800', label: 'text-amber-600 dark:text-amber-400', title: 'text-amber-800 dark:text-amber-200', body: 'text-amber-700 dark:text-amber-300', labelText: 'Warning' },
+  important: { bar: 'bg-rose-400',  card: 'bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800',  label: 'text-rose-500 dark:text-rose-400',  title: 'text-rose-800 dark:text-rose-200',  body: 'text-rose-700 dark:text-rose-300',  labelText: 'Important' },
 };
 
 export default function LoginPage() {
@@ -85,29 +85,6 @@ export default function LoginPage() {
             Y-23 Summer CRT Training
           </p>
         </div>
-        {updates.length > 0 && (
-          <div className="my-6 space-y-2 max-h-64 overflow-y-auto pr-1">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40 mb-2">
-              Updates
-            </p>
-            {updates.map(u => {
-              const s = UPDATE_STYLES[u.type] || UPDATE_STYLES.info;
-              return (
-                <div key={u._id} className="flex gap-2.5 rounded-md bg-white/5 border border-white/10 p-3">
-                  <div className={`w-0.5 shrink-0 rounded-full mt-0.5 ${s.bar}`} />
-                  <div className="min-w-0">
-                    <div className={`text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${s.text}`}>
-                      {u.pinned ? '📌 ' : ''}{s.label}
-                    </div>
-                    {u.title && <p className="text-xs font-semibold text-white leading-snug mb-0.5">{u.title}</p>}
-                    <p className="text-xs text-white/65 leading-relaxed whitespace-pre-wrap">{u.content}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
         <p className="text-white/25 text-[10px] leading-relaxed">
           Not an official KL University platform.<br />
           Made by a Y23 student with personal interest.<br />
@@ -129,9 +106,34 @@ export default function LoginPage() {
               <span className="text-sm font-bold text-slate-900 dark:text-slate-100">CRT Attendance Tracker</span>
             </div>
 
+            {/* Updates box */}
+            {updates.length > 0 && (
+              <div className="mb-6 space-y-2 max-h-52 overflow-y-auto">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">
+                  Updates
+                </p>
+                {updates.map(u => {
+                  const s = UPDATE_STYLES[u.type] || UPDATE_STYLES.info;
+                  return (
+                    <div key={u._id}
+                         className={`flex gap-2.5 rounded-lg border p-3 ${s.card}`}>
+                      <div className={`w-0.5 shrink-0 rounded-full ${s.bar}`} />
+                      <div className="min-w-0">
+                        <div className={`text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${s.label}`}>
+                          {u.pinned ? '📌 ' : ''}{s.labelText}
+                        </div>
+                        {u.title && <p className={`text-xs font-semibold leading-snug mb-0.5 ${s.title}`}>{u.title}</p>}
+                        <p className={`text-xs leading-relaxed whitespace-pre-wrap ${s.body}`}>{u.content}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
             <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-1">Sign in</h1>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-              Enter your credentials to access the portal.
+              Enter your credentials to access the tracker.
             </p>
 
             <form onSubmit={handleLogin} className="space-y-4">
