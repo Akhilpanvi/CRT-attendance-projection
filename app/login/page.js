@@ -149,11 +149,12 @@ export default function LoginPage() {
                 {fpMsg === 'sent' ? (
                   <div className="text-center">
                     <p className="text-sm font-semibold text-green-600 dark:text-green-400 mb-1">
-                      Request sent!
+                      Check your KL University email!
                     </p>
                     <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                      A confirmation has been sent to your KL University email.
-                      The admin will reset your password shortly.
+                      A password reset link has been sent to your
+                      <strong className="text-slate-600 dark:text-slate-300"> @kluniversity.in</strong> email.
+                      The link expires in 1 hour.
                     </p>
                     <button
                       onClick={() => { setFpOpen(false); setFpMsg(''); setFpRoll(''); }}
