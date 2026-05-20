@@ -105,7 +105,6 @@ export default function TermsPage() {
                 <ul className="space-y-2">
                   {[
                     'Y-23 batch students of KL University enrolled in the Summer CRT Training',
-                    'CRT administrative staff responsible for attendance management',
                     'Authorised users with credentials issued by the platform maintainer',
                   ].map((r, i) => (
                     <li key={i} className="flex items-start gap-3">
