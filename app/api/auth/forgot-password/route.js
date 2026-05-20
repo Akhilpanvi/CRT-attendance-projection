@@ -1,15 +1,6 @@
 import { NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
 import { connectDB } from '@/lib/mongodb';
 import Student from '@/lib/models/Student';
-
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_PASS,
-  },
-});
 
 function studentEmailTemplate({ name, rollNumber, requestedAt }) {
   return {
@@ -190,16 +181,25 @@ export async function POST(request) {
     const student = await Student.findOne({ rollNumber: roll }).lean();
 
     // Always return success to prevent reg-number enumeration
-    // Only send email if student exists
+    // Only send emails if student exists
     if (student) {
+      const nodemailer = (await import('nodemailer')).default ?? (await import('nodemailer'));
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.GMAIL_USER,
+          pass: process.env.GMAIL_PASS,
+        },
+      });
+
       const requestedAt = new Date().toLocaleString('en-IN', {
         timeZone: 'Asia/Kolkata',
         day: '2-digit', month: 'short', year: 'numeric',
         hour: '2-digit', minute: '2-digit', hour12: true,
       });
 
-      const admin   = adminEmailTemplate({ name: student.name, rollNumber: roll, requestedAt });
-      const student_ = studentEmailTemplate({ name: student.name, rollNumber: roll, requestedAt });
+      const admin    = adminEmailTemplate({ name: student.name, rollNumber: roll, requestedAt });
+      const stuMail  = studentEmailTemplate({ name: student.name, rollNumber: roll, requestedAt });
       const studentEmail = `${roll.toLowerCase()}@kluniversity.in`;
 
       await Promise.all([
@@ -212,15 +212,15 @@ export async function POST(request) {
         transporter.sendMail({
           from:    `"CRT Portal" <${process.env.GMAIL_USER}>`,
           to:      studentEmail,
-          subject: student_.subject,
-          html:    student_.html,
+          subject: stuMail.subject,
+          html:    stuMail.html,
         }),
       ]);
     }
 
     return NextResponse.json({ success: true });
   } catch (e) {
-    console.error('forgot-password:', e.message);
-    return NextResponse.json({ error: 'Failed to send request. Try again.' }, { status: 500 });
+    console.error('forgot-password error:', e);
+    return NextResponse.json({ error: e.message || 'Failed to send request. Try again.' }, { status: 500 });
   }
 }
