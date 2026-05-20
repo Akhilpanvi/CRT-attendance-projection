@@ -122,12 +122,13 @@ export async function POST(request) {
       });
 
       const resend = new Resend(process.env.RESEND_API_KEY);
-      await resend.emails.send({
+      const result = await resend.emails.send({
         from:    'CRT Portal <onboarding@resend.dev>',
         to:      `${roll.toLowerCase()}@kluniversity.in`,
         subject,
         html,
       });
+      if (result.error) throw new Error(result.error.message);
     }
 
     return NextResponse.json({ success: true });
