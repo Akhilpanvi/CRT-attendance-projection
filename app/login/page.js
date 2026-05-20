@@ -82,7 +82,17 @@ export default function LoginPage() {
                 />
               </div>
               <div>
-                <label className="form-label">Password</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="form-label mb-0">Password</label>
+                  <a
+                    href="https://forms.gle/tkna6132vDuLsTYV8"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-slate-400 dark:text-slate-500
+                               hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
+                    Forgot password?
+                  </a>
+                </div>
                 <input
                   className="form-input"
                   type="password"
