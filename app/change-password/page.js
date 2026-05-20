@@ -42,7 +42,7 @@ export default function ChangePasswordPage() {
           <div className="flex items-center gap-2 mb-8">
             <div className="w-8 h-8 rounded flex items-center justify-center text-xs font-black
                             text-white bg-slate-800 dark:bg-slate-700">KL</div>
-            <span className="text-sm font-bold text-slate-900 dark:text-slate-100">CRT Attendance Portal</span>
+            <span className="text-sm font-bold text-slate-900 dark:text-slate-100">CRT Attendance Tracker</span>
           </div>
 
           <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-6">

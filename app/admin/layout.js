@@ -87,7 +87,7 @@ export default function AdminLayout({ children }) {
         <div className="w-8 h-8 rounded bg-white/15 border border-white/20 flex items-center
                         justify-center text-sm font-black text-white shrink-0">KL</div>
         <div>
-          <div className="text-sm font-semibold text-white leading-none">CRT Portal</div>
+          <div className="text-sm font-semibold text-white leading-none">CRT Tracker</div>
           <div className="text-[10px] text-white/50 mt-0.5">KL University</div>
         </div>
       </div>
@@ -162,7 +162,7 @@ export default function AdminLayout({ children }) {
             </svg>
           </button>
           <span className="font-semibold text-slate-900 dark:text-slate-100 text-sm">
-            CRT Attendance Portal
+            CRT Attendance Tracker
           </span>
           <span className="hidden sm:block text-slate-300 dark:text-slate-600 text-xs">·</span>
           <span className="hidden sm:block text-slate-400 dark:text-slate-500 text-xs">

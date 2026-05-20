@@ -23,9 +23,9 @@ function generateAdvice(stats) {
 
   // Overall status
   if (overallPct >= 85) {
-    lines.push({ type: 'ok',   text: `Overall ${overallPct}% — well above both thresholds. Buffer: ${b85.canBunk} sessions at 85%, ${b75.canBunk} sessions at 75%.` });
+    lines.push({ type: 'ok',   text: `Overall ${overallPct}% — well above both thresholds. Flexibility: ${b85.canBunk} sessions at 85%, ${b75.canBunk} sessions at 75%.` });
   } else if (overallPct >= 75) {
-    lines.push({ type: 'warn', text: `Overall ${overallPct}% — safe at 75% but below 85%. Can skip ${b75.canBunk} more sessions before hitting 75%.` });
+    lines.push({ type: 'warn', text: `Overall ${overallPct}% — safe at 75% but below 85%. ${b75.canBunk} sessions of flexibility before hitting 75%.` });
   } else {
     lines.push({ type: 'bad',  text: `Overall ${overallPct}% — BELOW 75%. Must attend ${b75.needAttend} consecutive sessions to recover to 75%.` });
   }
@@ -35,19 +35,19 @@ function generateAdvice(stats) {
   for (const w of recent) {
     if (w.pct === 100) lines.push({ type: 'ok',   text: `Week ${w.week}: Perfect — ${w.present}/${w.total} (100%). Good buffer built.` });
     else if (w.pct < 60) lines.push({ type: 'bad',  text: `Week ${w.week}: Very low — ${w.present}/${w.total} (${w.pct}%). This week pulled the overall down.` });
-    else if (w.pct < 75) lines.push({ type: 'warn', text: `Week ${w.week}: Below threshold — ${w.present}/${w.total} (${w.pct}%). Avoid bunking this week.` });
+    else if (w.pct < 75) lines.push({ type: 'warn', text: `Week ${w.week}: Below threshold — ${w.present}/${w.total} (${w.pct}%). Prioritize attendance this week.` });
     else               lines.push({ type: 'info', text: `Week ${w.week}: ${w.present}/${w.total} (${w.pct}%) — on track.` });
   }
 
-  // Bunk strategy
+  // Attendance planning
   if (b75.canBunk >= 16) {
-    lines.push({ type: 'tip', text: `Strategy: ${b75.canBunk} slots of buffer (≈${Math.floor(b75.canBunk / 8)} full days). Spread them out — never skip more than 1 day per week.` });
+    lines.push({ type: 'tip', text: `Plan: ${b75.canBunk} sessions of flexibility (≈${Math.floor(b75.canBunk / 8)} full days). Spread them out — no more than 1 day per week.` });
   } else if (b75.canBunk >= 8) {
-    lines.push({ type: 'tip', text: `Strategy: ${b75.canBunk} slots left. Take at most 1 full day off, then attend everything for 2 weeks.` });
+    lines.push({ type: 'tip', text: `Plan: ${b75.canBunk} sessions of flexibility. Use at most 1 full day, then maintain full attendance for 2 weeks.` });
   } else if (b75.canBunk > 0) {
-    lines.push({ type: 'tip', text: `Strategy: Only ${b75.canBunk} slots to spare — skip individual slots (last of day), not full days.` });
+    lines.push({ type: 'tip', text: `Plan: Only ${b75.canBunk} sessions of flexibility — plan individual leaves carefully, avoid full days.` });
   } else if (b75.needAttend > 0) {
-    lines.push({ type: 'tip', text: `Recovery plan: Attend every session for the next ${Math.ceil(b75.needAttend / 8)} week${b75.needAttend > 8 ? 's' : ''} with zero bunks.` });
+    lines.push({ type: 'tip', text: `Recovery: Maintain full attendance for the next ${Math.ceil(b75.needAttend / 8)} week${b75.needAttend > 8 ? 's' : ''} to reach threshold.` });
   }
 
   return lines;
@@ -192,7 +192,7 @@ function CircleView({ members, stats, fetching, onAdd, onRemove, onSelect, onRef
                                 bg-white dark:bg-slate-800">
                   <div className="text-[10px] font-semibold text-slate-400 dark:text-slate-500
                                   uppercase tracking-wider mb-2">
-                    Bunk Calculator · {s.present}/{s.total} sessions
+                    Session Planner · {s.present}/{s.total} sessions
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     {[
@@ -293,7 +293,7 @@ function CircleView({ members, stats, fetching, onAdd, onRemove, onSelect, onRef
   );
 }
 
-// ── Bunk Calculator (manual + circle members) ─────────────────────────────────
+// ── Session Planner (manual + circle members) ─────────────────────────────────
 function BunkCalc({ members, stats, myRoll }) {
   const [mode, setMode]       = useState(members.length > 0 ? 'circle' : 'manual');
   const [selectedRoll, setSelectedRoll] = useState(myRoll || members[0] || '');
@@ -553,7 +553,7 @@ export default function AprameYaPage() {
 
   const TABS = [
     { key: 'circle',     label: 'Private Circle' },
-    { key: 'calculator', label: 'Bunk Calculator' },
+    { key: 'calculator', label: 'Session Planner' },
   ];
 
   return (
@@ -583,7 +583,7 @@ export default function AprameYaPage() {
                           rounded-lg p-4 mb-4 flex items-center gap-3">
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium text-slate-900 dark:text-slate-100 mb-1">Set your registration number</div>
-              <div className="text-xs text-slate-400">Auto-pull your own attendance in Bunk Calculator</div>
+              <div className="text-xs text-slate-400">Auto-pull your own attendance in Session Planner</div>
             </div>
             <input
               className="form-input w-40 text-xs"

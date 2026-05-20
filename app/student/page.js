@@ -18,9 +18,9 @@ function generateAdvice(present, total, overallPct, weeks = []) {
   const lines = [];
 
   if (overallPct >= 85) {
-    lines.push({ type: 'ok',   text: `Overall ${overallPct}% — well above both thresholds. Buffer: ${b85.canBunk} sessions at 85%, ${b75.canBunk} at 75%.` });
+    lines.push({ type: 'ok',   text: `Overall ${overallPct}% — well above both thresholds. Flexibility: ${b85.canBunk} sessions at 85%, ${b75.canBunk} at 75%.` });
   } else if (overallPct >= 75) {
-    lines.push({ type: 'warn', text: `Overall ${overallPct}% — safe at 75% but below 85%. You can skip ${b75.canBunk} more sessions before hitting 75%.` });
+    lines.push({ type: 'warn', text: `Overall ${overallPct}% — safe at 75% but below 85%. You have ${b75.canBunk} sessions of flexibility before hitting 75%.` });
   } else {
     lines.push({ type: 'bad',  text: `Overall ${overallPct}% — BELOW 75%. Attend ${b75.needAttend} consecutive sessions to recover.` });
   }
@@ -29,14 +29,14 @@ function generateAdvice(present, total, overallPct, weeks = []) {
   for (const w of recent) {
     if (w.pct === 100)   lines.push({ type: 'ok',   text: `Week ${w.week}: Perfect — ${w.present}/${w.total} (100%).` });
     else if (w.pct < 60) lines.push({ type: 'bad',  text: `Week ${w.week}: Very low — ${w.present}/${w.total} (${w.pct}%). This pulled your overall down.` });
-    else if (w.pct < 75) lines.push({ type: 'warn', text: `Week ${w.week}: Below threshold — ${w.present}/${w.total} (${w.pct}%). Don't skip this week.` });
+    else if (w.pct < 75) lines.push({ type: 'warn', text: `Week ${w.week}: Below threshold — ${w.present}/${w.total} (${w.pct}%). Prioritize attendance this week.` });
     else                 lines.push({ type: 'info', text: `Week ${w.week}: ${w.present}/${w.total} (${w.pct}%) — on track.` });
   }
 
-  if (b75.canBunk >= 16)      lines.push({ type: 'tip', text: `Strategy: ${b75.canBunk} slots of buffer (≈${Math.floor(b75.canBunk / 8)} full days). Spread them — never skip more than 1 day per week.` });
-  else if (b75.canBunk >= 8)  lines.push({ type: 'tip', text: `Strategy: ${b75.canBunk} slots left. Take at most 1 full day off, then attend everything for 2 weeks.` });
-  else if (b75.canBunk > 0)   lines.push({ type: 'tip', text: `Strategy: Only ${b75.canBunk} slots to spare — skip individual slots, not full days.` });
-  else if (b75.needAttend > 0) lines.push({ type: 'tip', text: `Recovery: Attend every session for the next ${Math.ceil(b75.needAttend / 8)} week${b75.needAttend > 8 ? 's' : ''} with zero skips.` });
+  if (b75.canBunk >= 16)      lines.push({ type: 'tip', text: `Plan: ${b75.canBunk} sessions of flexibility (≈${Math.floor(b75.canBunk / 8)} full days). Spread them — no more than 1 day per week.` });
+  else if (b75.canBunk >= 8)  lines.push({ type: 'tip', text: `Plan: ${b75.canBunk} sessions of flexibility. Use at most 1 full day, then maintain full attendance for 2 weeks.` });
+  else if (b75.canBunk > 0)   lines.push({ type: 'tip', text: `Plan: Only ${b75.canBunk} sessions of flexibility — plan individual leaves carefully, avoid full days.` });
+  else if (b75.needAttend > 0) lines.push({ type: 'tip', text: `Recovery: Maintain full attendance for the next ${Math.ceil(b75.needAttend / 8)} week${b75.needAttend > 8 ? 's' : ''} to reach threshold.` });
 
   return lines;
 }
@@ -108,7 +108,7 @@ export default function StudentPage() {
           <div className="flex items-center gap-2.5 mr-4">
             <div className="w-7 h-7 rounded flex items-center justify-center text-xs font-black
                             text-white shrink-0 bg-slate-800 dark:bg-slate-700">KL</div>
-            <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">CRT Attendance Portal</span>
+            <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">CRT Attendance Tracker</span>
           </div>
           <span className="hidden sm:block text-slate-300 dark:text-slate-600 text-xs mr-2">·</span>
           <span className="hidden sm:block text-xs text-slate-400 dark:text-slate-500">Y-23 Summer CRT Training</span>
@@ -167,10 +167,10 @@ export default function StudentPage() {
           ))}
         </div>
 
-        {/* Bunk Calculator */}
+        {/* Session Planner */}
         {stats.total > 0 && (
           <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-4">
-            <div className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-1">Bunk Calculator</div>
+            <div className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-1">Session Planner</div>
             <div className="text-xs text-slate-400 dark:text-slate-500 mb-3">
               {stats.present} present out of {stats.total} sessions
             </div>
@@ -186,7 +186,7 @@ export default function StudentPage() {
                   {data.canBunk > 0 ? (
                     <>
                       <div className="text-3xl font-bold text-green-600 dark:text-green-400">{data.canBunk}</div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">sessions you can skip</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">sessions of flexibility</div>
                       <div className="text-xs text-slate-400 dark:text-slate-500 mt-1.5">
                         ≈ {Math.floor(data.canBunk / 8)} day{Math.floor(data.canBunk / 8) !== 1 ? 's' : ''}
                         {data.canBunk % 8 > 0 ? ` + ${data.canBunk % 8} slot${data.canBunk % 8 !== 1 ? 's' : ''}` : ''}
@@ -275,6 +275,11 @@ export default function StudentPage() {
             </div>
           )}
         </div>
+
+        <p className="text-[10px] text-slate-300 dark:text-slate-600 text-center pb-6 leading-relaxed">
+          Not an official KL University platform.<br />
+          Made by a student of Y23 KL University with personal interest and easy tracking.
+        </p>
       </main>
     </div>
   );

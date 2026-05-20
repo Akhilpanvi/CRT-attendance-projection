@@ -28,7 +28,7 @@ function resetEmailTemplate({ name, rollNumber, resetLink, expiresIn }) {
               <td style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);
                          border-radius:6px;width:32px;height:32px;text-align:center;
                          vertical-align:middle;font-size:12px;font-weight:900;color:#ffffff;">KL</td>
-              <td style="padding-left:12px;color:#ffffff;font-size:14px;font-weight:600;">CRT Attendance Portal</td>
+              <td style="padding-left:12px;color:#ffffff;font-size:14px;font-weight:600;">CRT Attendance Tracker</td>
             </tr></table>
           </td>
         </tr>
@@ -74,7 +74,7 @@ function resetEmailTemplate({ name, rollNumber, resetLink, expiresIn }) {
         <tr>
           <td style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:16px 32px;">
             <p style="margin:0;font-size:11px;color:#94a3b8;text-align:center;">
-              KL University · CRT Attendance Portal · Y-23 Summer CRT Training
+              KL University · CRT Attendance Tracker · Y-23 Summer CRT Training
             </p>
           </td>
         </tr>

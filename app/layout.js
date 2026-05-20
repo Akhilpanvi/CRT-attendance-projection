@@ -1,8 +1,8 @@
 import './globals.css';
 
 export const metadata = {
-  title: 'CRT Attendance Portal — KL University',
-  description: '2023-27 Batch Y-23 Summer CRT Training',
+  title: 'CRT Attendance Tracker — KL University',
+  description: 'Y-23 Batch Summer CRT Training. Not an official KL University platform.',
 };
 
 export default function RootLayout({ children }) {

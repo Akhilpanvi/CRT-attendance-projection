@@ -71,9 +71,9 @@ export default function UpdatesPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
-        <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100">Portal Updates</h1>
+        <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100">Tracker Updates</h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-          Updates posted here appear on the login page for all students.
+          Updates posted here appear on the login page for all students to see.
         </p>
       </div>
 

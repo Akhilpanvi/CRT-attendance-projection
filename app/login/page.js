@@ -108,7 +108,11 @@ export default function LoginPage() {
           </div>
         )}
 
-        <p className="text-white/25 text-xs">© {new Date().getFullYear()} KL University</p>
+        <p className="text-white/25 text-[10px] leading-relaxed">
+          Not an official KL University platform.<br />
+          Made by a Y23 student with personal interest.<br />
+          © {new Date().getFullYear()} KL University
+        </p>
       </div>
 
       {/* Right — form */}
@@ -122,7 +126,7 @@ export default function LoginPage() {
             <div className="flex items-center gap-2 mb-8 lg:hidden">
               <div className="w-8 h-8 rounded flex items-center justify-center text-xs font-black
                               text-white bg-slate-800 dark:bg-slate-700">KL</div>
-              <span className="text-sm font-bold text-slate-900 dark:text-slate-100">CRT Attendance Portal</span>
+              <span className="text-sm font-bold text-slate-900 dark:text-slate-100">CRT Attendance Tracker</span>
             </div>
 
             <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-1">Sign in</h1>
@@ -239,6 +243,10 @@ export default function LoginPage() {
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-5 leading-relaxed">
               Students: use your registration number as username.<br />
               First-time login will prompt a password change.
+            </p>
+            <p className="text-[10px] text-slate-300 dark:text-slate-600 mt-4 leading-relaxed text-center">
+              Not an official KL University platform.<br />
+              Made by a student of Y23 KL University with personal interest and easy tracking.
             </p>
           </div>
         </div>
