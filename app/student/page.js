@@ -62,11 +62,18 @@ function PctBar({ pct }) {
   );
 }
 
+const UPDATE_COLORS = {
+  info:      { bar: 'bg-blue-400',  wrap: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800',  label: 'text-blue-500 dark:text-blue-400',  body: 'text-blue-700 dark:text-blue-300' },
+  warning:   { bar: 'bg-amber-400', wrap: 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800', label: 'text-amber-600 dark:text-amber-400', body: 'text-amber-700 dark:text-amber-300' },
+  important: { bar: 'bg-rose-400',  wrap: 'bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800',  label: 'text-rose-500 dark:text-rose-400',  body: 'text-rose-700 dark:text-rose-300' },
+};
+
 export default function StudentPage() {
   const router = useRouter();
   const [data, setData]       = useState(null);
   const [error, setError]     = useState('');
   const [loading, setLoading] = useState(true);
+  const [updates, setUpdates] = useState([]);
 
   useEffect(() => {
     fetch('/api/student/me')
@@ -74,6 +81,7 @@ export default function StudentPage() {
       .then(d => { if (d.error) setError(d.error); else setData(d); })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
+    fetch('/api/updates').then(r => r.json()).then(d => setUpdates(Array.isArray(d) ? d : [])).catch(() => {});
   }, []);
 
   async function logout() {
@@ -126,6 +134,27 @@ export default function StudentPage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-6 space-y-4">
+        {/* Updates banner */}
+        {updates.length > 0 && (
+          <div className="space-y-2">
+            {updates.map(u => {
+              const c = UPDATE_COLORS[u.category] || UPDATE_COLORS.info;
+              return (
+                <div key={u._id} className={`flex gap-3 rounded-lg border px-4 py-3 ${c.wrap}`}>
+                  <div className={`w-0.5 shrink-0 rounded-full self-stretch ${c.bar}`} />
+                  <div className="min-w-0">
+                    <span className={`text-[10px] font-bold uppercase tracking-wider mr-2 ${c.label}`}>
+                      {u.pinned ? '📌 ' : ''}{u.category === 'important' ? 'Important' : u.category === 'warning' ? 'Warning' : 'Info'}
+                    </span>
+                    {u.title && <span className={`text-xs font-semibold ${c.body}`}>{u.title} — </span>}
+                    <span className={`text-xs ${c.body}`}>{u.content}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
         {/* Profile */}
         <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-4">
           <div className="flex items-center gap-4">
