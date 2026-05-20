@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const CAT_COLOR = { info: '#3b82f6', warning: '#d97706', important: '#dc2626' };
 const CAT_LABEL = { info: 'Info', warning: 'Warning', important: 'Important' };
@@ -22,6 +23,16 @@ export default function LoginPage() {
   const [updates, setUpdates] = useState([]);
   useEffect(() => {
     fetch('/api/updates').then(r => r.json()).then(d => setUpdates(Array.isArray(d) ? d : [])).catch(() => {});
+  }, []);
+
+  const [isDark, setIsDark] = useState(true);
+  useEffect(() => {
+    const root = document.documentElement;
+    const update = () => setIsDark(root.classList.contains('dark'));
+    update();
+    const obs = new MutationObserver(update);
+    obs.observe(root, { attributes: true, attributeFilter: ['class'] });
+    return () => obs.disconnect();
   }, []);
 
   const [fpOpen,    setFpOpen]    = useState(false);
@@ -72,11 +83,15 @@ export default function LoginPage() {
     }
   }
 
+  const darkBg = 'radial-gradient(ellipse at 30% 60%, rgba(29,78,216,0.12) 0%, #080d1a 55%, #050810 100%)';
+
   return (
-    <div className="dark min-h-screen flex" style={{ background: 'radial-gradient(ellipse at 30% 60%, rgba(29,78,216,0.12) 0%, #080d1a 55%, #050810 100%)' }}>
+    <div className="min-h-screen flex" style={{ background: isDark ? darkBg : undefined }}
+         data-theme={isDark ? 'dark' : 'light'}>
       {/* Left panel */}
       <div className="hidden lg:flex flex-col justify-between w-[400px] shrink-0 p-10"
-           style={{ background: 'rgba(255,255,255,0.03)', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+           style={isDark ? { background: 'rgba(255,255,255,0.03)', borderRight: '1px solid rgba(255,255,255,0.06)' }
+                         : { background: '#1e293b', borderRight: '1px solid #334155' }}>
         <div>
           <div className="w-9 h-9 rounded flex items-center justify-center text-sm font-black text-white mb-8"
                style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)' }}>KL</div>
@@ -96,7 +111,10 @@ export default function LoginPage() {
       </div>
 
       {/* Right — form + updates */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col bg-slate-50 dark:bg-transparent">
+        <div className="flex justify-end p-4">
+          <ThemeToggle />
+        </div>
         <div className="flex-1 flex items-center justify-center gap-10 px-6 pb-12">
 
           {/* Login form */}
@@ -111,13 +129,17 @@ export default function LoginPage() {
             {/* Updates box — mobile only */}
             {updates.length > 0 && (
               <div className="lg:hidden mb-6 rounded-lg overflow-hidden"
-                   style={{ border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }}>
-                <div style={{ padding: '8px 14px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                   style={isDark
+                     ? { border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }
+                     : { border: '1px solid #e2e8f0', background: '#ffffff', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+                <div style={isDark
+                  ? { padding: '8px 14px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }
+                  : { padding: '8px 14px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#3b82f6' }} />
-                    <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Notices</span>
+                    <span style={{ color: isDark ? 'rgba(255,255,255,0.7)' : '#1e293b', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Notices</span>
                   </div>
-                  <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '10px' }}>{updates.length} item{updates.length !== 1 ? 's' : ''}</span>
+                  <span style={{ color: isDark ? 'rgba(255,255,255,0.25)' : '#94a3b8', fontSize: '10px' }}>{updates.length} item{updates.length !== 1 ? 's' : ''}</span>
                 </div>
                 <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
                   {updates.map((u, i) => {
@@ -125,12 +147,14 @@ export default function LoginPage() {
                     const cl = CAT_LABEL[u.category] || 'Info';
                     return (
                       <div key={u._id} style={{ display: 'flex', gap: '10px', padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.05)', alignItems: 'flex-start' }}>
-                        <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '10px', minWidth: '14px', paddingTop: '1px' }}>{i + 1}</span>
+                        <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '10px', minWidth: '14px', paddingTop: '2px' }}>{i + 1}</span>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <span style={{ fontSize: '9px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em', color: cc, background: `${cc}22`, padding: '1px 5px', borderRadius: '3px', display: 'inline-block', marginBottom: '3px' }}>{u.pinned ? '📌 ' : ''}{cl}</span>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                            <span style={{ fontSize: '9px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em', color: cc, background: `${cc}22`, padding: '1px 5px', borderRadius: '3px' }}>{u.pinned ? '📌 ' : ''}{cl}</span>
+                            <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '10px', whiteSpace: 'nowrap', flexShrink: 0 }}>{fmtDate(u.createdAt)}</span>
+                          </div>
                           {u.title && <p style={{ fontSize: '11px', fontWeight: '600', color: 'rgba(255,255,255,0.85)', marginBottom: '2px', lineHeight: '1.4' }}>{u.title}</p>}
                           <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{u.content}</p>
-                          <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.25)', marginTop: '3px' }}>{fmtDate(u.createdAt)}</p>
                         </div>
                       </div>
                     );
@@ -262,20 +286,26 @@ export default function LoginPage() {
           {/* Updates panel — desktop only, right of form */}
           {updates.length > 0 && (
             <div className="hidden lg:flex flex-col w-80 shrink-0 self-center rounded-lg overflow-hidden"
-                 style={{ border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }}>
+                 style={isDark
+                   ? { border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }
+                   : { border: '1px solid #e2e8f0', background: '#ffffff', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
               {/* Header */}
-              <div style={{ padding: '10px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={isDark
+                ? { padding: '10px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }
+                : { padding: '10px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
                   <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#3b82f6' }} />
-                  <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Notices</span>
+                  <span style={{ color: isDark ? 'rgba(255,255,255,0.7)' : '#1e293b', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Notices</span>
                 </div>
-                <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '10px' }}>Showing {updates.length}</span>
+                <span style={{ color: isDark ? 'rgba(255,255,255,0.25)' : '#94a3b8', fontSize: '10px' }}>Showing {updates.length}</span>
               </div>
               {/* Column labels */}
-              <div style={{ padding: '5px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', gap: '10px', background: 'rgba(255,255,255,0.02)' }}>
-                <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '10px', fontWeight: '600', minWidth: '16px' }}>#</span>
-                <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '10px', fontWeight: '600', flex: 1 }}>Subject / Notice</span>
-                <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '10px', fontWeight: '600', whiteSpace: 'nowrap' }}>Date</span>
+              <div style={isDark
+                ? { padding: '5px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', gap: '10px', background: 'rgba(255,255,255,0.02)' }
+                : { padding: '5px 16px', borderBottom: '1px solid #f1f5f9', display: 'flex', gap: '10px', background: '#f8fafc' }}>
+                <span style={{ color: isDark ? 'rgba(255,255,255,0.25)' : '#94a3b8', fontSize: '10px', fontWeight: '600', minWidth: '16px' }}>#</span>
+                <span style={{ color: isDark ? 'rgba(255,255,255,0.25)' : '#94a3b8', fontSize: '10px', fontWeight: '600', flex: 1 }}>Subject / Notice</span>
+                <span style={{ color: isDark ? 'rgba(255,255,255,0.25)' : '#94a3b8', fontSize: '10px', fontWeight: '600', whiteSpace: 'nowrap' }}>Date</span>
               </div>
               {/* Rows */}
               <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
@@ -283,14 +313,18 @@ export default function LoginPage() {
                   const cc = CAT_COLOR[u.category] || CAT_COLOR.info;
                   const cl = CAT_LABEL[u.category] || 'Info';
                   return (
-                    <div key={u._id} style={{ display: 'flex', gap: '10px', padding: '11px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', alignItems: 'flex-start' }}>
-                      <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '11px', minWidth: '16px', paddingTop: '1px' }}>{i + 1}</span>
+                    <div key={u._id} style={{ display: 'flex', gap: '10px', padding: '11px 16px', borderBottom: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid #f1f5f9', alignItems: 'flex-start' }}>
+                      <span style={{ color: isDark ? 'rgba(255,255,255,0.2)' : '#cbd5e1', fontSize: '11px', minWidth: '16px', paddingTop: '2px' }}>{i + 1}</span>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <span style={{ fontSize: '9px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em', color: cc, background: `${cc}22`, padding: '1px 6px', borderRadius: '3px', display: 'inline-block', marginBottom: '4px' }}>{u.pinned ? '📌 ' : ''}{cl}</span>
-                        {u.title && <p style={{ fontSize: '12px', fontWeight: '600', color: 'rgba(255,255,255,0.88)', marginBottom: '3px', lineHeight: '1.4' }}>{u.title}</p>}
-                        <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{u.content}</p>
+                        {/* Badge + date on same line */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '5px' }}>
+                          <span style={{ fontSize: '9px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em', color: cc, background: `${cc}22`, padding: '2px 6px', borderRadius: '3px' }}>{u.pinned ? '📌 ' : ''}{cl}</span>
+                          <span style={{ color: isDark ? 'rgba(255,255,255,0.25)' : '#94a3b8', fontSize: '10px', whiteSpace: 'nowrap', flexShrink: 0 }}>{fmtDate(u.createdAt)}</span>
+                        </div>
+                        {/* Title + content below, full width */}
+                        {u.title && <p style={{ fontSize: '12px', fontWeight: '600', color: isDark ? 'rgba(255,255,255,0.88)' : '#0f172a', marginBottom: '3px', lineHeight: '1.4' }}>{u.title}</p>}
+                        <p style={{ fontSize: '11px', color: isDark ? 'rgba(255,255,255,0.5)' : '#475569', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{u.content}</p>
                       </div>
-                      <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '10px', whiteSpace: 'nowrap', paddingTop: '1px', flexShrink: 0 }}>{fmtDate(u.createdAt)}</span>
                     </div>
                   );
                 })}
