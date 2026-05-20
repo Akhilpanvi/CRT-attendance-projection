@@ -40,6 +40,11 @@ export default function LoginPage() {
   const [fpLoading, setFpLoading] = useState(false);
   const [fpMsg,     setFpMsg]     = useState('');  // '' | 'sent' | error string
 
+  const [fbOpen,    setFbOpen]    = useState(false);
+  const [fbMsg,     setFbMsg]     = useState('');
+  const [fbLoading, setFbLoading] = useState(false);
+  const [fbStatus,  setFbStatus]  = useState('');  // '' | 'sent' | error string
+
   async function handleForgotPassword(e) {
     e.preventDefault();
     if (!fpRoll.trim()) return;
@@ -58,6 +63,28 @@ export default function LoginPage() {
       setFpMsg(e.message || 'Something went wrong. Try again.');
     } finally {
       setFpLoading(false);
+    }
+  }
+
+  async function handleFeedback(e) {
+    e.preventDefault();
+    if (!fbMsg.trim()) return;
+    setFbLoading(true);
+    setFbStatus('');
+    try {
+      const r = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: fbMsg.trim() }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error);
+      setFbStatus('sent');
+      setFbMsg('');
+    } catch (e) {
+      setFbStatus(e.message || 'Failed to send. Try again.');
+    } finally {
+      setFbLoading(false);
     }
   }
 
@@ -293,7 +320,83 @@ export default function LoginPage() {
               <a href="/terms" className="text-[10px] transition-colors" style={{ color: isDark ? 'rgba(255,255,255,0.25)' : '#94a3b8' }}>
                 Terms of Service
               </a>
+              <span style={{ color: isDark ? 'rgba(255,255,255,0.15)' : '#cbd5e1', fontSize: '10px' }}>·</span>
+              <button
+                type="button"
+                onClick={() => { setFbOpen(o => !o); setFbStatus(''); setFbMsg(''); }}
+                className="text-[10px] transition-colors"
+                style={{ color: isDark ? 'rgba(255,255,255,0.25)' : '#94a3b8' }}>
+                Feedback
+              </button>
             </div>
+
+            {/* Feedback panel */}
+            {fbOpen && (
+              <div className="mt-3 rounded-lg p-4"
+                   style={isDark
+                     ? { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }
+                     : { background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                {fbStatus === 'sent' ? (
+                  <div className="text-center py-1">
+                    <p className="text-sm font-semibold mb-1" style={{ color: isDark ? '#4ade80' : '#16a34a' }}>
+                      Thank you for your feedback!
+                    </p>
+                    <p className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.45)' : '#64748b' }}>
+                      Your response has been recorded anonymously.
+                    </p>
+                    <button
+                      onClick={() => { setFbOpen(false); setFbStatus(''); }}
+                      className="mt-3 text-xs transition-colors"
+                      style={{ color: isDark ? 'rgba(255,255,255,0.4)' : '#94a3b8' }}>
+                      Close
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleFeedback} className="space-y-3">
+                    <p className="text-xs font-semibold" style={{ color: isDark ? '#ffffff' : '#0f172a' }}>
+                      Send anonymous feedback
+                    </p>
+                    <p className="text-xs leading-relaxed" style={{ color: isDark ? 'rgba(255,255,255,0.45)' : '#64748b' }}>
+                      Share your thoughts or suggestions — no details needed.
+                    </p>
+                    <textarea
+                      rows={4}
+                      maxLength={1000}
+                      placeholder="Your review or suggestion…"
+                      value={fbMsg}
+                      onChange={e => setFbMsg(e.target.value)}
+                      className="form-input resize-none"
+                      style={{ fontSize: '13px' }}
+                    />
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px]" style={{ color: isDark ? 'rgba(255,255,255,0.25)' : '#94a3b8' }}>
+                        {fbMsg.length}/1000
+                      </span>
+                      {fbStatus && fbStatus !== 'sent' && (
+                        <p className="text-[11px] text-red-400">{fbStatus}</p>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="submit"
+                        disabled={fbLoading || !fbMsg.trim()}
+                        className="btn-primary flex-1 justify-center py-2 text-xs">
+                        {fbLoading ? 'Sending…' : 'Submit'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setFbOpen(false); setFbStatus(''); setFbMsg(''); }}
+                        className="px-3 py-2 text-xs rounded-md transition-colors"
+                        style={isDark
+                          ? { border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.6)' }
+                          : { border: '1px solid #e2e8f0', color: '#64748b' }}>
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Updates panel — desktop only, right of form */}
