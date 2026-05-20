@@ -10,6 +10,32 @@ export default function LoginPage() {
   const [error, setError]       = useState('');
   const [loading, setLoading]   = useState(false);
 
+  const [fpOpen,    setFpOpen]    = useState(false);
+  const [fpRoll,    setFpRoll]    = useState('');
+  const [fpLoading, setFpLoading] = useState(false);
+  const [fpMsg,     setFpMsg]     = useState('');  // '' | 'sent' | error string
+
+  async function handleForgotPassword(e) {
+    e.preventDefault();
+    if (!fpRoll.trim()) return;
+    setFpLoading(true);
+    setFpMsg('');
+    try {
+      const r = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rollNumber: fpRoll.trim() }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error);
+      setFpMsg('sent');
+    } catch (e) {
+      setFpMsg(e.message || 'Something went wrong. Try again.');
+    } finally {
+      setFpLoading(false);
+    }
+  }
+
   async function handleLogin(e) {
     e.preventDefault();
     setError('');
@@ -84,14 +110,13 @@ export default function LoginPage() {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="form-label mb-0">Password</label>
-                  <a
-                    href="https://forms.gle/tkna6132vDuLsTYV8"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    type="button"
+                    onClick={() => { setFpOpen(o => !o); setFpMsg(''); setFpRoll(''); }}
                     className="text-xs text-slate-400 dark:text-slate-500
                                hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
                     Forgot password?
-                  </a>
+                  </button>
                 </div>
                 <input
                   className="form-input"
@@ -116,6 +141,65 @@ export default function LoginPage() {
                 {loading ? 'Signing in…' : 'Sign In'}
               </button>
             </form>
+
+            {/* Forgot-password panel */}
+            {fpOpen && (
+              <div className="mt-4 rounded-lg border border-slate-200 dark:border-slate-700
+                              bg-slate-50 dark:bg-slate-800/50 p-4">
+                {fpMsg === 'sent' ? (
+                  <div className="text-center">
+                    <p className="text-sm font-semibold text-green-600 dark:text-green-400 mb-1">
+                      Request sent!
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                      A confirmation has been sent to your KL University email.
+                      The admin will reset your password shortly.
+                    </p>
+                    <button
+                      onClick={() => { setFpOpen(false); setFpMsg(''); setFpRoll(''); }}
+                      className="mt-3 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                      Close
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleForgotPassword} className="space-y-3">
+                    <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      Reset password request
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                      Enter your registration number / username. A reset request will be sent to your
+                      KL University email and the admin will be notified.
+                    </p>
+                    <input
+                      className="form-input"
+                      placeholder="Registration number / username"
+                      value={fpRoll}
+                      onChange={e => setFpRoll(e.target.value)}
+                      autoFocus
+                    />
+                    {fpMsg && fpMsg !== 'sent' && (
+                      <p className="text-xs text-red-500 dark:text-red-400">{fpMsg}</p>
+                    )}
+                    <div className="flex gap-2">
+                      <button
+                        type="submit"
+                        disabled={fpLoading || !fpRoll.trim()}
+                        className="btn-primary flex-1 justify-center py-2 text-xs">
+                        {fpLoading ? 'Sending…' : 'Send request'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setFpOpen(false); setFpMsg(''); setFpRoll(''); }}
+                        className="px-3 py-2 text-xs rounded-md border border-slate-200 dark:border-slate-600
+                                   text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700
+                                   transition-colors">
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            )}
 
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-5 leading-relaxed">
               Students: use your registration number as username.<br />
