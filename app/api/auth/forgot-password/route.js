@@ -105,7 +105,7 @@ export async function POST(request) {
     // Always return success to prevent reg-number enumeration
     if (student && user) {
       const token  = crypto.randomBytes(32).toString('hex');
-      const expiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+      const expiry = new Date(Date.now() + 2 * 60 * 1000); // 2 minutes
 
       user.resetToken       = token;
       user.resetTokenExpiry = expiry;
@@ -118,7 +118,7 @@ export async function POST(request) {
         name:       student.name,
         rollNumber: roll,
         resetLink,
-        expiresIn:  '1 hour',
+        expiresIn:  '2 minutes',
       });
 
       const resend = new Resend(process.env.RESEND_API_KEY);
