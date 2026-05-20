@@ -3,6 +3,8 @@ import { connectDB } from '@/lib/mongodb';
 import Update from '@/lib/models/Update';
 import { getSession } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+
 async function adminOnly() {
   const session = await getSession();
   if (!session || session.role !== 'admin') return null;
