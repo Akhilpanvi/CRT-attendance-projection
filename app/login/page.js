@@ -1,7 +1,13 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
+
+const UPDATE_STYLES = {
+  info:      { bar: 'bg-blue-400',  text: 'text-blue-200',  label: 'Info' },
+  warning:   { bar: 'bg-amber-400', text: 'text-amber-200', label: 'Warning' },
+  important: { bar: 'bg-rose-400',  text: 'text-rose-200',  label: 'Important' },
+};
 
 export default function LoginPage() {
   const router = useRouter();
@@ -9,6 +15,11 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError]       = useState('');
   const [loading, setLoading]   = useState(false);
+
+  const [updates, setUpdates] = useState([]);
+  useEffect(() => {
+    fetch('/api/updates').then(r => r.json()).then(d => setUpdates(Array.isArray(d) ? d : [])).catch(() => {});
+  }, []);
 
   const [fpOpen,    setFpOpen]    = useState(false);
   const [fpRoll,    setFpRoll]    = useState('');
@@ -74,6 +85,29 @@ export default function LoginPage() {
             Y-23 Summer CRT Training
           </p>
         </div>
+        {updates.length > 0 && (
+          <div className="my-6 space-y-2 max-h-64 overflow-y-auto pr-1">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40 mb-2">
+              Updates
+            </p>
+            {updates.map(u => {
+              const s = UPDATE_STYLES[u.type] || UPDATE_STYLES.info;
+              return (
+                <div key={u._id} className="flex gap-2.5 rounded-md bg-white/5 border border-white/10 p-3">
+                  <div className={`w-0.5 shrink-0 rounded-full mt-0.5 ${s.bar}`} />
+                  <div className="min-w-0">
+                    <div className={`text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${s.text}`}>
+                      {u.pinned ? '📌 ' : ''}{s.label}
+                    </div>
+                    {u.title && <p className="text-xs font-semibold text-white leading-snug mb-0.5">{u.title}</p>}
+                    <p className="text-xs text-white/65 leading-relaxed whitespace-pre-wrap">{u.content}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
         <p className="text-white/25 text-xs">© {new Date().getFullYear()} KL University</p>
       </div>
 
