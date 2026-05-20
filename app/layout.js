@@ -1,4 +1,5 @@
 import './globals.css';
+import { Analytics } from '@vercel/analytics/next';
 
 export const metadata = {
   title: 'CRT Attendance Portal — KL University',
@@ -20,6 +21,7 @@ export default function RootLayout({ children }) {
       </head>
       <body className="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100">
         {children}
+        <Analytics />
       </body>
     </html>
   );
