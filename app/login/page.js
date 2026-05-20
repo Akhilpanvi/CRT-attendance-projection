@@ -92,13 +92,15 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {/* Right — form */}
+      {/* Right — form + updates */}
       <div className="flex-1 flex flex-col">
         <div className="flex justify-end p-4">
           <ThemeToggle />
         </div>
-        <div className="flex-1 flex items-center justify-center px-6 pb-12">
-          <div className="w-full max-w-sm">
+        <div className="flex-1 flex items-center justify-center gap-10 px-6 pb-12">
+
+          {/* Login form */}
+          <div className="w-full max-w-sm shrink-0">
             {/* Mobile logo */}
             <div className="flex items-center gap-2 mb-8 lg:hidden">
               <div className="w-8 h-8 rounded flex items-center justify-center text-xs font-black
@@ -106,17 +108,16 @@ export default function LoginPage() {
               <span className="text-sm font-bold text-slate-900 dark:text-slate-100">CRT Attendance Tracker</span>
             </div>
 
-            {/* Updates box */}
+            {/* Updates box — mobile only (shown above form on small screens) */}
             {updates.length > 0 && (
-              <div className="mb-6 space-y-2 max-h-52 overflow-y-auto">
+              <div className="lg:hidden mb-6 space-y-2 max-h-48 overflow-y-auto">
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">
                   Updates
                 </p>
                 {updates.map(u => {
                   const s = UPDATE_STYLES[u.type] || UPDATE_STYLES.info;
                   return (
-                    <div key={u._id}
-                         className={`flex gap-2.5 rounded-lg border p-3 ${s.card}`}>
+                    <div key={u._id} className={`flex gap-2.5 rounded-lg border p-3 ${s.card}`}>
                       <div className={`w-0.5 shrink-0 rounded-full ${s.bar}`} />
                       <div className="min-w-0">
                         <div className={`text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${s.label}`}>
@@ -251,6 +252,33 @@ export default function LoginPage() {
               Made by a student of Y23 KL University with personal interest and easy tracking.
             </p>
           </div>
+
+          {/* Updates panel — desktop only, right of form */}
+          {updates.length > 0 && (
+            <div className="hidden lg:flex flex-col w-72 shrink-0 self-center">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">
+                Updates
+              </p>
+              <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+                {updates.map(u => {
+                  const s = UPDATE_STYLES[u.type] || UPDATE_STYLES.info;
+                  return (
+                    <div key={u._id} className={`flex gap-2.5 rounded-lg border p-3 ${s.card}`}>
+                      <div className={`w-0.5 shrink-0 rounded-full ${s.bar}`} />
+                      <div className="min-w-0">
+                        <div className={`text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${s.label}`}>
+                          {u.pinned ? '📌 ' : ''}{s.labelText}
+                        </div>
+                        {u.title && <p className={`text-xs font-semibold leading-snug mb-0.5 ${s.title}`}>{u.title}</p>}
+                        <p className={`text-xs leading-relaxed whitespace-pre-wrap ${s.body}`}>{u.content}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
     </div>
