@@ -131,7 +131,7 @@ export default function UpdatesPage() {
           <p className="text-sm text-slate-400 text-center py-8">No updates posted yet.</p>
         ) : updates.map(u => (
           <div key={u._id}
-               className={`rounded-lg border p-4 ${CAT_STYLES[u.category] || TYPE_STYLES.info}`}>
+               className={`rounded-lg border p-4 ${CAT_STYLES[u.category] || CAT_STYLES.info}`}>
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap mb-1">
