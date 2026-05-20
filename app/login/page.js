@@ -281,6 +281,19 @@ export default function LoginPage() {
               Not an official KL University platform.<br />
               Made by a student of Y23 KL University with personal interest and easy tracking.
             </p>
+            <div className="flex items-center justify-center gap-3 mt-3">
+              <a href="/privacy" className="text-[10px] transition-colors" style={{ color: 'rgba(255,255,255,0.25)' }}
+                 onMouseOver={e => e.target.style.color = 'rgba(255,255,255,0.6)'}
+                 onMouseOut={e => e.target.style.color = 'rgba(255,255,255,0.25)'}>
+                Privacy Policy
+              </a>
+              <span style={{ color: 'rgba(255,255,255,0.15)', fontSize: '10px' }}>·</span>
+              <a href="/terms" className="text-[10px] transition-colors" style={{ color: 'rgba(255,255,255,0.25)' }}
+                 onMouseOver={e => e.target.style.color = 'rgba(255,255,255,0.6)'}
+                 onMouseOut={e => e.target.style.color = 'rgba(255,255,255,0.25)'}>
+                Terms of Service
+              </a>
+            </div>
           </div>
 
           {/* Updates panel — desktop only, right of form */}
