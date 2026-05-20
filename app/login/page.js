@@ -3,11 +3,15 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
 
-const UPDATE_STYLES = {
-  info:      { bar: 'bg-blue-400',  card: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800',  label: 'text-blue-500 dark:text-blue-400',  title: 'text-blue-800 dark:text-blue-200',  body: 'text-blue-700 dark:text-blue-300',  labelText: 'Info' },
-  warning:   { bar: 'bg-amber-400', card: 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800', label: 'text-amber-600 dark:text-amber-400', title: 'text-amber-800 dark:text-amber-200', body: 'text-amber-700 dark:text-amber-300', labelText: 'Warning' },
-  important: { bar: 'bg-rose-400',  card: 'bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800',  label: 'text-rose-500 dark:text-rose-400',  title: 'text-rose-800 dark:text-rose-200',  body: 'text-rose-700 dark:text-rose-300',  labelText: 'Important' },
-};
+const CAT_COLOR = { info: '#3b82f6', warning: '#d97706', important: '#dc2626' };
+const CAT_LABEL = { info: 'Info', warning: 'Warning', important: 'Important' };
+
+function fmtDate(d) {
+  return new Date(d).toLocaleString('en-IN', {
+    timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short',
+    year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true,
+  });
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -108,27 +112,31 @@ export default function LoginPage() {
               <span className="text-sm font-bold text-white">CRT Attendance Tracker</span>
             </div>
 
-            {/* Updates box — mobile only (shown above form on small screens) */}
+            {/* Updates box — mobile only */}
             {updates.length > 0 && (
-              <div className="lg:hidden mb-6 space-y-2 max-h-48 overflow-y-auto">
-                <p className="text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                  Updates
-                </p>
-                {updates.map(u => {
-                  const s = UPDATE_STYLES[u.category] || UPDATE_STYLES.info;
-                  return (
-                    <div key={u._id} className={`flex gap-2.5 rounded-lg border p-3 ${s.card}`}>
-                      <div className={`w-0.5 shrink-0 rounded-full ${s.bar}`} />
-                      <div className="min-w-0">
-                        <div className={`text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${s.label}`}>
-                          {u.pinned ? '📌 ' : ''}{s.labelText}
+              <div className="lg:hidden mb-6 rounded-lg overflow-hidden"
+                   style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}>
+                <div style={{ background: '#1e293b', padding: '8px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#fff', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Notices</span>
+                  <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>{updates.length} item{updates.length !== 1 ? 's' : ''}</span>
+                </div>
+                <div style={{ background: '#ffffff', maxHeight: '200px', overflowY: 'auto' }}>
+                  {updates.map((u, i) => {
+                    const cc = CAT_COLOR[u.category] || CAT_COLOR.info;
+                    const cl = CAT_LABEL[u.category] || 'Info';
+                    return (
+                      <div key={u._id} style={{ display: 'flex', gap: '10px', padding: '10px 14px', borderBottom: '1px solid #f1f5f9', alignItems: 'flex-start' }}>
+                        <span style={{ color: '#94a3b8', fontSize: '10px', minWidth: '14px', paddingTop: '1px' }}>{i + 1}</span>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <span style={{ fontSize: '9px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em', color: cc, background: `${cc}18`, padding: '1px 5px', borderRadius: '3px', display: 'inline-block', marginBottom: '3px' }}>{u.pinned ? '📌 ' : ''}{cl}</span>
+                          {u.title && <p style={{ fontSize: '11px', fontWeight: '600', color: '#0f172a', marginBottom: '2px', lineHeight: '1.4' }}>{u.title}</p>}
+                          <p style={{ fontSize: '11px', color: '#475569', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{u.content}</p>
+                          <p style={{ fontSize: '10px', color: '#94a3b8', marginTop: '3px' }}>{fmtDate(u.createdAt)}</p>
                         </div>
-                        {u.title && <p className={`text-xs font-semibold leading-snug mb-0.5 ${s.title}`}>{u.title}</p>}
-                        <p className={`text-xs leading-relaxed whitespace-pre-wrap ${s.body}`}>{u.content}</p>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             )}
 
@@ -254,23 +262,38 @@ export default function LoginPage() {
 
           {/* Updates panel — desktop only, right of form */}
           {updates.length > 0 && (
-            <div className="hidden lg:flex flex-col w-72 shrink-0 self-center">
-              <p className="text-[10px] font-semibold uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                Updates
-              </p>
-              <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
-                {updates.map(u => {
-                  const s = UPDATE_STYLES[u.category] || UPDATE_STYLES.info;
+            <div className="hidden lg:flex flex-col w-80 shrink-0 self-center rounded-lg overflow-hidden"
+                 style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
+              {/* Header */}
+              <div style={{ background: '#1e293b', padding: '11px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#3b82f6' }} />
+                  <span style={{ color: '#ffffff', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Notices</span>
+                </div>
+                <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>Showing {updates.length}</span>
+              </div>
+              {/* Column header row */}
+              <div style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', padding: '6px 18px', display: 'flex', gap: '10px' }}>
+                <span style={{ color: '#94a3b8', fontSize: '10px', fontWeight: '600', minWidth: '16px' }}>#</span>
+                <span style={{ color: '#94a3b8', fontSize: '10px', fontWeight: '600', flex: 1 }}>Subject / Notice</span>
+                <span style={{ color: '#94a3b8', fontSize: '10px', fontWeight: '600', whiteSpace: 'nowrap' }}>Date</span>
+              </div>
+              {/* Rows */}
+              <div style={{ background: '#ffffff', maxHeight: '400px', overflowY: 'auto' }}>
+                {updates.map((u, i) => {
+                  const cc = CAT_COLOR[u.category] || CAT_COLOR.info;
+                  const cl = CAT_LABEL[u.category] || 'Info';
                   return (
-                    <div key={u._id} className={`flex gap-2.5 rounded-lg border p-3 ${s.card}`}>
-                      <div className={`w-0.5 shrink-0 rounded-full ${s.bar}`} />
-                      <div className="min-w-0">
-                        <div className={`text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${s.label}`}>
-                          {u.pinned ? '📌 ' : ''}{s.labelText}
+                    <div key={u._id} style={{ display: 'flex', gap: '10px', padding: '12px 18px', borderBottom: '1px solid #f1f5f9', alignItems: 'flex-start' }}>
+                      <span style={{ color: '#cbd5e1', fontSize: '11px', fontWeight: '500', minWidth: '16px', paddingTop: '2px' }}>{i + 1}</span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '9px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em', color: cc, background: `${cc}18`, padding: '2px 6px', borderRadius: '3px' }}>{u.pinned ? '📌 ' : ''}{cl}</span>
                         </div>
-                        {u.title && <p className={`text-xs font-semibold leading-snug mb-0.5 ${s.title}`}>{u.title}</p>}
-                        <p className={`text-xs leading-relaxed whitespace-pre-wrap ${s.body}`}>{u.content}</p>
+                        {u.title && <p style={{ fontSize: '12px', fontWeight: '600', color: '#0f172a', marginBottom: '3px', lineHeight: '1.4' }}>{u.title}</p>}
+                        <p style={{ fontSize: '11px', color: '#475569', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{u.content}</p>
                       </div>
+                      <span style={{ color: '#94a3b8', fontSize: '10px', whiteSpace: 'nowrap', paddingTop: '2px', flexShrink: 0 }}>{fmtDate(u.createdAt)}</span>
                     </div>
                   );
                 })}
