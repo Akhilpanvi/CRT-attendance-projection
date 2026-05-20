@@ -241,6 +241,86 @@ export default function LoginPage() {
               </button>
             </form>
 
+            {/* Feedback trigger */}
+            <button
+              type="button"
+              onClick={() => { setFbOpen(o => !o); setFbStatus(''); setFbMsg(''); }}
+              className="w-full mt-3 flex items-center gap-2 px-3 py-2.5 rounded-lg text-xs transition-colors"
+              style={isDark
+                ? { border: '1px dashed rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.45)', background: 'rgba(255,255,255,0.02)' }
+                : { border: '1px dashed #cbd5e1', color: '#64748b', background: '#f8fafc' }}>
+              <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+              </svg>
+              <span>Have a suggestion or feedback? Share it here</span>
+              <svg className="w-3 h-3 shrink-0 ml-auto transition-transform" style={{ transform: fbOpen ? 'rotate(180deg)' : 'none' }}
+                   fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {/* Feedback panel */}
+            {fbOpen && (
+              <div className="rounded-b-lg px-4 pb-4 pt-3"
+                   style={isDark
+                     ? { border: '1px dashed rgba(255,255,255,0.15)', borderTop: 'none', background: 'rgba(255,255,255,0.02)' }
+                     : { border: '1px dashed #cbd5e1', borderTop: 'none', background: '#f8fafc' }}>
+                {fbStatus === 'sent' ? (
+                  <div className="text-center py-2">
+                    <p className="text-sm font-semibold mb-1" style={{ color: isDark ? '#4ade80' : '#16a34a' }}>
+                      Thank you for your feedback!
+                    </p>
+                    <p className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.45)' : '#64748b' }}>
+                      Your response has been recorded anonymously.
+                    </p>
+                    <button
+                      onClick={() => { setFbOpen(false); setFbStatus(''); }}
+                      className="mt-3 text-xs transition-colors"
+                      style={{ color: isDark ? 'rgba(255,255,255,0.4)' : '#94a3b8' }}>
+                      Close
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleFeedback} className="space-y-3">
+                    <textarea
+                      rows={3}
+                      maxLength={1000}
+                      placeholder="Your review or suggestion — no details needed…"
+                      value={fbMsg}
+                      onChange={e => setFbMsg(e.target.value)}
+                      className="form-input resize-none"
+                      style={{ fontSize: '13px' }}
+                    />
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px]" style={{ color: isDark ? 'rgba(255,255,255,0.25)' : '#94a3b8' }}>
+                        {fbMsg.length}/1000
+                      </span>
+                      {fbStatus && fbStatus !== 'sent' && (
+                        <p className="text-[11px] text-red-400">{fbStatus}</p>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="submit"
+                        disabled={fbLoading || !fbMsg.trim()}
+                        className="btn-primary flex-1 justify-center py-2 text-xs">
+                        {fbLoading ? 'Sending…' : 'Submit'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setFbOpen(false); setFbStatus(''); setFbMsg(''); }}
+                        className="px-3 py-2 text-xs rounded-md transition-colors"
+                        style={isDark
+                          ? { border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.6)' }
+                          : { border: '1px solid #e2e8f0', color: '#64748b' }}>
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            )}
+
             {/* Forgot-password panel */}
             {fpOpen && (
               <div className="mt-4 rounded-lg p-4"
@@ -320,83 +400,7 @@ export default function LoginPage() {
               <a href="/terms" className="text-[10px] transition-colors" style={{ color: isDark ? 'rgba(255,255,255,0.25)' : '#94a3b8' }}>
                 Terms of Service
               </a>
-              <span style={{ color: isDark ? 'rgba(255,255,255,0.15)' : '#cbd5e1', fontSize: '10px' }}>·</span>
-              <button
-                type="button"
-                onClick={() => { setFbOpen(o => !o); setFbStatus(''); setFbMsg(''); }}
-                className="text-[10px] transition-colors"
-                style={{ color: isDark ? 'rgba(255,255,255,0.25)' : '#94a3b8' }}>
-                Feedback
-              </button>
             </div>
-
-            {/* Feedback panel */}
-            {fbOpen && (
-              <div className="mt-3 rounded-lg p-4"
-                   style={isDark
-                     ? { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }
-                     : { background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                {fbStatus === 'sent' ? (
-                  <div className="text-center py-1">
-                    <p className="text-sm font-semibold mb-1" style={{ color: isDark ? '#4ade80' : '#16a34a' }}>
-                      Thank you for your feedback!
-                    </p>
-                    <p className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.45)' : '#64748b' }}>
-                      Your response has been recorded anonymously.
-                    </p>
-                    <button
-                      onClick={() => { setFbOpen(false); setFbStatus(''); }}
-                      className="mt-3 text-xs transition-colors"
-                      style={{ color: isDark ? 'rgba(255,255,255,0.4)' : '#94a3b8' }}>
-                      Close
-                    </button>
-                  </div>
-                ) : (
-                  <form onSubmit={handleFeedback} className="space-y-3">
-                    <p className="text-xs font-semibold" style={{ color: isDark ? '#ffffff' : '#0f172a' }}>
-                      Send anonymous feedback
-                    </p>
-                    <p className="text-xs leading-relaxed" style={{ color: isDark ? 'rgba(255,255,255,0.45)' : '#64748b' }}>
-                      Share your thoughts or suggestions — no details needed.
-                    </p>
-                    <textarea
-                      rows={4}
-                      maxLength={1000}
-                      placeholder="Your review or suggestion…"
-                      value={fbMsg}
-                      onChange={e => setFbMsg(e.target.value)}
-                      className="form-input resize-none"
-                      style={{ fontSize: '13px' }}
-                    />
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px]" style={{ color: isDark ? 'rgba(255,255,255,0.25)' : '#94a3b8' }}>
-                        {fbMsg.length}/1000
-                      </span>
-                      {fbStatus && fbStatus !== 'sent' && (
-                        <p className="text-[11px] text-red-400">{fbStatus}</p>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        type="submit"
-                        disabled={fbLoading || !fbMsg.trim()}
-                        className="btn-primary flex-1 justify-center py-2 text-xs">
-                        {fbLoading ? 'Sending…' : 'Submit'}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => { setFbOpen(false); setFbStatus(''); setFbMsg(''); }}
-                        className="px-3 py-2 text-xs rounded-md transition-colors"
-                        style={isDark
-                          ? { border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.6)' }
-                          : { border: '1px solid #e2e8f0', color: '#64748b' }}>
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
-                )}
-              </div>
-            )}
           </div>
 
           {/* Updates panel — desktop only, right of form */}
