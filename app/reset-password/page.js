@@ -48,7 +48,7 @@ function ResetPasswordForm() {
           <div className="w-9 h-9 rounded bg-white/15 border border-white/20 flex items-center
                           justify-center text-sm font-black text-white mb-8">KL</div>
           <h2 className="text-2xl font-bold text-white leading-snug">
-            CRT Attendance<br />Portal
+            CRT Attendance<br />Tracker
           </h2>
           <p className="text-white/50 text-sm mt-2">
             KL University · 2023-27 Batch<br />
@@ -126,6 +126,13 @@ function ResetPasswordForm() {
                   {loading ? 'Updating…' : 'Update Password'}
                 </button>
               </form>
+
+              <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-4 flex items-start gap-1.5 leading-relaxed">
+                <svg className="w-3.5 h-3.5 shrink-0 mt-0.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                Passwords are stored as encrypted hashes — never in plain text. Your privacy, our priority.
+              </p>
 
               <p className="text-xs text-slate-400 dark:text-slate-500 mt-4 text-center">
                 <a href="/login" className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
