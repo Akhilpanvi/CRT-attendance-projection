@@ -232,7 +232,7 @@ export default function PrivacyPage() {
                 </p>
                 <p>
                   There is no automated data purge after the programme concludes. Requests for data deletion
-                  must be directed to the CRT admin.
+                  can be submitted to <a href="mailto:support@kluniversity.me" className="underline underline-offset-2">support@kluniversity.me</a>.
                 </p>
               </div>
             </section>
@@ -247,7 +247,7 @@ export default function PrivacyPage() {
                   {[
                     'Change your account password at any time from the student dashboard.',
                     'Know what data is associated with your account — your dashboard reflects all stored records.',
-                    'Request deletion of your account and associated data by contacting the CRT admin.',
+                    'Request deletion of your account and associated data by writing to support@kluniversity.me.',
                     'Discontinue use of this tracker at any time. Use is entirely voluntary.',
                   ].map((r, i) => (
                     <li key={i} className="flex items-start gap-3">
@@ -263,11 +263,18 @@ export default function PrivacyPage() {
 
             <section id="contact">
               <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-4">Contact</h2>
-              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                This platform is maintained by a Y-23 student of KL University. It has no formal support
-                channel. For concerns regarding your data, account access, or this privacy policy, contact
-                the CRT admin directly through your institution.
-              </p>
+              <div className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed space-y-3">
+                <p>
+                  This platform is built and maintained by a Y-23 student of KL University. For any questions,
+                  data requests, or concerns regarding this privacy policy, reach out at:
+                </p>
+                <p>
+                  <a href="mailto:support@kluniversity.me"
+                     className="font-medium text-slate-800 dark:text-slate-200 underline underline-offset-2">
+                    support@kluniversity.me
+                  </a>
+                </p>
+              </div>
             </section>
 
           </div>

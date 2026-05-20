@@ -106,7 +106,7 @@ export default function TermsPage() {
                   {[
                     'Y-23 batch students of KL University enrolled in the Summer CRT Training',
                     'CRT administrative staff responsible for attendance management',
-                    'Authorised users with credentials issued by the admin',
+                    'Authorised users with credentials issued by the platform maintainer',
                   ].map((r, i) => (
                     <li key={i} className="flex items-start gap-3">
                       <span className="mt-1.5 w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-500 shrink-0" />
@@ -131,7 +131,7 @@ export default function TermsPage() {
                   'You will not attempt to access, view, or modify any other student\'s data or account.',
                   'You will not submit automated, scripted, or excessive requests that may degrade service for others.',
                   'You will not attempt to reverse-engineer, exploit, or extract data from the platform.',
-                  'You will report any security vulnerabilities to the admin rather than exploiting them.',
+                  'You will report any security vulnerabilities to support@kluniversity.me rather than exploiting them.',
                 ].map((t, i) => (
                   <li key={i} className="flex items-start gap-3">
                     <span className="mt-1.5 w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-500 shrink-0" />
@@ -151,9 +151,9 @@ export default function TermsPage() {
                   If you believe your account has been compromised, you must change your password immediately.
                 </p>
                 <p>
-                  Default passwords are assigned by the admin. You are required to set a personal password
-                  on first login. The platform is not liable for any consequences resulting from unauthorised
-                  access due to credential sharing or negligence on your part.
+                  Default passwords are assigned at account creation. You are required to set a personal
+                  password on first login. The platform is not liable for any consequences resulting from
+                  unauthorised access due to credential sharing or negligence on your part.
                 </p>
               </div>
             </section>
@@ -164,9 +164,9 @@ export default function TermsPage() {
               <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-4">5. Data Accuracy</h2>
               <div className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed space-y-3">
                 <p>
-                  Attendance records are uploaded by the CRT administration from official registers.
-                  While accuracy is maintained to the best of our ability, this tracker is a convenience
-                  tool and does not constitute an official attendance record.
+                  Attendance records are uploaded from official registers. While accuracy is maintained
+                  to the best of our ability, this tracker is a convenience tool and does not constitute
+                  an official attendance record.
                 </p>
                 <p>
                   Any discrepancies between the data displayed here and the official record must be resolved
