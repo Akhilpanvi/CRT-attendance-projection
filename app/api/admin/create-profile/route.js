@@ -22,7 +22,12 @@ export async function POST(request) {
     const existing = await User.findOne({ username: roll });
     if (existing) return NextResponse.json({ error: `User ${roll} already exists` }, { status: 409 });
 
-    const effectiveRole = role === 'admin' ? 'admin' : 'student';
+    // Only super-admins (permissions === null) can create other admins
+    const isSuperAdmin = session.permissions === null || session.permissions === undefined;
+    const effectiveRole = (role === 'admin' && isSuperAdmin) ? 'admin' : 'student';
+    if (role === 'admin' && !isSuperAdmin)
+      return NextResponse.json({ error: 'Only the main admin can create admin accounts' }, { status: 403 });
+
     const hash = await bcrypt.hash(roll, 10);
 
     // Admin permissions: null = full access, array = restricted
