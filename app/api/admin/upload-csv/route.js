@@ -7,6 +7,7 @@ import User from '@/lib/models/User';
 import Attendance from '@/lib/models/Attendance';
 import { getSession } from '@/lib/auth';
 import { getWeekNumber } from '@/lib/helpers';
+import SelfAttendance from '@/lib/models/SelfAttendance';
 
 export async function POST(request) {
   try {
@@ -110,6 +111,11 @@ export async function POST(request) {
     for (let i = 0; i < attendanceBulk.length; i += CHUNK) {
       const r = await Attendance.bulkWrite(attendanceBulk.slice(i, i + CHUNK), { ordered: false });
       attCount += (r.upsertedCount || 0) + (r.modifiedCount || 0);
+    }
+
+    // Clear self-tracked data for this date — official records now supersede them
+    if (rollNumbers.length) {
+      await SelfAttendance.deleteMany({ rollNumber: { $in: rollNumbers }, date: attendanceDate });
     }
 
     return NextResponse.json({
