@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast, Toast } from '@/components/Toast';
 
 const ALL_PERMISSIONS = [
@@ -20,10 +20,18 @@ export default function CreateProfilePage() {
     name: '', rollNumber: '', branch: '', dept: '',
     cluster: '', crtSec: '', crtRoom: '', role: 'student',
   });
-  const [permissions, setPermissions] = useState([]);
-  const [fullAccess,  setFullAccess]  = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [created, setCreated] = useState(null);
+  const [permissions,  setPermissions]  = useState([]);
+  const [fullAccess,   setFullAccess]   = useState(false);
+  const [loading,      setLoading]      = useState(false);
+  const [created,      setCreated]      = useState(null);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/admin/me')
+      .then(r => r.json())
+      .then(d => setIsSuperAdmin(d.permissions === null))
+      .catch(() => {});
+  }, []);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -102,7 +110,7 @@ export default function CreateProfilePage() {
               <label className="form-label">Role</label>
               <select className="form-input" value={form.role} onChange={e => handleRoleChange(e.target.value)}>
                 <option value="student">Student</option>
-                <option value="admin">Admin</option>
+                {isSuperAdmin && <option value="admin">Admin</option>}
               </select>
             </div>
 
