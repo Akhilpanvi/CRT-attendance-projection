@@ -76,6 +76,16 @@ export default function StudentPage() {
   const [error, setError]     = useState('');
   const [loading, setLoading] = useState(true);
   const [updates, setUpdates] = useState([]);
+  const [isDark, setIsDark]   = useState(true);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const sync = () => setIsDark(root.classList.contains('dark'));
+    sync();
+    const obs = new MutationObserver(sync);
+    obs.observe(root, { attributes: true, attributeFilter: ['class'] });
+    return () => obs.disconnect();
+  }, []);
 
   const trackerRef = useRef(null);
 
@@ -235,14 +245,18 @@ export default function StudentPage() {
     router.push('/login');
   }
 
+  const darkBg = 'radial-gradient(ellipse at 30% 60%, rgba(29,78,216,0.10) 0%, #080d1a 55%, #050810 100%)';
+
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-screen flex items-center justify-center bg-slate-100"
+         style={isDark ? { background: darkBg } : {}}>
       <p className="text-slate-400 text-sm">Loading…</p>
     </div>
   );
 
   if (error) return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4"
+         style={isDark ? { background: darkBg } : {}}>
       <div className="alert-danger max-w-sm">{error}</div>
     </div>
   );
@@ -272,25 +286,40 @@ export default function StudentPage() {
   const allDates        = [...dates, ...selfOnlyDates].sort().reverse();
   const allSlots        = stats.slots.length > 0 ? stats.slots : TIME_SLOTS;
 
+  // Shared card styles matching the login page's dark aesthetic
+  const card  = isDark
+    ? { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px' }
+    : { background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px' };
+  const inner = isDark
+    ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }
+    : { background: '#f8fafc', border: '1px solid #f1f5f9' };
+  const divider = isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #f1f5f9';
+
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-slate-100"
+         style={isDark ? { background: darkBg } : {}}>
       {/* Top bar */}
-      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10">
+      <header className="sticky top-0 z-10 border-b"
+              style={isDark
+                ? { background: 'rgba(8,13,26,0.92)', borderColor: 'rgba(255,255,255,0.07)', backdropFilter: 'blur(12px)' }
+                : { background: '#ffffff', borderColor: '#e2e8f0' }}>
         <div className="max-w-4xl mx-auto px-4 flex items-center" style={{ height: 52 }}>
           <div className="flex items-center gap-2.5 mr-4">
-            <div className="w-7 h-7 rounded flex items-center justify-center text-xs font-black
-                            text-white shrink-0 bg-slate-800 dark:bg-slate-700">KL</div>
-            <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">CRT Attendance Tracker</span>
+            <div className="w-7 h-7 rounded flex items-center justify-center text-xs font-black text-white shrink-0"
+                 style={isDark ? { background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.14)' }
+                               : { background: '#1e293b' }}>KL</div>
+            <span className="font-semibold text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.88)' : '#0f172a' }}>CRT Attendance Tracker</span>
           </div>
-          <span className="hidden sm:block text-slate-300 dark:text-slate-600 text-xs mr-2">·</span>
-          <span className="hidden sm:block text-xs text-slate-400 dark:text-slate-500">Y-23 Summer CRT Training</span>
+          <span className="hidden sm:block text-xs mr-2" style={{ color: isDark ? 'rgba(255,255,255,0.18)' : '#cbd5e1' }}>·</span>
+          <span className="hidden sm:block text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.35)' : '#94a3b8' }}>Y-23 Summer CRT Training</span>
           <div className="ml-auto flex items-center gap-1">
             <ThemeToggle />
             <button
               onClick={logout}
-              className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100
-                         border border-slate-200 dark:border-slate-600 hover:border-slate-300
-                         rounded px-3 py-1.5 transition-colors font-medium ml-1">
+              className="text-xs rounded px-3 py-1.5 transition-colors font-medium ml-1"
+              style={isDark
+                ? { color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.12)' }
+                : { color: '#64748b', border: '1px solid #e2e8f0' }}>
               Sign Out
             </button>
           </div>
@@ -367,7 +396,7 @@ export default function StudentPage() {
         )}
 
         {/* Profile */}
-        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-4">
+        <div className="rounded-lg p-4" style={card}>
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-full flex items-center justify-center
                             text-white text-base font-bold shrink-0 bg-slate-700 dark:bg-slate-600">
@@ -391,16 +420,15 @@ export default function StudentPage() {
         {/* Stats */}
         <div className="grid grid-cols-4 gap-3">
           {[
-            { label: 'Total Sessions', value: stats.total,   color: '#334155' },
-            { label: 'Present',        value: stats.present, color: '#15803d' },
+            { label: 'Total Sessions', value: stats.total,   color: isDark ? 'rgba(255,255,255,0.7)' : '#334155' },
+            { label: 'Present',        value: stats.present, color: '#16a34a' },
             { label: 'Absent',         value: stats.absent,  color: '#dc2626' },
             { label: 'Attendance',     value: pct + '%',     color: pctColor(pct) },
           ].map(item => (
-            <div key={item.label}
-                 className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
-                            rounded-lg p-4 text-center">
+            <div key={item.label} className="rounded-lg p-4 text-center" style={card}>
               <div className="text-2xl font-bold" style={{ color: item.color }}>{item.value}</div>
-              <div className="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 mt-1">
+              <div className="text-[10px] uppercase tracking-wider mt-1"
+                   style={{ color: isDark ? 'rgba(255,255,255,0.3)' : '#94a3b8' }}>
                 {item.label}
               </div>
             </div>
@@ -408,10 +436,10 @@ export default function StudentPage() {
         </div>
 
         {/* Attendance Progression */}
-        <div ref={trackerRef} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
-          <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700">
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Attendance Progression</h2>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+        <div ref={trackerRef} className="rounded-lg overflow-hidden" style={card}>
+          <div className="px-4 py-3" style={{ borderBottom: divider }}>
+            <h2 className="text-sm font-semibold" style={{ color: isDark ? 'rgba(255,255,255,0.88)' : '#0f172a' }}>Attendance Progression</h2>
+            <p className="text-xs mt-0.5" style={{ color: isDark ? 'rgba(255,255,255,0.35)' : '#94a3b8' }}>
               Mark your own attendance to see a projected percentage.
             </p>
           </div>
@@ -423,12 +451,12 @@ export default function StudentPage() {
 
               if (entry.saved && !entry.expanded) {
                 return (
-                  <div key={entry.id} className={idx > 0 ? 'pt-3 border-t border-slate-100 dark:border-slate-700' : ''}>
+                  <div key={entry.id} className={idx > 0 ? 'pt-3' : ''}
+                       style={idx > 0 ? { borderTop: divider } : {}}>
                     <button
                       onClick={() => toggleExpanded(entry.id)}
-                      className="w-full flex items-center gap-3 text-left rounded-lg px-3 py-2.5
-                                 bg-slate-50 dark:bg-slate-700/30 hover:bg-slate-100 dark:hover:bg-slate-700/50
-                                 border border-slate-200 dark:border-slate-600 transition-colors">
+                      className="w-full flex items-center gap-3 text-left rounded-lg px-3 py-2.5 transition-colors"
+                      style={inner}>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium text-slate-800 dark:text-slate-200">{fmtDate(entry.date)}</div>
                         <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
@@ -451,7 +479,8 @@ export default function StudentPage() {
 
               return (
                 <div key={entry.id}
-                     className={idx > 0 ? 'pt-4 border-t border-slate-100 dark:border-slate-700 space-y-3' : 'space-y-3'}>
+                     className={idx > 0 ? 'pt-4 space-y-3' : 'space-y-3'}
+                     style={idx > 0 ? { borderTop: divider } : {}}>
                   {/* Header: date display + collapse/delete (saved) or date picker + remove (unsaved) */}
                   <div className="flex items-center gap-3">
                     {entry.saved ? (
@@ -543,11 +572,11 @@ export default function StudentPage() {
             })}
 
             {/* Add another date */}
-            <div className="pt-2 border-t border-slate-100 dark:border-slate-700">
+            <div className="pt-2" style={{ borderTop: divider }}>
               <button
                 onClick={addEntry}
-                className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400
-                           hover:text-slate-700 dark:hover:text-slate-200 transition-colors">
+                className="flex items-center gap-1.5 text-xs transition-colors"
+                style={{ color: isDark ? 'rgba(255,255,255,0.4)' : '#64748b' }}>
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
@@ -557,12 +586,11 @@ export default function StudentPage() {
 
             {/* Live projection */}
             {liveHasData && (
-              <div className="rounded-lg border border-slate-200 dark:border-slate-600
-                              bg-slate-50 dark:bg-slate-700/30 px-4 py-3">
+              <div className="rounded-lg px-4 py-3" style={inner}>
                 <div className="flex items-center justify-between gap-4">
                   <div className="min-w-0">
-                    <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">Projected Attendance</p>
-                    <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
+                    <p className="text-xs font-semibold" style={{ color: isDark ? 'rgba(255,255,255,0.75)' : '#334155' }}>Projected Attendance</p>
+                    <p className="text-[11px] mt-0.5" style={{ color: isDark ? 'rgba(255,255,255,0.35)' : '#94a3b8' }}>
                       {liveProjPresent}/{liveProjTotal} sessions
                     </p>
                   </div>
@@ -577,8 +605,8 @@ export default function StudentPage() {
 
         {/* Session Planner */}
         {stats.total > 0 && (
-          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-4">
-            <div className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3">Session Planner</div>
+          <div className="rounded-lg p-4" style={card}>
+            <div className="text-sm font-semibold mb-3" style={{ color: isDark ? 'rgba(255,255,255,0.88)' : '#0f172a' }}>Session Planner</div>
 
             {/* Official row */}
             <div className="mb-3">
@@ -594,9 +622,7 @@ export default function StudentPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 {[{ label: '75%', data: b75 }, { label: '85%', data: b85 }].map(({ label, data }) => (
-                  <div key={label}
-                       className="border border-slate-200 dark:border-slate-600
-                                  bg-slate-50 dark:bg-slate-700/40 rounded-lg p-3">
+                  <div key={label} className="rounded-lg p-3" style={inner}>
                     <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">{label} Threshold</div>
                     {data.canBunk > 0 ? (
                       <>
@@ -625,7 +651,7 @@ export default function StudentPage() {
               const pb75 = calcBunk(liveProjPresent, liveProjTotal, 75);
               const pb85 = calcBunk(liveProjPresent, liveProjTotal, 85);
               return (
-                <div className="pt-3 border-t border-slate-100 dark:border-slate-700">
+                <div className="pt-3" style={{ borderTop: divider }}>
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-[10px] font-semibold uppercase tracking-widest text-indigo-500 dark:text-indigo-400">
                       Projected
@@ -666,7 +692,7 @@ export default function StudentPage() {
 
             {/* Advice */}
             {advice.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700 space-y-4">
+              <div className="mt-4 pt-4 space-y-4" style={{ borderTop: divider }}>
                 {/* Official advice */}
                 <div>
                   <div className="flex items-center gap-2 mb-2">
@@ -715,12 +741,11 @@ export default function StudentPage() {
         )}
 
         {/* Attendance log */}
-        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
-                        rounded-lg overflow-hidden">
-          <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+        <div className="rounded-lg overflow-hidden" style={card}>
+          <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: divider }}>
             <div>
-              <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Attendance Log</h2>
-              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+              <h2 className="text-sm font-semibold" style={{ color: isDark ? 'rgba(255,255,255,0.88)' : '#0f172a' }}>Attendance Log</h2>
+              <p className="text-xs mt-0.5" style={{ color: isDark ? 'rgba(255,255,255,0.35)' : '#94a3b8' }}>
                 {dates.length} official · {selfOnlyDates.length} self-tracked
               </p>
             </div>
@@ -794,8 +819,10 @@ export default function StudentPage() {
                             <td key={sl} className="tbl-cell text-center relative">
                               {isOpen && (
                                 <div className="absolute z-20 bottom-full left-1/2 -translate-x-1/2 mb-1
-                                                bg-white dark:bg-slate-800 border border-slate-200
-                                                dark:border-slate-600 rounded-lg shadow-xl p-2 min-w-[110px]">
+                                                rounded-lg shadow-xl p-2 min-w-[110px]"
+                                     style={isDark
+                                       ? { background: '#0d1424', border: '1px solid rgba(255,255,255,0.12)', boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }
+                                       : { background: '#ffffff', border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }}>
                                   <p className="text-[9px] text-slate-400 mb-1.5 text-center">
                                     {isRevert ? 'Remove SP?' : 'Placement drive?'}
                                   </p>
@@ -869,7 +896,8 @@ export default function StudentPage() {
           )}
         </div>
 
-        <p className="text-[10px] text-slate-300 dark:text-slate-600 text-center pb-6 leading-relaxed">
+        <p className="text-[10px] text-center pb-6 leading-relaxed"
+           style={{ color: isDark ? 'rgba(255,255,255,0.18)' : '#cbd5e1' }}>
           Not an official KL University platform.<br />
           Made by a student of Y23 KL University with personal interest and easy tracking.
         </p>
