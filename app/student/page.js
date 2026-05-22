@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { fmtDate, pctColor, TIME_SLOTS } from '@/lib/helpers';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -76,6 +76,8 @@ export default function StudentPage() {
   const [error, setError]     = useState('');
   const [loading, setLoading] = useState(true);
   const [updates, setUpdates] = useState([]);
+
+  const trackerRef = useRef(null);
 
   // Self-tracking state
   const [selfByDate,    setSelfByDate]    = useState({});
@@ -154,6 +156,26 @@ export default function StudentPage() {
       }
     } catch (_) {}
     finally { setTrackerSaving(false); }
+  }
+
+  function handleEditDraft(date) {
+    setTrackerDate(date);
+    setTrackerSlots(selfByDate[date] || {});
+    setTrackerSaved(false);
+    setTimeout(() => trackerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+  }
+
+  async function handleDeleteDraft(date) {
+    if (!confirm(`Delete self-tracked entries for ${fmtDate(date)}?`)) return;
+    try {
+      await fetch('/api/student/self-attendance', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date }),
+      });
+      setSelfByDate(prev => { const u = { ...prev }; delete u[date]; return u; });
+      if (trackerDate === date) { setTrackerSlots({}); setTrackerSaved(false); }
+    } catch (_) {}
   }
 
   async function logout() {
@@ -282,8 +304,8 @@ export default function StudentPage() {
           ))}
         </div>
 
-        {/* Track Your Attendance */}
-        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+        {/* Attendance Progression */}
+        <div ref={trackerRef} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
           <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700">
             <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Attendance Progression</h2>
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
@@ -472,13 +494,29 @@ export default function StudentPage() {
                             ? 'tbl-row'
                             : 'bg-indigo-50/50 dark:bg-indigo-900/10'}>
                         <td className="tbl-cell font-medium">
-                          <span>{fmtDate(dt)}</span>
-                          {!isOfficial && (
-                            <span className="ml-1.5 text-[9px] font-semibold text-indigo-500 dark:text-indigo-400
-                                             bg-indigo-100 dark:bg-indigo-900/40 px-1 py-0.5 rounded">
-                              Draft
-                            </span>
-                          )}
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span>{fmtDate(dt)}</span>
+                            {!isOfficial && (
+                              <>
+                                <span className="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400
+                                                 bg-indigo-100 dark:bg-indigo-900/40 px-1 py-0.5 rounded">
+                                  Draft
+                                </span>
+                                <button
+                                  onClick={() => handleEditDraft(dt)}
+                                  className="text-[9px] text-blue-500 dark:text-blue-400 hover:text-blue-700
+                                             dark:hover:text-blue-300 transition-colors font-medium">
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteDraft(dt)}
+                                  className="text-[9px] text-red-400 dark:text-red-500 hover:text-red-600
+                                             dark:hover:text-red-400 transition-colors font-medium">
+                                  Delete
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </td>
                         {allSlots.map(sl => {
                           const v = rowData[sl];
