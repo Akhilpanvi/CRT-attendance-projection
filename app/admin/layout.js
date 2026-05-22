@@ -109,18 +109,30 @@ const navItems = [
   },
 ];
 
+function isPageAllowed(pathname, perms) {
+  if (perms === 'loading' || perms === null || perms === 'full') return true;
+  const item = navItems.find(i => pathname === i.href || pathname.startsWith(i.href + '/'));
+  if (!item) return true; // /admin root or unknown — allow
+  if (item.superAdminOnly) return false;
+  return Array.isArray(perms) && perms.includes(item.permission);
+}
+
 export default function AdminLayout({ children }) {
   const pathname = usePathname();
   const router   = useRouter();
   const [open, setOpen] = useState(false);
   // null = super-admin (full access, no restrictions); 'full' = fallback; array = specific perms; 'loading' = not yet loaded
-  const [myPerms, setMyPerms] = useState('loading');
+  const [myPerms,   setMyPerms]   = useState('loading');
+  const [myUsername, setMyUsername] = useState('');
 
   useEffect(() => {
     fetch('/api/admin/me')
       .then(r => r.json())
-      // preserve null (super-admin); only fall back to 'full' on undefined/error
-      .then(d => setMyPerms(d.permissions === undefined ? 'full' : d.permissions))
+      .then(d => {
+        setMyUsername(d.username || '');
+        // preserve null (super-admin); only fall back to 'full' on undefined/error
+        setMyPerms(d.permissions === undefined ? 'full' : d.permissions);
+      })
       .catch(() => setMyPerms('full'));
   }, []);
 
@@ -175,8 +187,17 @@ export default function AdminLayout({ children }) {
       <div className="px-3 py-3 border-t border-white/10">
         <div className="flex items-center gap-2 bg-white/8 rounded px-3 py-2 mb-2">
           <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center
-                          text-xs font-bold text-white shrink-0">A</div>
-          <div className="text-[10px] text-white/50">Administrator</div>
+                          text-xs font-bold text-white shrink-0">
+            {myUsername ? myUsername[0].toUpperCase() : 'A'}
+          </div>
+          <div className="min-w-0">
+            <div className="text-xs font-semibold text-white/80 truncate leading-none">
+              {myUsername || 'Admin'}
+            </div>
+            <div className="text-[9px] text-white/40 mt-0.5">
+              {myPerms === null ? 'Super Admin' : 'Administrator'}
+            </div>
+          </div>
         </div>
         <button
           onClick={logout}
@@ -226,7 +247,22 @@ export default function AdminLayout({ children }) {
           </div>
         </header>
 
-        <main className="flex-1 p-4 lg:p-6 bg-slate-50 dark:bg-slate-900">{children}</main>
+        <main className="flex-1 p-4 lg:p-6 bg-slate-50 dark:bg-slate-900">
+          {myPerms !== 'loading' && !isPageAllowed(pathname, myPerms) ? (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+              <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center
+                              justify-center mb-4">
+                <svg className="w-6 h-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                </svg>
+              </div>
+              <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-1">Access Denied</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs">
+                You don't have permission to view this page. Contact your super-admin to request access.
+              </p>
+            </div>
+          ) : children}
+        </main>
       </div>
     </div>
   );
