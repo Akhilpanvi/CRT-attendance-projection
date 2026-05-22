@@ -19,7 +19,7 @@ export async function GET() {
 
     const records = await Attendance.find({ rollNumber: roll }).sort({ date: 1, slot: 1 }).lean();
     const total   = records.length;
-    const present = records.filter(r => r.status === 'present').length;
+    const present = records.filter(r => r.status === 'present' || r.status === 'sp').length;
 
     const byDate = {};
     const slots  = new Set();

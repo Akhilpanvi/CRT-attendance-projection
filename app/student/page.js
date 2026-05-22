@@ -80,6 +80,7 @@ export default function StudentPage() {
   const trackerRef = useRef(null);
 
   const [selfByDate,     setSelfByDate]     = useState({});
+  const [slotEditing,    setSlotEditing]    = useState(null); // { date, slot }
   const [trackerEntries, setTrackerEntries] = useState([
     { id: 1, date: today, slots: {}, saving: false, saved: false, expanded: true },
   ]);
@@ -196,6 +197,31 @@ export default function StudentPage() {
         return kept.length > 0 ? kept : [{ id: Date.now(), date: today, slots: {}, saving: false, saved: false, expanded: true }];
       });
     } catch (_) {}
+  }
+
+  async function applySpStatus(date, slot, status) {
+    try {
+      const r = await fetch('/api/admin/mark-sp', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rollNumber: data.student.rollNumber, date, slot, status }),
+      });
+      if (!r.ok) return;
+      setData(prev => {
+        const prevStatus = prev.stats.byDate[date]?.[slot];
+        const wasPresent = prevStatus === 'present' || prevStatus === 'sp';
+        const isPresent  = status === 'present' || status === 'sp';
+        return {
+          ...prev,
+          stats: {
+            ...prev.stats,
+            present: prev.stats.present + (isPresent ? 1 : 0) - (wasPresent ? 1 : 0),
+            byDate: { ...prev.stats.byDate, [date]: { ...prev.stats.byDate[date], [slot]: status } },
+          },
+        };
+      });
+    } catch (_) {}
+    setSlotEditing(null);
   }
 
   async function logout() {
@@ -645,12 +671,17 @@ export default function StudentPage() {
                 {dates.length} official · {selfOnlyDates.length} self-tracked
               </p>
             </div>
-            {selfOnlyDates.length > 0 && (
-              <span className="text-[10px] text-indigo-500 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20
-                               border border-indigo-200 dark:border-indigo-800 rounded px-2 py-0.5">
-                Draft rows shown
+            <div className="flex items-center gap-2 flex-wrap">
+              {selfOnlyDates.length > 0 && (
+                <span className="text-[10px] text-indigo-500 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20
+                                 border border-indigo-200 dark:border-indigo-800 rounded px-2 py-0.5">
+                  Draft rows shown
+                </span>
+              )}
+              <span className="text-[10px] text-slate-400 dark:text-slate-500">
+                Tap a slot to mark SP
               </span>
-            )}
+            </div>
           </div>
 
           {allDates.length === 0 ? (
@@ -669,7 +700,7 @@ export default function StudentPage() {
                   {allDates.map(dt => {
                     const isOfficial = officialDateSet.has(dt);
                     const rowData    = isOfficial ? (stats.byDate[dt] || {}) : (selfByDate[dt] || {});
-                    const p = allSlots.filter(sl => rowData[sl] === 'present').length;
+                    const p = allSlots.filter(sl => rowData[sl] === 'present' || rowData[sl] === 'sp').length;
                     const t = allSlots.filter(sl => !!rowData[sl]).length;
                     return (
                       <tr key={dt}
@@ -703,11 +734,42 @@ export default function StudentPage() {
                         </td>
                         {allSlots.map(sl => {
                           const v = rowData[sl];
+                          const isEditing = isOfficial && slotEditing?.date === dt && slotEditing?.slot === sl;
                           return (
-                            <td key={sl} className="tbl-cell text-center">
-                              {v === 'present' ? <span className="badge-present">P</span>
-                               : v === 'absent' ? <span className="badge-absent">A</span>
-                               : <span className="badge-dash">—</span>}
+                            <td key={sl} className="tbl-cell text-center relative">
+                              {isEditing && (
+                                <div className="absolute z-10 bottom-full left-1/2 -translate-x-1/2 mb-1
+                                                bg-white dark:bg-slate-700 border border-slate-200
+                                                dark:border-slate-600 rounded shadow-lg flex gap-1 p-1">
+                                  {[['P','present','bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400'],
+                                    ['A','absent','bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'],
+                                    ['SP','sp','bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300']].map(([lbl,val,cls]) => (
+                                    <button key={val}
+                                      onClick={() => applySpStatus(dt, sl, val)}
+                                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${cls} hover:opacity-80`}>
+                                      {lbl}
+                                    </button>
+                                  ))}
+                                  <button onClick={() => setSlotEditing(null)}
+                                    className="text-[10px] px-1 text-slate-400 hover:text-slate-600">✕</button>
+                                </div>
+                              )}
+                              {isOfficial ? (
+                                <button
+                                  onClick={() => setSlotEditing(isEditing ? null : { date: dt, slot: sl })}
+                                  className="cursor-pointer hover:opacity-70 transition-opacity">
+                                  {v === 'present' ? <span className="badge-present">P</span>
+                                   : v === 'absent'  ? <span className="badge-absent">A</span>
+                                   : v === 'sp'      ? <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">SP</span>
+                                   : <span className="badge-dash">—</span>}
+                                </button>
+                              ) : (
+                                <>
+                                  {v === 'present' ? <span className="badge-present">P</span>
+                                   : v === 'absent' ? <span className="badge-absent">A</span>
+                                   : <span className="badge-dash">—</span>}
+                                </>
+                              )}
                             </td>
                           );
                         })}

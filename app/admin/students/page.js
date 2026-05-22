@@ -101,17 +101,47 @@ function Modal({ roll, name, onClose, showToast }) {
         <div className="overflow-y-auto p-5 flex-1">
           {err   && <div className="alert-danger">{err}</div>}
           {!data && !err && <p className="text-slate-400 text-sm">Loading…</p>}
-          {data  && <DetailView data={data} />}
+          {data  && <DetailView data={data} roll={roll} showToast={showToast} />}
         </div>
       </div>
     </div>
   );
 }
 
-function DetailView({ data }) {
-  const { student: s, stats } = data;
-  const pct = stats.overallPct;
-  const dates = Object.keys(stats.byDate || {}).sort().reverse();
+function DetailView({ data, roll, showToast }) {
+  const { student: s, stats: initStats } = data;
+  const [byDate, setByDate] = useState(initStats.byDate || {});
+  const [editing, setEditing] = useState(null); // { date, slot }
+  const [saving, setSaving]   = useState(false);
+
+  const dates = Object.keys(byDate).sort().reverse();
+
+  const present = stats => {
+    let p = 0;
+    for (const dt of Object.keys(stats)) for (const sl of Object.keys(stats[dt]))
+      if (stats[dt][sl] === 'present' || stats[dt][sl] === 'sp') p++;
+    return p;
+  };
+  const total   = Object.values(byDate).reduce((s, d) => s + Object.keys(d).length, 0);
+  const pres    = present(byDate);
+  const pct     = total > 0 ? Math.round((pres / total) * 100) : 0;
+
+  async function applyStatus(date, slot, status) {
+    setSaving(true);
+    try {
+      const r = await fetch('/api/admin/mark-sp', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rollNumber: roll, date, slot, status }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error);
+      setByDate(prev => ({ ...prev, [date]: { ...prev[date], [slot]: status } }));
+      showToast(`Marked ${slot} on ${fmtDate(date)} as ${status.toUpperCase()}`);
+    } catch (e) { showToast(e.message, 'error'); }
+    finally { setSaving(false); setEditing(null); }
+  }
+
   return (
     <>
       <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-700/50
@@ -131,10 +161,10 @@ function DetailView({ data }) {
 
       <div className="grid grid-cols-4 gap-2 mb-4">
         {[
-          ['Total',   stats.total,   'text-slate-800 dark:text-slate-200'],
-          ['Present', stats.present, 'text-green-700 dark:text-green-400'],
-          ['Absent',  stats.absent,  'text-red-700 dark:text-red-400'],
-          ['%',       pct + '%',     null],
+          ['Total',   total,        'text-slate-800 dark:text-slate-200'],
+          ['Present', pres,         'text-green-700 dark:text-green-400'],
+          ['Absent',  total - pres, 'text-red-700 dark:text-red-400'],
+          ['%',       pct + '%',    null],
         ].map(([l, v, c]) => (
           <div key={l} className="border border-slate-200 dark:border-slate-600
                                    bg-slate-50 dark:bg-slate-700/40 rounded p-2.5 text-center">
@@ -145,6 +175,10 @@ function DetailView({ data }) {
         ))}
       </div>
 
+      <p className="text-[10px] text-slate-400 dark:text-slate-500 mb-2">
+        Click any slot badge to edit · SP = Special Permission (counts as present)
+      </p>
+
       {dates.length === 0
         ? <p className="text-slate-400 text-sm">No attendance records yet.</p>
         : (
@@ -153,24 +187,47 @@ function DetailView({ data }) {
               <thead>
                 <tr>
                   <th className="tbl-header">Date</th>
-                  {stats.slots.map(s => <th key={s} className="tbl-header">{s}</th>)}
+                  {initStats.slots.map(sl => <th key={sl} className="tbl-header">{sl}</th>)}
                   <th className="tbl-header text-center">P/T</th>
                 </tr>
               </thead>
               <tbody>
                 {dates.map(dt => {
-                  const p = stats.slots.filter(sl => stats.byDate[dt][sl] === 'present').length;
-                  const t = stats.slots.filter(sl => !!stats.byDate[dt][sl]).length;
+                  const p = initStats.slots.filter(sl => byDate[dt]?.[sl] === 'present' || byDate[dt]?.[sl] === 'sp').length;
+                  const t = initStats.slots.filter(sl => !!byDate[dt]?.[sl]).length;
                   return (
                     <tr key={dt} className="tbl-row">
-                      <td className="tbl-cell font-semibold">{fmtDate(dt)}</td>
-                      {stats.slots.map(sl => {
-                        const v = stats.byDate[dt][sl];
+                      <td className="tbl-cell font-semibold whitespace-nowrap">{fmtDate(dt)}</td>
+                      {initStats.slots.map(sl => {
+                        const v = byDate[dt]?.[sl];
+                        const isEditing = editing?.date === dt && editing?.slot === sl;
                         return (
-                          <td key={sl} className="tbl-cell text-center">
-                            {v === 'present' ? <span className="badge-present">P</span>
-                             : v === 'absent' ? <span className="badge-absent">A</span>
-                             : <span className="badge-dash">—</span>}
+                          <td key={sl} className="tbl-cell text-center relative">
+                            {isEditing ? (
+                              <div className="absolute z-10 top-0 left-1/2 -translate-x-1/2 mt-1
+                                              bg-white dark:bg-slate-700 border border-slate-200
+                                              dark:border-slate-600 rounded shadow-lg flex gap-1 p-1">
+                                {[['P','present','bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400'],
+                                  ['A','absent','bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'],
+                                  ['SP','sp','bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300']].map(([lbl,val,cls]) => (
+                                  <button key={val} disabled={saving}
+                                    onClick={() => applyStatus(dt, sl, val)}
+                                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${cls} hover:opacity-80`}>
+                                    {lbl}
+                                  </button>
+                                ))}
+                                <button onClick={() => setEditing(null)}
+                                  className="text-[10px] px-1 text-slate-400 hover:text-slate-600">✕</button>
+                              </div>
+                            ) : null}
+                            <button
+                              onClick={() => setEditing(isEditing ? null : { date: dt, slot: sl })}
+                              className="cursor-pointer hover:opacity-70 transition-opacity">
+                              {v === 'present' ? <span className="badge-present">P</span>
+                               : v === 'absent'  ? <span className="badge-absent">A</span>
+                               : v === 'sp'      ? <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">SP</span>
+                               : <span className="badge-dash">—</span>}
+                            </button>
                           </td>
                         );
                       })}
