@@ -129,10 +129,7 @@ export default function AdminLayout({ children }) {
         <div className="flex items-center gap-2 bg-white/8 rounded px-3 py-2 mb-2">
           <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center
                           text-xs font-bold text-white shrink-0">A</div>
-          <div>
-            <div className="text-xs font-semibold text-white">CRT Admin</div>
-            <div className="text-[10px] text-white/50">Administrator</div>
-          </div>
+          <div className="text-[10px] text-white/50">Administrator</div>
         </div>
         <button
           onClick={logout}

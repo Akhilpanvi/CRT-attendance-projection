@@ -282,6 +282,78 @@ export default function StudentPage() {
           ))}
         </div>
 
+        {/* Track Your Attendance */}
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+          <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700">
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Track Your Attendance</h2>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+              Mark your own attendance to see a projected percentage. Replaced automatically when admin uploads official records.
+            </p>
+          </div>
+
+          <div className="p-4 space-y-4">
+            {/* Date picker */}
+            <div className="flex items-center gap-3">
+              <label className="text-xs font-medium text-slate-500 dark:text-slate-400 shrink-0">Date</label>
+              <input
+                type="date"
+                value={trackerDate}
+                onChange={e => setTrackerDate(e.target.value)}
+                className="form-input py-1 text-sm"
+                style={{ maxWidth: 160 }}
+              />
+            </div>
+
+            {/* Slot toggles */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {TIME_SLOTS.map(slot => (
+                <div key={slot} className="flex items-center gap-2">
+                  <span className="text-xs text-slate-500 dark:text-slate-400 w-28 shrink-0">{slot}</span>
+                  <button
+                    onClick={() => handleSlotToggle(slot, 'present')}
+                    className={`px-3 py-1 rounded text-xs font-semibold transition-colors ${
+                      trackerSlots[slot] === 'present'
+                        ? 'bg-green-500 text-white'
+                        : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-green-100 dark:hover:bg-green-900/30 hover:text-green-700 dark:hover:text-green-400'
+                    }`}>P</button>
+                  <button
+                    onClick={() => handleSlotToggle(slot, 'absent')}
+                    className={`px-3 py-1 rounded text-xs font-semibold transition-colors ${
+                      trackerSlots[slot] === 'absent'
+                        ? 'bg-red-500 text-white'
+                        : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400'
+                    }`}>A</button>
+                  {trackerSlots[slot] && (
+                    <button
+                      onClick={() => handleSlotToggle(slot, trackerSlots[slot])}
+                      className="text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400
+                                 transition-colors text-sm leading-none">×</button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Save row */}
+            <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-700">
+              <p className="text-[10px] text-slate-400 dark:text-slate-500">
+                {Object.keys(trackerSlots).length > 0
+                  ? `${Object.values(trackerSlots).filter(v => v === 'present').length} present · ${Object.values(trackerSlots).filter(v => v === 'absent').length} absent marked`
+                  : 'No slots marked for this date'}
+              </p>
+              <button
+                onClick={handleTrackerSave}
+                disabled={trackerSaving}
+                className={`text-xs font-medium px-4 py-1.5 rounded transition-colors ${
+                  trackerSaved
+                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800'
+                    : 'btn-primary'
+                }`}>
+                {trackerSaving ? 'Saving…' : trackerSaved ? 'Saved ✓' : 'Save'}
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Projected stats banner */}
         {selfTotal > 0 && (
           <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800
@@ -357,78 +429,6 @@ export default function StudentPage() {
             )}
           </div>
         )}
-
-        {/* Track Your Attendance */}
-        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
-          <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700">
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Track Your Attendance</h2>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-              Mark your own attendance to see a projected percentage. Replaced automatically when admin uploads official records.
-            </p>
-          </div>
-
-          <div className="p-4 space-y-4">
-            {/* Date picker */}
-            <div className="flex items-center gap-3">
-              <label className="text-xs font-medium text-slate-500 dark:text-slate-400 shrink-0">Date</label>
-              <input
-                type="date"
-                value={trackerDate}
-                onChange={e => setTrackerDate(e.target.value)}
-                className="form-input py-1 text-sm"
-                style={{ maxWidth: 160 }}
-              />
-            </div>
-
-            {/* Slot toggles */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {TIME_SLOTS.map(slot => (
-                <div key={slot} className="flex items-center gap-2">
-                  <span className="text-xs text-slate-500 dark:text-slate-400 w-28 shrink-0">{slot}</span>
-                  <button
-                    onClick={() => handleSlotToggle(slot, 'present')}
-                    className={`px-3 py-1 rounded text-xs font-semibold transition-colors ${
-                      trackerSlots[slot] === 'present'
-                        ? 'bg-green-500 text-white'
-                        : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-green-100 dark:hover:bg-green-900/30 hover:text-green-700 dark:hover:text-green-400'
-                    }`}>P</button>
-                  <button
-                    onClick={() => handleSlotToggle(slot, 'absent')}
-                    className={`px-3 py-1 rounded text-xs font-semibold transition-colors ${
-                      trackerSlots[slot] === 'absent'
-                        ? 'bg-red-500 text-white'
-                        : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400'
-                    }`}>A</button>
-                  {trackerSlots[slot] && (
-                    <button
-                      onClick={() => handleSlotToggle(slot, trackerSlots[slot])}
-                      className="text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400
-                                 transition-colors text-sm leading-none">×</button>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Save row */}
-            <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-700">
-              <p className="text-[10px] text-slate-400 dark:text-slate-500">
-                {Object.keys(trackerSlots).length > 0
-                  ? `${Object.values(trackerSlots).filter(v => v === 'present').length} present · ${Object.values(trackerSlots).filter(v => v === 'absent').length} absent marked`
-                  : 'No slots marked for this date'}
-              </p>
-              <button
-                onClick={handleTrackerSave}
-                disabled={trackerSaving}
-                className={`text-xs font-medium px-4 py-1.5 rounded transition-colors ${
-                  trackerSaved
-                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800'
-                    : 'btn-primary'
-                }`}>
-                {trackerSaving ? 'Saving…' : trackerSaved ? 'Saved ✓' : 'Save'}
-              </button>
-            </div>
-          </div>
-        </div>
 
         {/* Attendance log */}
         <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
