@@ -787,28 +787,24 @@ export default function StudentPage() {
                         </td>
                         {allSlots.map(sl => {
                           const v = rowData[sl];
-                          const isOpen = isOfficial && slotEditing?.date === dt && slotEditing?.slot === sl;
+                          const canMarkSP = isOfficial && v === 'absent';
+                          const isOpen    = canMarkSP && slotEditing?.date === dt && slotEditing?.slot === sl;
                           return (
                             <td key={sl} className="tbl-cell text-center relative">
                               {isOpen && (
                                 <div className="absolute z-20 bottom-full left-1/2 -translate-x-1/2 mb-1
                                                 bg-white dark:bg-slate-800 border border-slate-200
-                                                dark:border-slate-600 rounded-lg shadow-xl p-2 min-w-[130px]">
-                                  <p className="text-[9px] text-slate-400 mb-1.5 text-center">Select then Save</p>
+                                                dark:border-slate-600 rounded-lg shadow-xl p-2 min-w-[110px]">
+                                  <p className="text-[9px] text-slate-400 mb-1.5 text-center">Placement drive?</p>
                                   <div className="flex gap-1 justify-center mb-2">
-                                    {[['P','present','bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 border-green-300 dark:border-green-700'],
-                                      ['A','absent','bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 border-red-300 dark:border-red-700'],
-                                      ['SP','sp','bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700']].map(([lbl,val,cls]) => {
-                                        const selected = slotEditing?.pending === val;
-                                        return (
-                                          <button key={val}
-                                            onClick={() => setSlotEditing(e => ({ ...e, pending: val }))}
-                                            className={`text-[10px] font-bold px-2 py-1 rounded border-2 transition-all
-                                              ${cls} ${selected ? 'ring-2 ring-offset-1 ring-slate-400 scale-110' : 'opacity-70 hover:opacity-100'}`}>
-                                            {lbl}
-                                          </button>
-                                        );
-                                    })}
+                                    <button
+                                      onClick={() => setSlotEditing(e => ({ ...e, pending: e?.pending === 'sp' ? null : 'sp' }))}
+                                      className={`text-[10px] font-bold px-3 py-1.5 rounded border-2 transition-all
+                                        bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400
+                                        border-yellow-300 dark:border-yellow-700
+                                        ${slotEditing?.pending === 'sp' ? 'ring-2 ring-offset-1 ring-yellow-400 scale-110' : 'opacity-70 hover:opacity-100'}`}>
+                                      SP
+                                    </button>
                                   </div>
                                   <div className="flex gap-1">
                                     <button
@@ -829,8 +825,8 @@ export default function StudentPage() {
                               )}
                               {isOfficial ? (
                                 <button
-                                  onClick={() => setSlotEditing(isOpen ? null : { date: dt, slot: sl, pending: null })}
-                                  className="cursor-pointer hover:opacity-70 transition-opacity">
+                                  onClick={() => canMarkSP ? setSlotEditing(isOpen ? null : { date: dt, slot: sl, pending: null }) : undefined}
+                                  className={canMarkSP ? 'cursor-pointer hover:opacity-70 transition-opacity' : 'cursor-default'}>
                                   {v === 'present' ? <span className="badge-present">P</span>
                                    : v === 'absent'  ? <span className="badge-absent">A</span>
                                    : v === 'sp'      ? <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400">SP</span>
