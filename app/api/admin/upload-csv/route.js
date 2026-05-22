@@ -44,6 +44,8 @@ export async function POST(request) {
     const week = getWeekNumber(attendanceDate);
     const year = new Date(attendanceDate).getFullYear();
     const knownCols = [rollCol, nameCol, branchCol, deptCol, clusterCol, crtSecCol, crtRoomCol, snoCol].filter(Boolean);
+    // Normalize slot names: pad single-digit hours so 04:30-5:30 → 04:30-05:30
+    const normalizeSlot = s => s.replace(/\b(\d):/g, '0$1:');
     const slotCols  = cols.filter(c => !knownCols.includes(c));
 
     const studentBulk    = [];
@@ -73,8 +75,9 @@ export async function POST(request) {
       for (const slotCol of slotCols) {
         const val = row[slotCol]?.trim().toUpperCase();
         if (!val || !['P', 'A'].includes(val)) continue;
+        const slot = normalizeSlot(slotCol);
         attendanceBulk.push({ updateOne: {
-          filter: { rollNumber, date: attendanceDate, slot: slotCol },
+          filter: { rollNumber, date: attendanceDate, slot },
           update: { $set: { status: val === 'P' ? 'present' : 'absent', week, year, markedAt: new Date() } },
           upsert: true,
         }});
@@ -127,7 +130,7 @@ export async function POST(request) {
       updated:         stuResult.modifiedCount  || 0,
       attendanceCount: attCount,
       total:           rollNumbers.length,
-      slotCols,
+      slotCols: slotCols.map(normalizeSlot),
       date:            attendanceDate,
       reupload,
     });
