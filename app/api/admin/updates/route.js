@@ -35,6 +35,19 @@ export async function POST(request) {
   }
 }
 
+export async function PATCH(request) {
+  try {
+    if (!await adminOnly()) return NextResponse.json({ error: 'Admin only' }, { status: 403 });
+    const { id, pinned } = await request.json();
+    if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
+    await connectDB();
+    const update = await Update.findByIdAndUpdate(id, { $set: { pinned } }, { new: true });
+    return NextResponse.json(update);
+  } catch (e) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
+  }
+}
+
 export async function DELETE(request) {
   try {
     if (!await adminOnly()) return NextResponse.json({ error: 'Admin only' }, { status: 403 });

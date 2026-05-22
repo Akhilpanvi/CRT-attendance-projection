@@ -61,6 +61,15 @@ export default function UpdatesPage() {
     await load();
   }
 
+  async function handleTogglePin(id, currentPinned) {
+    await fetch('/api/admin/updates', {
+      method:  'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ id, pinned: !currentPinned }),
+    });
+    await load();
+  }
+
   function formatDate(d) {
     return new Date(d).toLocaleString('en-IN', {
       timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short',
@@ -148,13 +157,21 @@ export default function UpdatesPage() {
                 )}
                 <p className="text-sm opacity-90 whitespace-pre-wrap">{u.content}</p>
               </div>
-              <button
-                onClick={() => handleDelete(u._id)}
-                className="shrink-0 opacity-50 hover:opacity-100 transition-opacity text-current">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <div className="flex items-center gap-1 shrink-0">
+                <button
+                  onClick={() => handleTogglePin(u._id, u.pinned)}
+                  title={u.pinned ? 'Unpin' : 'Pin to top'}
+                  className="opacity-50 hover:opacity-100 transition-opacity text-current text-xs font-medium px-1.5 py-0.5 rounded border border-current">
+                  {u.pinned ? 'Unpin' : 'Pin'}
+                </button>
+                <button
+                  onClick={() => handleDelete(u._id)}
+                  className="opacity-50 hover:opacity-100 transition-opacity text-current">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         ))}
