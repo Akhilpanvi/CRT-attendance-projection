@@ -11,7 +11,7 @@ export async function POST(request) {
     if (!session || session.role !== 'admin')
       return NextResponse.json({ error: 'Admin only' }, { status: 403 });
 
-    const { name, rollNumber, branch, dept, cluster, crtSec, crtRoom, role } = await request.json();
+    const { name, rollNumber, branch, dept, cluster, crtSec, crtRoom, role, permissions } = await request.json();
     if (!name?.trim() || !rollNumber?.trim())
       return NextResponse.json({ error: 'Name and registration number are required' }, { status: 400 });
 
@@ -25,6 +25,11 @@ export async function POST(request) {
     const effectiveRole = role === 'admin' ? 'admin' : 'student';
     const hash = await bcrypt.hash(roll, 10);
 
+    // Admin permissions: null = full access, array = restricted
+    const effectivePerms = effectiveRole === 'admin'
+      ? (Array.isArray(permissions) && permissions.length > 0 ? permissions : null)
+      : null;
+
     await Promise.all([
       User.create({
         username:           roll,
@@ -32,6 +37,7 @@ export async function POST(request) {
         role:               effectiveRole,
         rollNumber:         roll,
         mustChangePassword: true,
+        permissions:        effectivePerms,
       }),
       effectiveRole === 'student'
         ? Student.findOneAndUpdate(
@@ -42,7 +48,7 @@ export async function POST(request) {
         : Promise.resolve(),
     ]);
 
-    return NextResponse.json({ success: true, rollNumber: roll, role: effectiveRole });
+    return NextResponse.json({ success: true, rollNumber: roll, role: effectiveRole, permissions: effectivePerms });
   } catch (e) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
