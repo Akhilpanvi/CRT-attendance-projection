@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { fmtDate, pctColor } from '@/lib/helpers';
+import { fmtDate, pctColor, TIME_SLOTS } from '@/lib/helpers';
 import ThemeToggle from '@/components/ThemeToggle';
 
 function calcBunk(present, total, threshold = 75) {
@@ -68,6 +68,8 @@ const UPDATE_COLORS = {
   important: { bar: 'bg-rose-400',  wrap: 'bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800',  label: 'text-rose-500 dark:text-rose-400',  body: 'text-rose-700 dark:text-rose-300' },
 };
 
+const today = new Date().toISOString().split('T')[0];
+
 export default function StudentPage() {
   const router = useRouter();
   const [data, setData]       = useState(null);
@@ -75,14 +77,84 @@ export default function StudentPage() {
   const [loading, setLoading] = useState(true);
   const [updates, setUpdates] = useState([]);
 
+  // Self-tracking state
+  const [selfByDate,    setSelfByDate]    = useState({});
+  const [trackerDate,   setTrackerDate]   = useState(today);
+  const [trackerSlots,  setTrackerSlots]  = useState({});
+  const [trackerSaving, setTrackerSaving] = useState(false);
+  const [trackerSaved,  setTrackerSaved]  = useState(false);
+
   useEffect(() => {
     fetch('/api/student/me')
       .then(r => r.json())
       .then(d => { if (d.error) setError(d.error); else setData(d); })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
+
     fetch('/api/updates').then(r => r.json()).then(d => setUpdates(Array.isArray(d) ? d : [])).catch(() => {});
+
+    fetch('/api/student/self-attendance')
+      .then(r => r.json())
+      .then(records => {
+        if (!Array.isArray(records)) return;
+        const byDate = {};
+        for (const r of records) {
+          if (!byDate[r.date]) byDate[r.date] = {};
+          byDate[r.date][r.slot] = r.status;
+        }
+        setSelfByDate(byDate);
+        setTrackerSlots(byDate[today] || {});
+      })
+      .catch(() => {});
   }, []);
+
+  // Sync tracker slots when date changes
+  useEffect(() => {
+    setTrackerSlots(selfByDate[trackerDate] || {});
+    setTrackerSaved(false);
+  }, [trackerDate]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function handleSlotToggle(slot, val) {
+    setTrackerSlots(prev => {
+      if (prev[slot] === val) {
+        const next = { ...prev };
+        delete next[slot];
+        return next;
+      }
+      return { ...prev, [slot]: val };
+    });
+    setTrackerSaved(false);
+  }
+
+  async function handleTrackerSave() {
+    setTrackerSaving(true);
+    const prevSlots    = selfByDate[trackerDate] ? Object.keys(selfByDate[trackerDate]) : [];
+    const currentSlots = Object.keys(trackerSlots);
+    const deletedSlots = prevSlots.filter(s => !currentSlots.includes(s));
+
+    const entries = [
+      ...Object.entries(trackerSlots).map(([slot, status]) => ({ slot, status })),
+      ...deletedSlots.map(slot => ({ slot, status: null })),
+    ];
+
+    try {
+      const r = await fetch('/api/student/self-attendance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date: trackerDate, entries }),
+      });
+      if (r.ok) {
+        setSelfByDate(prev => {
+          const updated = { ...prev };
+          if (currentSlots.length === 0) delete updated[trackerDate];
+          else updated[trackerDate] = { ...trackerSlots };
+          return updated;
+        });
+        setTrackerSaved(true);
+      }
+    } catch (_) {}
+    finally { setTrackerSaving(false); }
+  }
 
   async function logout() {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -107,6 +179,20 @@ export default function StudentPage() {
   const b85    = calcBunk(stats.present, stats.total, 85);
   const advice = generateAdvice(stats.present, stats.total, pct, stats.weeks || []);
   const dates  = Object.keys(stats.byDate || {}).sort().reverse();
+
+  // Projected stats
+  const selfEntries   = Object.values(selfByDate).flatMap(bySlot => Object.values(bySlot));
+  const selfTotal     = selfEntries.length;
+  const selfPresent   = selfEntries.filter(s => s === 'present').length;
+  const projTotal     = stats.total + selfTotal;
+  const projPresent   = stats.present + selfPresent;
+  const projPct       = projTotal > 0 ? Math.round((projPresent / projTotal) * 100) : 0;
+
+  // Merged attendance log
+  const officialDateSet = new Set(dates);
+  const selfOnlyDates   = Object.keys(selfByDate).filter(d => !officialDateSet.has(d)).sort().reverse();
+  const allDates        = [...dates, ...selfOnlyDates].sort().reverse();
+  const allSlots        = stats.slots.length > 0 ? stats.slots : TIME_SLOTS;
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -196,6 +282,25 @@ export default function StudentPage() {
           ))}
         </div>
 
+        {/* Projected stats banner */}
+        {selfTotal > 0 && (
+          <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800
+                          rounded-lg px-4 py-3 flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-400">
+                Projected Attendance
+              </p>
+              <p className="text-xs text-indigo-600 dark:text-indigo-500 mt-0.5">
+                Official: {stats.present}/{stats.total} · Self-tracked: +{selfPresent} present, +{selfTotal - selfPresent} absent ({selfTotal} sessions not yet uploaded)
+              </p>
+            </div>
+            <div className="shrink-0 text-right">
+              <div className="text-2xl font-bold" style={{ color: pctColor(projPct) }}>{projPct}%</div>
+              <div className="text-[10px] text-indigo-500 dark:text-indigo-400">{projPresent}/{projTotal}</div>
+            </div>
+          </div>
+        )}
+
         {/* Session Planner */}
         {stats.total > 0 && (
           <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-4">
@@ -253,17 +358,97 @@ export default function StudentPage() {
           </div>
         )}
 
-        {/* Attendance log */}
-        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
-                        rounded-lg overflow-hidden">
+        {/* Track Your Attendance */}
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
           <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700">
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Attendance Log</h2>
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Track Your Attendance</h2>
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-              {dates.length} session{dates.length !== 1 ? 's' : ''} recorded
+              Mark your own attendance to see a projected percentage. Replaced automatically when admin uploads official records.
             </p>
           </div>
 
-          {dates.length === 0 ? (
+          <div className="p-4 space-y-4">
+            {/* Date picker */}
+            <div className="flex items-center gap-3">
+              <label className="text-xs font-medium text-slate-500 dark:text-slate-400 shrink-0">Date</label>
+              <input
+                type="date"
+                value={trackerDate}
+                onChange={e => setTrackerDate(e.target.value)}
+                className="form-input py-1 text-sm"
+                style={{ maxWidth: 160 }}
+              />
+            </div>
+
+            {/* Slot toggles */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {TIME_SLOTS.map(slot => (
+                <div key={slot} className="flex items-center gap-2">
+                  <span className="text-xs text-slate-500 dark:text-slate-400 w-28 shrink-0">{slot}</span>
+                  <button
+                    onClick={() => handleSlotToggle(slot, 'present')}
+                    className={`px-3 py-1 rounded text-xs font-semibold transition-colors ${
+                      trackerSlots[slot] === 'present'
+                        ? 'bg-green-500 text-white'
+                        : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-green-100 dark:hover:bg-green-900/30 hover:text-green-700 dark:hover:text-green-400'
+                    }`}>P</button>
+                  <button
+                    onClick={() => handleSlotToggle(slot, 'absent')}
+                    className={`px-3 py-1 rounded text-xs font-semibold transition-colors ${
+                      trackerSlots[slot] === 'absent'
+                        ? 'bg-red-500 text-white'
+                        : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400'
+                    }`}>A</button>
+                  {trackerSlots[slot] && (
+                    <button
+                      onClick={() => handleSlotToggle(slot, trackerSlots[slot])}
+                      className="text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400
+                                 transition-colors text-sm leading-none">×</button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Save row */}
+            <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-700">
+              <p className="text-[10px] text-slate-400 dark:text-slate-500">
+                {Object.keys(trackerSlots).length > 0
+                  ? `${Object.values(trackerSlots).filter(v => v === 'present').length} present · ${Object.values(trackerSlots).filter(v => v === 'absent').length} absent marked`
+                  : 'No slots marked for this date'}
+              </p>
+              <button
+                onClick={handleTrackerSave}
+                disabled={trackerSaving}
+                className={`text-xs font-medium px-4 py-1.5 rounded transition-colors ${
+                  trackerSaved
+                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800'
+                    : 'btn-primary'
+                }`}>
+                {trackerSaving ? 'Saving…' : trackerSaved ? 'Saved ✓' : 'Save'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Attendance log */}
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
+                        rounded-lg overflow-hidden">
+          <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Attendance Log</h2>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                {dates.length} official · {selfOnlyDates.length} self-tracked
+              </p>
+            </div>
+            {selfOnlyDates.length > 0 && (
+              <span className="text-[10px] text-indigo-500 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20
+                               border border-indigo-200 dark:border-indigo-800 rounded px-2 py-0.5">
+                Draft rows shown
+              </span>
+            )}
+          </div>
+
+          {allDates.length === 0 ? (
             <p className="text-slate-400 text-sm text-center py-10">No attendance records yet.</p>
           ) : (
             <div className="overflow-x-auto">
@@ -271,19 +456,32 @@ export default function StudentPage() {
                 <thead>
                   <tr>
                     <th className="tbl-header">Date</th>
-                    {stats.slots.map(sl => <th key={sl} className="tbl-header">{sl}</th>)}
+                    {allSlots.map(sl => <th key={sl} className="tbl-header">{sl}</th>)}
                     <th className="tbl-header text-center">P / T</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {dates.map(dt => {
-                    const p = stats.slots.filter(sl => stats.byDate[dt][sl] === 'present').length;
-                    const t = stats.slots.filter(sl => !!stats.byDate[dt][sl]).length;
+                  {allDates.map(dt => {
+                    const isOfficial = officialDateSet.has(dt);
+                    const rowData    = isOfficial ? (stats.byDate[dt] || {}) : (selfByDate[dt] || {});
+                    const p = allSlots.filter(sl => rowData[sl] === 'present').length;
+                    const t = allSlots.filter(sl => !!rowData[sl]).length;
                     return (
-                      <tr key={dt} className="tbl-row">
-                        <td className="tbl-cell font-medium">{fmtDate(dt)}</td>
-                        {stats.slots.map(sl => {
-                          const v = stats.byDate[dt][sl];
+                      <tr key={dt}
+                          className={isOfficial
+                            ? 'tbl-row'
+                            : 'bg-indigo-50/50 dark:bg-indigo-900/10'}>
+                        <td className="tbl-cell font-medium">
+                          <span>{fmtDate(dt)}</span>
+                          {!isOfficial && (
+                            <span className="ml-1.5 text-[9px] font-semibold text-indigo-500 dark:text-indigo-400
+                                             bg-indigo-100 dark:bg-indigo-900/40 px-1 py-0.5 rounded">
+                              Draft
+                            </span>
+                          )}
+                        </td>
+                        {allSlots.map(sl => {
+                          const v = rowData[sl];
                           return (
                             <td key={sl} className="tbl-cell text-center">
                               {v === 'present' ? <span className="badge-present">P</span>
