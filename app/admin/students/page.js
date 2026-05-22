@@ -13,7 +13,10 @@ async function downloadAttendanceReport(students) {
 
   // Sheet 1: Overall attendance summary
   const rows = students.map((s, i) => {
-    const sp = s.stats?.sp ?? 0;
+    const sp      = s.stats?.sp      ?? 0;
+    const present = s.stats?.present ?? 0;
+    const total   = s.stats?.total   ?? 0;
+    const origPct = total > 0 ? Math.round(((present - sp) / total) * 100) : 0;
     return {
       '#':                        i + 1,
       'Name':                     s.name,
@@ -23,11 +26,12 @@ async function downloadAttendanceReport(students) {
       'Cluster':                  s.cluster || '',
       'CRT Section':              s.crtSec  || '',
       'CRT Room':                 s.crtRoom || '',
-      'Present (incl. SP)':       s.stats?.present ?? 0,
+      'Present (incl. SP)':       present,
       'SP (Special Permission)':  sp,
-      'Absent':                   s.stats?.absent  ?? 0,
-      'Total':                    s.stats?.total   ?? 0,
-      'Attendance %':             s.stats?.overallPct ?? 0,
+      'Absent':                   s.stats?.absent ?? 0,
+      'Total':                    total,
+      'Original %':               origPct,
+      'Attendance % (with SP)':   s.stats?.overallPct ?? 0,
       'Notes':                    sp > 0 ? `${sp} slot${sp > 1 ? 's' : ''} manually marked SP` : '',
     };
   });
@@ -36,15 +40,24 @@ async function downloadAttendanceReport(students) {
   // Sheet 2: SP edited students
   const spStudents = students.filter(s => (s.stats?.sp ?? 0) > 0);
   if (spStudents.length > 0) {
-    const spRows = spStudents.map((s, i) => ({
-      '#':                       i + 1,
-      'Name':                    s.name,
-      'Reg. No.':                s.rollNumber,
-      'SP Slots':                s.stats?.sp ?? 0,
-      'Present (incl. SP)':      s.stats?.present ?? 0,
-      'Total':                   s.stats?.total   ?? 0,
-      'Attendance %':            s.stats?.overallPct ?? 0,
-    }));
+    const spRows = spStudents.map((s, i) => {
+      const sp      = s.stats?.sp      ?? 0;
+      const present = s.stats?.present ?? 0;
+      const total   = s.stats?.total   ?? 0;
+      const origPct = total > 0 ? Math.round(((present - sp) / total) * 100) : 0;
+      return {
+        '#':                       i + 1,
+        'Name':                    s.name,
+        'Reg. No.':                s.rollNumber,
+        'SP Slots':                sp,
+        'Original Present':        present - sp,
+        'Present (incl. SP)':      present,
+        'Total':                   total,
+        'Original %':              origPct,
+        'Attendance % (with SP)':  s.stats?.overallPct ?? 0,
+        'SP Impact':               `+${(s.stats?.overallPct ?? 0) - origPct}%`,
+      };
+    });
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(spRows), 'SP Edited Students');
   }
 
