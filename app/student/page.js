@@ -300,64 +300,69 @@ export default function StudentPage() {
       <main className="max-w-4xl mx-auto px-4 py-6 space-y-4">
         {/* Notices panel */}
         {updates.length > 0 && (
-          <div className="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-white/8
+          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
                           rounded-xl overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-2.5
-                            border-b border-slate-100 dark:border-white/7
-                            bg-slate-50 dark:bg-white/2">
+                            border-b border-slate-200 dark:border-slate-700
+                            bg-slate-50 dark:bg-slate-800">
               <div className="flex items-center gap-2">
                 <div className="w-[5px] h-[5px] rounded-full bg-blue-500" />
                 <span className="text-[10px] font-bold uppercase tracking-widest
-                                 text-slate-700 dark:text-white/70">Notices</span>
+                                 text-slate-600 dark:text-slate-300">Notices</span>
               </div>
-              <span className="text-[10px] text-slate-400 dark:text-white/25">
+              <span className="text-[10px] text-slate-400 dark:text-slate-500">
                 Showing {updates.length}
               </span>
             </div>
             {/* Column headers */}
-            <div className="flex gap-2.5 px-4 py-1.5 border-b border-slate-100 dark:border-white/5
-                            bg-slate-50/50 dark:bg-white/[0.015] text-[10px] font-semibold
-                            text-slate-400 dark:text-white/25">
+            <div className="flex gap-2.5 px-4 py-1.5 border-b border-slate-100 dark:border-slate-700
+                            bg-slate-50 dark:bg-slate-800/80 text-[10px] font-semibold
+                            text-slate-400 dark:text-slate-500">
               <span className="min-w-[16px]">#</span>
               <span className="flex-1">Subject / Notice</span>
               <span className="whitespace-nowrap">Date</span>
             </div>
-            {/* Rows */}
+            {/* Rows — capped height with scroll */}
+            <div className="max-h-72 overflow-y-auto">
             {updates.map((u, i) => {
-              const cc = UPDATE_COLORS[u.category] || UPDATE_COLORS.info;
               const cl = u.category === 'important' ? 'Important' : u.category === 'warning' ? 'Warning' : 'Info';
+              const noticeDate = new Date(u.createdAt).toLocaleString('en-IN', {
+                timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short',
+                year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true,
+              });
               return (
                 <div key={u._id}
-                     className="flex gap-2.5 px-4 py-3 border-b border-slate-100 dark:border-white/5
+                     className="flex gap-2.5 px-4 py-3 border-b border-slate-100 dark:border-slate-700
                                 last:border-0 items-start">
-                  <span className="text-[11px] min-w-[16px] pt-px text-slate-300 dark:text-white/20">
+                  <span className="text-[11px] min-w-[16px] pt-px text-slate-300 dark:text-slate-600">
                     {i + 1}
                   </span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2 mb-1">
                       <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider
-                        ${u.category === 'important' ? 'bg-rose-100 dark:bg-rose-900/25 text-rose-600 dark:text-rose-400'
-                          : u.category === 'warning' ? 'bg-amber-100 dark:bg-amber-900/25 text-amber-600 dark:text-amber-400'
-                          : 'bg-blue-100 dark:bg-blue-900/25 text-blue-600 dark:text-blue-400'}`}>
+                        ${u.category === 'important' ? 'bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400'
+                          : u.category === 'warning'  ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
+                          : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'}`}>
                         {u.pinned ? '📌 ' : ''}{cl}
                       </span>
-                      <span className="text-[10px] text-slate-400 dark:text-white/25 whitespace-nowrap shrink-0">
-                        {fmtDate(u.createdAt)}
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500 whitespace-nowrap shrink-0">
+                        {noticeDate}
                       </span>
                     </div>
                     {u.title && (
-                      <p className="text-xs font-semibold text-slate-900 dark:text-white/88 mb-0.5 leading-snug">
+                      <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 mb-0.5 leading-snug">
                         {u.title}
                       </p>
                     )}
-                    <p className="text-xs text-slate-500 dark:text-white/50 leading-relaxed whitespace-pre-wrap">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed whitespace-pre-wrap">
                       {u.content}
                     </p>
                   </div>
                 </div>
               );
             })}
+            </div>
           </div>
         )}
 
