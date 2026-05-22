@@ -69,12 +69,14 @@ function Modal({ roll, name, onClose, showToast }) {
   const [resetting, setResetting] = useState(false);
   const [resetDone, setResetDone] = useState(false);
 
-  useEffect(() => {
+  function load() {
     fetch(`/api/students/${roll}`)
       .then(r => r.json())
       .then(d => { if (d.error) setErr(d.error); else setData(d); })
       .catch(e => setErr(e.message));
-  }, [roll]);
+  }
+
+  useEffect(() => { load(); }, [roll]);
 
   async function resetPassword() {
     if (!confirm(`Reset password for ${name} (${roll}) back to their Reg. No.?`)) return;
@@ -124,45 +126,54 @@ function Modal({ roll, name, onClose, showToast }) {
         <div className="overflow-y-auto p-5 flex-1">
           {err   && <div className="alert-danger">{err}</div>}
           {!data && !err && <p className="text-slate-400 text-sm">Loading…</p>}
-          {data  && <DetailView data={data} roll={roll} showToast={showToast} />}
+          {data  && <DetailView data={data} roll={roll} showToast={showToast} refetch={load} />}
         </div>
       </div>
     </div>
   );
 }
 
-function DetailView({ data, roll, showToast }) {
-  const { student: s, stats: initStats } = data;
-  const [byDate, setByDate] = useState(initStats.byDate || {});
-  const [editing, setEditing] = useState(null); // { date, slot }
+const SP_CLS = 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400';
+
+function SpBadge() {
+  return <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold ${SP_CLS}`}>SP</span>;
+}
+
+function DetailView({ data, roll, showToast, refetch }) {
+  const { student: s, stats } = data;
+  const byDate = stats.byDate || {};
+  const dates  = Object.keys(byDate).sort().reverse();
+
+  const total = stats.total;
+  const pres  = stats.present;
+  const pct   = stats.overallPct;
+
+  // editing: { date, slot, pending: 'present'|'absent'|'sp'|null }
+  const [editing, setEditing] = useState(null);
   const [saving, setSaving]   = useState(false);
 
-  const dates = Object.keys(byDate).sort().reverse();
+  function openEdit(date, slot) {
+    setEditing(prev =>
+      prev?.date === date && prev?.slot === slot ? null : { date, slot, pending: null }
+    );
+  }
 
-  const present = stats => {
-    let p = 0;
-    for (const dt of Object.keys(stats)) for (const sl of Object.keys(stats[dt]))
-      if (stats[dt][sl] === 'present' || stats[dt][sl] === 'sp') p++;
-    return p;
-  };
-  const total   = Object.values(byDate).reduce((s, d) => s + Object.keys(d).length, 0);
-  const pres    = present(byDate);
-  const pct     = total > 0 ? Math.round((pres / total) * 100) : 0;
-
-  async function applyStatus(date, slot, status) {
+  async function saveEdit() {
+    if (!editing?.pending) return;
     setSaving(true);
     try {
       const r = await fetch('/api/admin/mark-sp', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rollNumber: roll, date, slot, status }),
+        body: JSON.stringify({ rollNumber: roll, date: editing.date, slot: editing.slot, status: editing.pending }),
       });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error);
-      setByDate(prev => ({ ...prev, [date]: { ...prev[date], [slot]: status } }));
-      showToast(`Marked ${slot} on ${fmtDate(date)} as ${status.toUpperCase()}`);
+      showToast(`Saved — ${editing.slot} on ${fmtDate(editing.date)} → ${editing.pending.toUpperCase()}`);
+      setEditing(null);
+      refetch();
     } catch (e) { showToast(e.message, 'error'); }
-    finally { setSaving(false); setEditing(null); }
+    finally { setSaving(false); }
   }
 
   return (
@@ -199,7 +210,7 @@ function DetailView({ data, roll, showToast }) {
       </div>
 
       <p className="text-[10px] text-slate-400 dark:text-slate-500 mb-2">
-        Click any slot badge to edit · SP = Special Permission (counts as present)
+        Click any slot badge to edit · <span className={`font-semibold ${SP_CLS} px-1 rounded`}>SP</span> = Special Permission (placement drive, counts as present)
       </p>
 
       {dates.length === 0
@@ -210,45 +221,64 @@ function DetailView({ data, roll, showToast }) {
               <thead>
                 <tr>
                   <th className="tbl-header">Date</th>
-                  {initStats.slots.map(sl => <th key={sl} className="tbl-header">{sl}</th>)}
+                  {stats.slots.map(sl => <th key={sl} className="tbl-header">{sl}</th>)}
                   <th className="tbl-header text-center">P/T</th>
                 </tr>
               </thead>
               <tbody>
                 {dates.map(dt => {
-                  const p = initStats.slots.filter(sl => byDate[dt]?.[sl] === 'present' || byDate[dt]?.[sl] === 'sp').length;
-                  const t = initStats.slots.filter(sl => !!byDate[dt]?.[sl]).length;
+                  const p = stats.slots.filter(sl => byDate[dt]?.[sl] === 'present' || byDate[dt]?.[sl] === 'sp').length;
+                  const t = stats.slots.filter(sl => !!byDate[dt]?.[sl]).length;
                   return (
                     <tr key={dt} className="tbl-row">
                       <td className="tbl-cell font-semibold whitespace-nowrap">{fmtDate(dt)}</td>
-                      {initStats.slots.map(sl => {
+                      {stats.slots.map(sl => {
                         const v = byDate[dt]?.[sl];
-                        const isEditing = editing?.date === dt && editing?.slot === sl;
+                        const isOpen = editing?.date === dt && editing?.slot === sl;
                         return (
                           <td key={sl} className="tbl-cell text-center relative">
-                            {isEditing ? (
-                              <div className="absolute z-10 top-0 left-1/2 -translate-x-1/2 mt-1
-                                              bg-white dark:bg-slate-700 border border-slate-200
-                                              dark:border-slate-600 rounded shadow-lg flex gap-1 p-1">
-                                {[['P','present','bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400'],
-                                  ['A','absent','bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'],
-                                  ['SP','sp','bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300']].map(([lbl,val,cls]) => (
-                                  <button key={val} disabled={saving}
-                                    onClick={() => applyStatus(dt, sl, val)}
-                                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${cls} hover:opacity-80`}>
-                                    {lbl}
+                            {isOpen && (
+                              <div className="absolute z-20 bottom-full left-1/2 -translate-x-1/2 mb-1
+                                              bg-white dark:bg-slate-800 border border-slate-200
+                                              dark:border-slate-600 rounded-lg shadow-xl p-2 min-w-[130px]">
+                                <p className="text-[9px] text-slate-400 mb-1.5 text-center">Select then Save</p>
+                                <div className="flex gap-1 justify-center mb-2">
+                                  {[['P','present','bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 border-green-300 dark:border-green-700'],
+                                    ['A','absent','bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 border-red-300 dark:border-red-700'],
+                                    ['SP','sp',SP_CLS + ' border-yellow-300 dark:border-yellow-700']].map(([lbl, val, cls]) => {
+                                    const selected = editing.pending === val;
+                                    return (
+                                      <button key={val}
+                                        onClick={() => setEditing(e => ({ ...e, pending: val }))}
+                                        className={`text-[10px] font-bold px-2 py-1 rounded border-2 transition-all
+                                          ${cls} ${selected ? 'ring-2 ring-offset-1 ring-slate-400 scale-110' : 'opacity-70 hover:opacity-100'}`}>
+                                        {lbl}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                                <div className="flex gap-1">
+                                  <button
+                                    disabled={!editing.pending || saving}
+                                    onClick={saveEdit}
+                                    className="flex-1 text-[10px] font-semibold py-1 rounded
+                                               bg-slate-800 dark:bg-slate-600 text-white
+                                               disabled:opacity-40 hover:bg-slate-700 transition-colors">
+                                    {saving ? '…' : 'Save'}
                                   </button>
-                                ))}
-                                <button onClick={() => setEditing(null)}
-                                  className="text-[10px] px-1 text-slate-400 hover:text-slate-600">✕</button>
+                                  <button onClick={() => setEditing(null)}
+                                    className="text-[10px] px-2 py-1 rounded border border-slate-200
+                                               dark:border-slate-600 text-slate-400 hover:text-slate-600">
+                                    ✕
+                                  </button>
+                                </div>
                               </div>
-                            ) : null}
-                            <button
-                              onClick={() => setEditing(isEditing ? null : { date: dt, slot: sl })}
+                            )}
+                            <button onClick={() => openEdit(dt, sl)}
                               className="cursor-pointer hover:opacity-70 transition-opacity">
                               {v === 'present' ? <span className="badge-present">P</span>
                                : v === 'absent'  ? <span className="badge-absent">A</span>
-                               : v === 'sp'      ? <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">SP</span>
+                               : v === 'sp'      ? <SpBadge />
                                : <span className="badge-dash">—</span>}
                             </button>
                           </td>

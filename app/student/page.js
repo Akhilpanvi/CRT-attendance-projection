@@ -80,7 +80,8 @@ export default function StudentPage() {
   const trackerRef = useRef(null);
 
   const [selfByDate,     setSelfByDate]     = useState({});
-  const [slotEditing,    setSlotEditing]    = useState(null); // { date, slot }
+  const [slotEditing,    setSlotEditing]    = useState(null); // { date, slot, pending: null|status }
+  const [slotSaving,     setSlotSaving]     = useState(false);
   const [trackerEntries, setTrackerEntries] = useState([
     { id: 1, date: today, slots: {}, saving: false, saved: false, expanded: true },
   ]);
@@ -199,28 +200,22 @@ export default function StudentPage() {
     } catch (_) {}
   }
 
-  async function applySpStatus(date, slot, status) {
+  async function saveSlotEdit() {
+    if (!slotEditing?.pending) return;
+    const { date, slot, pending } = slotEditing;
+    setSlotSaving(true);
     try {
       const r = await fetch('/api/admin/mark-sp', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rollNumber: data.student.rollNumber, date, slot, status }),
+        body: JSON.stringify({ rollNumber: data.student.rollNumber, date, slot, status: pending }),
       });
       if (!r.ok) return;
-      setData(prev => {
-        const prevStatus = prev.stats.byDate[date]?.[slot];
-        const wasPresent = prevStatus === 'present' || prevStatus === 'sp';
-        const isPresent  = status === 'present' || status === 'sp';
-        return {
-          ...prev,
-          stats: {
-            ...prev.stats,
-            present: prev.stats.present + (isPresent ? 1 : 0) - (wasPresent ? 1 : 0),
-            byDate: { ...prev.stats.byDate, [date]: { ...prev.stats.byDate[date], [slot]: status } },
-          },
-        };
-      });
+      // Re-fetch to get accurate updated % from server
+      const fresh = await fetch('/api/student/me').then(res => res.json());
+      if (!fresh.error) setData(fresh);
     } catch (_) {}
+    setSlotSaving(false);
     setSlotEditing(null);
   }
 
@@ -734,33 +729,53 @@ export default function StudentPage() {
                         </td>
                         {allSlots.map(sl => {
                           const v = rowData[sl];
-                          const isEditing = isOfficial && slotEditing?.date === dt && slotEditing?.slot === sl;
+                          const isOpen = isOfficial && slotEditing?.date === dt && slotEditing?.slot === sl;
                           return (
                             <td key={sl} className="tbl-cell text-center relative">
-                              {isEditing && (
-                                <div className="absolute z-10 bottom-full left-1/2 -translate-x-1/2 mb-1
-                                                bg-white dark:bg-slate-700 border border-slate-200
-                                                dark:border-slate-600 rounded shadow-lg flex gap-1 p-1">
-                                  {[['P','present','bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400'],
-                                    ['A','absent','bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'],
-                                    ['SP','sp','bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300']].map(([lbl,val,cls]) => (
-                                    <button key={val}
-                                      onClick={() => applySpStatus(dt, sl, val)}
-                                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${cls} hover:opacity-80`}>
-                                      {lbl}
+                              {isOpen && (
+                                <div className="absolute z-20 bottom-full left-1/2 -translate-x-1/2 mb-1
+                                                bg-white dark:bg-slate-800 border border-slate-200
+                                                dark:border-slate-600 rounded-lg shadow-xl p-2 min-w-[130px]">
+                                  <p className="text-[9px] text-slate-400 mb-1.5 text-center">Select then Save</p>
+                                  <div className="flex gap-1 justify-center mb-2">
+                                    {[['P','present','bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 border-green-300 dark:border-green-700'],
+                                      ['A','absent','bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 border-red-300 dark:border-red-700'],
+                                      ['SP','sp','bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700']].map(([lbl,val,cls]) => {
+                                        const selected = slotEditing?.pending === val;
+                                        return (
+                                          <button key={val}
+                                            onClick={() => setSlotEditing(e => ({ ...e, pending: val }))}
+                                            className={`text-[10px] font-bold px-2 py-1 rounded border-2 transition-all
+                                              ${cls} ${selected ? 'ring-2 ring-offset-1 ring-slate-400 scale-110' : 'opacity-70 hover:opacity-100'}`}>
+                                            {lbl}
+                                          </button>
+                                        );
+                                    })}
+                                  </div>
+                                  <div className="flex gap-1">
+                                    <button
+                                      disabled={!slotEditing?.pending || slotSaving}
+                                      onClick={saveSlotEdit}
+                                      className="flex-1 text-[10px] font-semibold py-1 rounded
+                                                 bg-slate-800 dark:bg-slate-600 text-white
+                                                 disabled:opacity-40 hover:bg-slate-700 transition-colors">
+                                      {slotSaving ? '…' : 'Save'}
                                     </button>
-                                  ))}
-                                  <button onClick={() => setSlotEditing(null)}
-                                    className="text-[10px] px-1 text-slate-400 hover:text-slate-600">✕</button>
+                                    <button onClick={() => setSlotEditing(null)}
+                                      className="text-[10px] px-2 py-1 rounded border border-slate-200
+                                                 dark:border-slate-600 text-slate-400 hover:text-slate-600">
+                                      ✕
+                                    </button>
+                                  </div>
                                 </div>
                               )}
                               {isOfficial ? (
                                 <button
-                                  onClick={() => setSlotEditing(isEditing ? null : { date: dt, slot: sl })}
+                                  onClick={() => setSlotEditing(isOpen ? null : { date: dt, slot: sl, pending: null })}
                                   className="cursor-pointer hover:opacity-70 transition-opacity">
                                   {v === 'present' ? <span className="badge-present">P</span>
                                    : v === 'absent'  ? <span className="badge-absent">A</span>
-                                   : v === 'sp'      ? <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">SP</span>
+                                   : v === 'sp'      ? <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400">SP</span>
                                    : <span className="badge-dash">—</span>}
                                 </button>
                               ) : (
