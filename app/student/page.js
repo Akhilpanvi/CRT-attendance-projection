@@ -408,40 +408,91 @@ export default function StudentPage() {
         {/* Session Planner */}
         {stats.total > 0 && (
           <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-4">
-            <div className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-1">Session Planner</div>
-            <div className="text-xs text-slate-400 dark:text-slate-500 mb-3">
-              {stats.present} present out of {stats.total} sessions
+            <div className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3">Session Planner</div>
+
+            {/* Official row */}
+            <div className="mb-3">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                  Official
+                </span>
+                {dates[0] && (
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500">
+                    · till {fmtDate(dates[0])} · {stats.present}/{stats.total} sessions
+                  </span>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {[{ label: '75%', data: b75 }, { label: '85%', data: b85 }].map(({ label, data }) => (
+                  <div key={label}
+                       className="border border-slate-200 dark:border-slate-600
+                                  bg-slate-50 dark:bg-slate-700/40 rounded-lg p-3">
+                    <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">{label} Threshold</div>
+                    {data.canBunk > 0 ? (
+                      <>
+                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">{data.canBunk}</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">sessions flexible</div>
+                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                          ≈ {Math.floor(data.canBunk / 8)}d {data.canBunk % 8 > 0 ? `+ ${data.canBunk % 8}s` : ''}
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-2xl font-bold text-red-600 dark:text-red-400">{data.needAttend}</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">sessions to recover</div>
+                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                          ≈ {Math.ceil(data.needAttend / 8)} week{data.needAttend > 8 ? 's' : ''}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { label: '75% Threshold', data: b75 },
-                { label: '85% Threshold', data: b85 },
-              ].map(({ label, data }) => (
-                <div key={label}
-                     className="border border-slate-200 dark:border-slate-600
-                                bg-slate-50 dark:bg-slate-700/40 rounded-lg p-4">
-                  <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">{label}</div>
-                  {data.canBunk > 0 ? (
-                    <>
-                      <div className="text-3xl font-bold text-green-600 dark:text-green-400">{data.canBunk}</div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">sessions of flexibility</div>
-                      <div className="text-xs text-slate-400 dark:text-slate-500 mt-1.5">
-                        ≈ {Math.floor(data.canBunk / 8)} day{Math.floor(data.canBunk / 8) !== 1 ? 's' : ''}
-                        {data.canBunk % 8 > 0 ? ` + ${data.canBunk % 8} slot${data.canBunk % 8 !== 1 ? 's' : ''}` : ''}
+
+            {/* Projected row — only when self-tracked data exists */}
+            {liveHasData && (() => {
+              const pb75 = calcBunk(liveProjPresent, liveProjTotal, 75);
+              const pb85 = calcBunk(liveProjPresent, liveProjTotal, 85);
+              return (
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-700">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-semibold uppercase tracking-widest text-indigo-500 dark:text-indigo-400">
+                      Projected
+                    </span>
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500">
+                      · with self-tracked · {liveProjPresent}/{liveProjTotal} sessions
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[{ label: '75%', data: pb75 }, { label: '85%', data: pb85 }].map(({ label, data }) => (
+                      <div key={label}
+                           className="border border-indigo-200 dark:border-indigo-800
+                                      bg-indigo-50/50 dark:bg-indigo-900/20 rounded-lg p-3">
+                        <div className="text-[10px] font-semibold text-indigo-400 uppercase tracking-wider mb-1.5">{label} Threshold</div>
+                        {data.canBunk > 0 ? (
+                          <>
+                            <div className="text-2xl font-bold text-green-600 dark:text-green-400">{data.canBunk}</div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">sessions flexible</div>
+                            <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                              ≈ {Math.floor(data.canBunk / 8)}d {data.canBunk % 8 > 0 ? `+ ${data.canBunk % 8}s` : ''}
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="text-2xl font-bold text-red-600 dark:text-red-400">{data.needAttend}</div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">sessions to recover</div>
+                            <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                              ≈ {Math.ceil(data.needAttend / 8)} week{data.needAttend > 8 ? 's' : ''}
+                            </div>
+                          </>
+                        )}
                       </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="text-3xl font-bold text-red-600 dark:text-red-400">{data.needAttend}</div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">sessions to recover</div>
-                      <div className="text-xs text-slate-400 dark:text-slate-500 mt-1.5">
-                        ≈ {Math.ceil(data.needAttend / 8)} week{data.needAttend > 8 ? 's' : ''} of full attendance
-                      </div>
-                    </>
-                  )}
+                    ))}
+                  </div>
                 </div>
-              ))}
-            </div>
+              );
+            })()}
 
             {/* Advice */}
             {advice.length > 0 && (
