@@ -42,3 +42,17 @@ export async function POST(request) {
   if (ops.length) await SelfAttendance.bulkWrite(ops, { ordered: false });
   return NextResponse.json({ success: true });
 }
+
+export async function DELETE(request) {
+  const session = await getSession();
+  if (!session || session.role !== 'student')
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const { date } = await request.json();
+  if (!date) return NextResponse.json({ error: 'Date required' }, { status: 400 });
+
+  const roll = session.rollNumber.toUpperCase();
+  await connectDB();
+  await SelfAttendance.deleteMany({ rollNumber: roll, date });
+  return NextResponse.json({ success: true });
+}
