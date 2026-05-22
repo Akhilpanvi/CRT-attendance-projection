@@ -27,6 +27,7 @@ export async function GET() {
     permissions:        a.permissions,
     mustChangePassword: a.mustChangePassword,
     createdAt:          a.createdAt,
+    isSelf:             a.username === session.username,
   })));
 }
 
