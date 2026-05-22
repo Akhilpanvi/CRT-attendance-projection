@@ -113,21 +113,22 @@ export default function AdminLayout({ children }) {
   const pathname = usePathname();
   const router   = useRouter();
   const [open, setOpen] = useState(false);
-  // null = not yet loaded; [] = loaded but restricted; array with items = specific perms; 'full' = no restrictions
-  const [myPerms, setMyPerms] = useState(null);
+  // null = super-admin (full access, no restrictions); 'full' = fallback; array = specific perms; 'loading' = not yet loaded
+  const [myPerms, setMyPerms] = useState('loading');
 
   useEffect(() => {
     fetch('/api/admin/me')
       .then(r => r.json())
-      .then(d => setMyPerms(d.permissions ?? 'full'))
+      // preserve null (super-admin); only fall back to 'full' on undefined/error
+      .then(d => setMyPerms(d.permissions === undefined ? 'full' : d.permissions))
       .catch(() => setMyPerms('full'));
   }, []);
 
-  // Show nav item if: perms not loaded yet, OR full access, OR permission is in the array
+  // Show nav item if: still loading, OR super-admin (null), OR full access, OR permission in array
   // superAdminOnly items only show for super-admins (permissions === null)
   const visibleNav = navItems.filter(item => {
-    if (item.superAdminOnly) return myPerms === null;
-    return myPerms === null || myPerms === 'full' || (Array.isArray(myPerms) && myPerms.includes(item.permission));
+    if (item.superAdminOnly) return myPerms === 'loading' || myPerms === null;
+    return myPerms === 'loading' || myPerms === null || myPerms === 'full' || (Array.isArray(myPerms) && myPerms.includes(item.permission));
   });
 
   async function logout() {
