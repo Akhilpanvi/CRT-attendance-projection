@@ -14,21 +14,25 @@ function PctBadge({ pct }) {
 const PAGE_SIZES = [10, 50, 100];
 
 export default function ProgressionPage() {
-  const [data,     setData]     = useState(null);
-  const [loading,  setLoading]  = useState(true);
-  const [error,    setError]    = useState('');
-  const [search,   setSearch]   = useState('');
-  const [expanded, setExpanded] = useState({});
-  const [pageSize, setPageSize] = useState(50);
-  const [page,     setPage]     = useState(1);
+  const [data,       setData]       = useState(null);
+  const [loading,    setLoading]    = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error,      setError]      = useState('');
+  const [search,     setSearch]     = useState('');
+  const [expanded,   setExpanded]   = useState({});
+  const [pageSize,   setPageSize]   = useState(50);
+  const [page,       setPage]       = useState(1);
 
-  useEffect(() => {
+  function loadData(isRefresh = false) {
+    if (isRefresh) setRefreshing(true); else setLoading(true);
     fetch('/api/admin/self-progression')
       .then(r => r.json())
-      .then(d => { if (d.error) setError(d.error); else setData(d); })
+      .then(d => { if (d.error) setError(d.error); else { setData(d); setError(''); } })
       .catch(e => setError(e.message))
-      .finally(() => setLoading(false));
-  }, []);
+      .finally(() => { setLoading(false); setRefreshing(false); });
+  }
+
+  useEffect(() => { loadData(); }, []);
 
   function toggle(roll) {
     setExpanded(prev => ({ ...prev, [roll]: !prev[roll] }));
@@ -64,11 +68,27 @@ export default function ProgressionPage() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-4">
-      <div>
-        <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100">Student Self-Tracked Attendance</h1>
-        <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-          Attendance students have projected themselves before official upload
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100">Student Self-Tracked Attendance</h1>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+            Attendance students have projected themselves before official upload
+          </p>
+        </div>
+        <button
+          onClick={() => loadData(true)}
+          disabled={refreshing}
+          className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded border
+                     border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300
+                     hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50
+                     transition-colors shrink-0">
+          <svg className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`}
+               fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          {refreshing ? 'Refreshing…' : 'Refresh'}
+        </button>
       </div>
 
       {/* Summary cards */}
