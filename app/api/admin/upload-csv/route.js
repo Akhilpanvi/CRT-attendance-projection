@@ -76,9 +76,11 @@ export async function POST(request) {
         const val = row[slotCol]?.trim().toUpperCase();
         if (!val || !['P', 'A'].includes(val)) continue;
         const slot = normalizeSlot(slotCol);
+        // Match both normalized '04:30-05:30' and un-normalized '04:30-5:30' forms in DB
+        const slotRegex = new RegExp('^' + slot.replace(/0(\d):/g, '0?$1:') + '$');
         attendanceBulk.push({ updateOne: {
-          filter: { rollNumber, date: attendanceDate, slot },
-          update: { $set: { status: val === 'P' ? 'present' : 'absent', week, year, markedAt: new Date() } },
+          filter: { rollNumber, date: attendanceDate, slot: slotRegex },
+          update: { $set: { status: val === 'P' ? 'present' : 'absent', slot, week, year, markedAt: new Date() } },
           upsert: true,
         }});
       }
