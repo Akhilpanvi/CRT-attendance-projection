@@ -28,6 +28,8 @@ const SORT_OPTIONS = [
   { value: 'name_desc',  label: 'Name Z → A' },
 ];
 
+const PAGE_SIZE = 20;
+
 export default function IrregularPage() {
   const { toast, show } = useToast();
   const [all, setAll]         = useState([]);
@@ -36,6 +38,7 @@ export default function IrregularPage() {
   const [q, setQ]             = useState('');
   const [activePatterns, setActivePatterns] = useState(new Set());
   const [sort, setSort]       = useState('days_desc');
+  const [page, setPage]       = useState(1);
 
   useEffect(() => {
     fetch('/api/admin/irregular')
@@ -57,6 +60,7 @@ export default function IrregularPage() {
       n.has(p) ? n.delete(p) : n.add(p);
       return n;
     });
+    setPage(1);
   }
 
   const filtered = useMemo(() => {
@@ -89,6 +93,9 @@ export default function IrregularPage() {
     return list;
   }, [all, q, activePatterns, sort]);
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paged      = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   return (
     <div>
       <Toast toast={toast} />
@@ -110,7 +117,7 @@ export default function IrregularPage() {
             className="form-input text-xs w-52"
             placeholder="Search name or reg. no."
             value={q}
-            onChange={e => setQ(e.target.value)}
+            onChange={e => { setQ(e.target.value); setPage(1); }}
           />
           <div className="flex items-center gap-1.5 ml-auto">
             <span className="text-xs text-slate-400 shrink-0">Sort:</span>
@@ -159,6 +166,7 @@ export default function IrregularPage() {
                         text-xs text-slate-400 dark:text-slate-500">
           {loading ? 'Analysing…' : `${filtered.length} of ${all.length} students`}
           {activePatterns.size > 0 && ` · filtered by ${activePatterns.size} pattern${activePatterns.size > 1 ? 's' : ''}`}
+          {!loading && totalPages > 1 && ` · Page ${page} of ${totalPages}`}
         </div>
 
         {loading && (
@@ -168,7 +176,7 @@ export default function IrregularPage() {
           <p className="text-center text-slate-400 py-10 text-sm">No irregular attendance detected.</p>
         )}
 
-        {filtered.map(s => (
+        {paged.map((s, idx) => (
           <div key={s.rollNumber}
                className="border-b border-slate-100 dark:border-slate-700 last:border-0">
 
@@ -244,6 +252,36 @@ export default function IrregularPage() {
             )}
           </div>
         ))}
+        {!loading && totalPages > 1 && (
+          <div className="flex items-center justify-between px-4 py-2.5
+                          border-t border-slate-200 dark:border-slate-700">
+            <button
+              className="btn-outline btn-sm"
+              disabled={page === 1}
+              onClick={() => { setPage(p => p - 1); setExpanded(null); }}>
+              Prev
+            </button>
+            <div className="flex items-center gap-1.5">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(pg => (
+                <button
+                  key={pg}
+                  onClick={() => { setPage(pg); setExpanded(null); }}
+                  className={`w-7 h-7 rounded text-xs font-medium transition-colors
+                    ${pg === page
+                      ? 'bg-slate-800 dark:bg-slate-600 text-white'
+                      : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'}`}>
+                  {pg}
+                </button>
+              ))}
+            </div>
+            <button
+              className="btn-outline btn-sm"
+              disabled={page === totalPages}
+              onClick={() => { setPage(p => p + 1); setExpanded(null); }}>
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

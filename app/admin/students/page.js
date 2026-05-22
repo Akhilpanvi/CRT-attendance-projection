@@ -5,23 +5,46 @@ import { useToast, Toast } from '@/components/Toast';
 
 function downloadAttendanceReport(students) {
   import('xlsx').then(XLSX => {
-    const rows = students.map((s, i) => ({
-      '#':             i + 1,
-      'Name':          s.name,
-      'Reg. No.':      s.rollNumber,
-      'Branch':        s.branch  || '',
-      'Department':    s.dept    || '',
-      'Cluster':       s.cluster || '',
-      'CRT Section':   s.crtSec  || '',
-      'CRT Room':      s.crtRoom || '',
-      'Present':       s.stats?.present ?? 0,
-      'Total':         s.stats?.total   ?? 0,
-      'Absent':        s.stats?.absent  ?? 0,
-      'Attendance %':  s.stats?.overallPct ?? 0,
-    }));
-    const ws = XLSX.utils.json_to_sheet(rows);
+    const rows = students.map((s, i) => {
+      const sp = s.stats?.sp ?? 0;
+      return {
+        '#':                        i + 1,
+        'Name':                     s.name,
+        'Reg. No.':                 s.rollNumber,
+        'Branch':                   s.branch  || '',
+        'Department':               s.dept    || '',
+        'Cluster':                  s.cluster || '',
+        'CRT Section':              s.crtSec  || '',
+        'CRT Room':                 s.crtRoom || '',
+        'Present (incl. SP)':       s.stats?.present ?? 0,
+        'SP (Special Permission)':  sp,
+        'Absent':                   s.stats?.absent  ?? 0,
+        'Total':                    s.stats?.total   ?? 0,
+        'Attendance %':             s.stats?.overallPct ?? 0,
+        'Notes':                    sp > 0 ? `${sp} slot${sp > 1 ? 's' : ''} manually marked SP` : '',
+      };
+    });
+
     const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(rows);
     XLSX.utils.book_append_sheet(wb, ws, 'Attendance Report');
+
+    // Second sheet: list every student who has SP entries
+    const spStudents = students.filter(s => (s.stats?.sp ?? 0) > 0);
+    if (spStudents.length > 0) {
+      const spRows = spStudents.map((s, i) => ({
+        '#':                       i + 1,
+        'Name':                    s.name,
+        'Reg. No.':                s.rollNumber,
+        'SP Slots':                s.stats?.sp ?? 0,
+        'Present (incl. SP)':      s.stats?.present ?? 0,
+        'Total':                   s.stats?.total   ?? 0,
+        'Attendance %':            s.stats?.overallPct ?? 0,
+      }));
+      const ws2 = XLSX.utils.json_to_sheet(spRows);
+      XLSX.utils.book_append_sheet(wb, ws2, 'SP Edited Students');
+    }
+
     XLSX.writeFile(wb, `attendance_report_${new Date().toISOString().slice(0, 10)}.xlsx`);
   });
 }

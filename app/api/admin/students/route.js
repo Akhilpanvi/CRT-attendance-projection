@@ -18,6 +18,7 @@ export async function GET() {
           _id:     '$rollNumber',
           total:   { $sum: 1 },
           present: { $sum: { $cond: [{ $in: ['$status', ['present', 'sp']] }, 1, 0] } },
+          sp:      { $sum: { $cond: [{ $eq: ['$status', 'sp'] }, 1, 0] } },
         }},
       ]),
     ]);
@@ -28,6 +29,7 @@ export async function GET() {
         total:      s.total,
         present:    s.present,
         absent:     s.total - s.present,
+        sp:         s.sp || 0,
         overallPct: s.total > 0 ? Math.round((s.present / s.total) * 100) : 0,
       };
     }
