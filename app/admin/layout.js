@@ -96,6 +96,17 @@ const navItems = [
       </svg>
     ),
   },
+  {
+    href: '/admin/admin-accounts',
+    permission: null,
+    superAdminOnly: true,
+    label: 'Admin Accounts',
+    icon: (
+      <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+      </svg>
+    ),
+  },
 ];
 
 export default function AdminLayout({ children }) {
@@ -113,9 +124,11 @@ export default function AdminLayout({ children }) {
   }, []);
 
   // Show nav item if: perms not loaded yet, OR full access, OR permission is in the array
-  const visibleNav = navItems.filter(item =>
-    myPerms === null || myPerms === 'full' || myPerms.includes(item.permission)
-  );
+  // superAdminOnly items only show for super-admins (permissions === null)
+  const visibleNav = navItems.filter(item => {
+    if (item.superAdminOnly) return myPerms === null;
+    return myPerms === null || myPerms === 'full' || (Array.isArray(myPerms) && myPerms.includes(item.permission));
+  });
 
   async function logout() {
     await fetch('/api/auth/logout', { method: 'POST' });

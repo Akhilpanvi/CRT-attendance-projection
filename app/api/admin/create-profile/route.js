@@ -11,7 +11,7 @@ export async function POST(request) {
     if (!session || session.role !== 'admin')
       return NextResponse.json({ error: 'Admin only' }, { status: 403 });
 
-    const { name, rollNumber, branch, dept, cluster, crtSec, crtRoom, role, permissions } = await request.json();
+    const { name, rollNumber, branch, dept, cluster, crtSec, crtRoom, role, permissions, email } = await request.json();
     if (!name?.trim() || !rollNumber?.trim())
       return NextResponse.json({ error: 'Name and registration number are required' }, { status: 400 });
 
@@ -43,6 +43,7 @@ export async function POST(request) {
         rollNumber:         roll,
         mustChangePassword: true,
         permissions:        effectivePerms,
+        email:              effectiveRole === 'admin' ? (email?.trim() || '') : '',
       }),
       effectiveRole === 'student'
         ? Student.findOneAndUpdate(
