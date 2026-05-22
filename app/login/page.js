@@ -5,34 +5,47 @@ import ThemeToggle from '@/components/ThemeToggle';
 
 const CAT_COLOR = { info: '#3b82f6', warning: '#d97706', important: '#dc2626' };
 const CAT_LABEL = { info: 'Info', warning: 'Warning', important: 'Important' };
-const CAT_BG    = { info: 'rgba(59,130,246,0.08)', warning: 'rgba(217,119,6,0.08)', important: 'rgba(220,38,38,0.08)' };
-const CAT_BORDER= { info: 'rgba(59,130,246,0.2)',  warning: 'rgba(217,119,6,0.2)',  important: 'rgba(220,38,38,0.2)' };
 
-function UpdateCard({ u, isDark }) {
-  const cc  = CAT_COLOR[u.category]  || CAT_COLOR.info;
-  const cl  = CAT_LABEL[u.category]  || 'Info';
-  const bg  = CAT_BG[u.category]     || CAT_BG.info;
-  const bdr = CAT_BORDER[u.category] || CAT_BORDER.info;
+function NoticesPanel({ updates, isDark, maxHeight = '400px' }) {
+  const darkPanel  = { border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)', borderRadius: '10px', overflow: 'hidden' };
+  const lightPanel = { border: '1px solid #e2e8f0', background: '#ffffff', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', borderRadius: '10px', overflow: 'hidden' };
+  const darkHdr    = { padding: '10px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' };
+  const lightHdr   = { padding: '10px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc' };
+  const darkCols   = { padding: '5px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', gap: '10px', background: 'rgba(255,255,255,0.02)' };
+  const lightCols  = { padding: '5px 16px', borderBottom: '1px solid #f1f5f9', display: 'flex', gap: '10px', background: '#f8fafc' };
+  const colLbl     = { color: isDark ? 'rgba(255,255,255,0.25)' : '#94a3b8', fontSize: '10px', fontWeight: '600' };
   return (
-    <div style={{
-      display: 'flex', gap: '10px', borderRadius: '8px',
-      border: `1px solid ${isDark ? bdr : bdr.replace('0.2','0.35')}`,
-      background: isDark ? bg : bg.replace('0.08','0.06'),
-      padding: '11px 14px',
-    }}>
-      <div style={{ width: '3px', borderRadius: '2px', flexShrink: 0, alignSelf: 'stretch', background: cc }} />
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <span style={{ fontSize: '9px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', color: cc }}>
-          {u.pinned ? '📌 ' : ''}{cl}
-        </span>
-        {u.title && (
-          <span style={{ fontSize: '11px', fontWeight: '600', color: isDark ? 'rgba(255,255,255,0.88)' : '#0f172a', marginLeft: '6px' }}>
-            {u.title} —{' '}
-          </span>
-        )}
-        <span style={{ fontSize: '11px', color: isDark ? 'rgba(255,255,255,0.55)' : '#475569', lineHeight: '1.55', whiteSpace: 'pre-wrap' }}>
-          {u.content}
-        </span>
+    <div style={isDark ? darkPanel : lightPanel}>
+      <div style={isDark ? darkHdr : lightHdr}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+          <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#3b82f6' }} />
+          <span style={{ color: isDark ? 'rgba(255,255,255,0.7)' : '#1e293b', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Notices</span>
+        </div>
+        <span style={{ color: isDark ? 'rgba(255,255,255,0.25)' : '#94a3b8', fontSize: '10px' }}>Showing {updates.length}</span>
+      </div>
+      <div style={isDark ? darkCols : lightCols}>
+        <span style={{ ...colLbl, minWidth: '16px' }}>#</span>
+        <span style={{ ...colLbl, flex: 1 }}>Subject / Notice</span>
+        <span style={{ ...colLbl, whiteSpace: 'nowrap' }}>Date</span>
+      </div>
+      <div style={{ maxHeight, overflowY: 'auto' }}>
+        {updates.map((u, i) => {
+          const cc = CAT_COLOR[u.category] || CAT_COLOR.info;
+          const cl = CAT_LABEL[u.category] || 'Info';
+          return (
+            <div key={u._id} style={{ display: 'flex', gap: '10px', padding: '11px 16px', borderBottom: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid #f1f5f9', alignItems: 'flex-start' }}>
+              <span style={{ color: isDark ? 'rgba(255,255,255,0.2)' : '#cbd5e1', fontSize: '11px', minWidth: '16px', paddingTop: '2px' }}>{i + 1}</span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '5px' }}>
+                  <span style={{ fontSize: '9px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em', color: cc, background: `${cc}22`, padding: '2px 6px', borderRadius: '3px' }}>{u.pinned ? '📌 ' : ''}{cl}</span>
+                  <span style={{ color: isDark ? 'rgba(255,255,255,0.25)' : '#94a3b8', fontSize: '10px', whiteSpace: 'nowrap', flexShrink: 0, marginLeft: '8px' }}>{fmtDate(u.createdAt)}</span>
+                </div>
+                {u.title && <p style={{ fontSize: '12px', fontWeight: '600', color: isDark ? 'rgba(255,255,255,0.88)' : '#0f172a', marginBottom: '3px', lineHeight: '1.4' }}>{u.title}</p>}
+                <p style={{ fontSize: '11px', color: isDark ? 'rgba(255,255,255,0.5)' : '#475569', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{u.content}</p>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -185,10 +198,10 @@ export default function LoginPage() {
               <span className="text-sm font-bold" style={{ color: isDark ? '#ffffff' : '#0f172a' }}>CRT Attendance Tracker</span>
             </div>
 
-            {/* Updates — mobile only */}
+            {/* Notices — mobile only */}
             {updates.length > 0 && (
-              <div className="lg:hidden mb-6 space-y-2">
-                {updates.map(u => <UpdateCard key={u._id} u={u} isDark={isDark} />)}
+              <div className="lg:hidden mb-6">
+                <NoticesPanel updates={updates} isDark={isDark} maxHeight="220px" />
               </div>
             )}
 
@@ -405,20 +418,10 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Updates — desktop only, right of form */}
+          {/* Notices — desktop only, right of form */}
           {updates.length > 0 && (
-            <div className="hidden lg:flex flex-col w-80 shrink-0 self-center gap-2"
-                 style={{ maxHeight: '80vh', overflowY: 'auto' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '7px', paddingBottom: '6px' }}>
-                <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#3b82f6' }} />
-                <span style={{ color: isDark ? 'rgba(255,255,255,0.5)' : '#64748b', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                  Notices
-                </span>
-                <span style={{ color: isDark ? 'rgba(255,255,255,0.2)' : '#94a3b8', fontSize: '10px', marginLeft: 'auto' }}>
-                  {updates.length}
-                </span>
-              </div>
-              {updates.map(u => <UpdateCard key={u._id} u={u} isDark={isDark} />)}
+            <div className="hidden lg:block w-80 shrink-0 self-center">
+              <NoticesPanel updates={updates} isDark={isDark} maxHeight="460px" />
             </div>
           )}
 
