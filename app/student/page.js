@@ -81,7 +81,7 @@ export default function StudentPage() {
 
   const [selfByDate,     setSelfByDate]     = useState({});
   const [trackerEntries, setTrackerEntries] = useState([
-    { id: 1, date: today, slots: {}, saving: false, saved: false },
+    { id: 1, date: today, slots: {}, saving: false, saved: false, expanded: true },
   ]);
 
   useEffect(() => {
@@ -103,7 +103,7 @@ export default function StudentPage() {
           byDate[r.date][r.slot] = r.status;
         }
         setSelfByDate(byDate);
-        setTrackerEntries([{ id: 1, date: today, slots: byDate[today] || {}, saving: false, saved: false }]);
+        setTrackerEntries([{ id: 1, date: today, slots: byDate[today] || {}, saving: false, saved: !!byDate[today], expanded: !byDate[today] }]);
       })
       .catch(() => {});
   }, []);
@@ -111,8 +111,12 @@ export default function StudentPage() {
   function addEntry() {
     setTrackerEntries(prev => [
       ...prev,
-      { id: Date.now(), date: today, slots: {}, saving: false, saved: false },
+      { id: Date.now(), date: today, slots: {}, saving: false, saved: false, expanded: true },
     ]);
+  }
+
+  function toggleExpanded(id) {
+    setTrackerEntries(prev => prev.map(e => e.id === id ? { ...e, expanded: !e.expanded } : e));
   }
 
   function removeEntry(id) {
@@ -161,7 +165,7 @@ export default function StudentPage() {
           else updated[entry.date] = { ...entry.slots };
           return updated;
         });
-        setTrackerEntries(prev => prev.map(e => e.id === id ? { ...e, saving: false, saved: true } : e));
+        setTrackerEntries(prev => prev.map(e => e.id === id ? { ...e, saving: false, saved: true, expanded: false } : e));
       }
     } catch (_) {
       setTrackerEntries(prev => prev.map(e => e.id === id ? { ...e, saving: false } : e));
@@ -187,7 +191,10 @@ export default function StudentPage() {
         body: JSON.stringify({ date }),
       });
       setSelfByDate(prev => { const u = { ...prev }; delete u[date]; return u; });
-      setTrackerEntries(prev => prev.map(e => e.date === date ? { ...e, slots: {}, saved: false } : e));
+      setTrackerEntries(prev => {
+        const kept = prev.filter(e => e.date !== date);
+        return kept.length > 0 ? kept : [{ id: Date.now(), date: today, slots: {}, saving: false, saved: false, expanded: true }];
+      });
     } catch (_) {}
   }
 
@@ -334,27 +341,76 @@ export default function StudentPage() {
             {trackerEntries.map((entry, idx) => {
               const ep = Object.values(entry.slots).filter(v => v === 'present').length;
               const ea = Object.values(entry.slots).filter(v => v === 'absent').length;
+
+              if (entry.saved && !entry.expanded) {
+                return (
+                  <div key={entry.id} className={idx > 0 ? 'pt-3 border-t border-slate-100 dark:border-slate-700' : ''}>
+                    <button
+                      onClick={() => toggleExpanded(entry.id)}
+                      className="w-full flex items-center gap-3 text-left rounded-lg px-3 py-2.5
+                                 bg-slate-50 dark:bg-slate-700/30 hover:bg-slate-100 dark:hover:bg-slate-700/50
+                                 border border-slate-200 dark:border-slate-600 transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-slate-800 dark:text-slate-200">{fmtDate(entry.date)}</div>
+                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                          {ep} present · {ea} absent
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-semibold text-green-600 dark:text-green-400
+                                       bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800
+                                       rounded px-2 py-0.5 shrink-0">
+                        Saved ✓
+                      </span>
+                      <svg className="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0"
+                           fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                  </div>
+                );
+              }
+
               return (
                 <div key={entry.id}
                      className={idx > 0 ? 'pt-4 border-t border-slate-100 dark:border-slate-700 space-y-3' : 'space-y-3'}>
-                  {/* Date + remove */}
+                  {/* Header: date display + collapse/delete (saved) or date picker + remove (unsaved) */}
                   <div className="flex items-center gap-3">
-                    <label className="text-xs font-medium text-slate-500 dark:text-slate-400 shrink-0">Date</label>
-                    <input
-                      type="date"
-                      value={entry.date}
-                      onChange={e => handleDateChange(entry.id, e.target.value)}
-                      className="form-input py-1 text-sm"
-                      style={{ maxWidth: 160 }}
-                    />
-                    {trackerEntries.length > 1 && (
-                      <button
-                        onClick={() => removeEntry(entry.id)}
-                        className="ml-auto text-xs text-slate-400 dark:text-slate-500 hover:text-red-400
-                                   dark:hover:text-red-400 transition-colors px-2 py-1 rounded border
-                                   border-slate-200 dark:border-slate-600">
-                        Remove
-                      </button>
+                    {entry.saved ? (
+                      <>
+                        <span className="text-sm font-medium text-slate-700 dark:text-slate-300 flex-1">{fmtDate(entry.date)}</span>
+                        <button
+                          onClick={() => toggleExpanded(entry.id)}
+                          className="text-xs text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200
+                                     transition-colors px-2 py-1 rounded border border-slate-200 dark:border-slate-600">
+                          Collapse
+                        </button>
+                        <button
+                          onClick={() => handleDeleteDraft(entry.date)}
+                          className="text-xs text-red-400 dark:text-red-500 hover:text-red-600 dark:hover:text-red-400
+                                     transition-colors px-2 py-1 rounded border border-red-200 dark:border-red-800">
+                          Delete
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <label className="text-xs font-medium text-slate-500 dark:text-slate-400 shrink-0">Date</label>
+                        <input
+                          type="date"
+                          value={entry.date}
+                          onChange={e => handleDateChange(entry.id, e.target.value)}
+                          className="form-input py-1 text-sm"
+                          style={{ maxWidth: 160 }}
+                        />
+                        {trackerEntries.length > 1 && (
+                          <button
+                            onClick={() => removeEntry(entry.id)}
+                            className="ml-auto text-xs text-slate-400 dark:text-slate-500 hover:text-red-400
+                                       dark:hover:text-red-400 transition-colors px-2 py-1 rounded border
+                                       border-slate-200 dark:border-slate-600">
+                            Remove
+                          </button>
+                        )}
+                      </>
                     )}
                   </div>
 

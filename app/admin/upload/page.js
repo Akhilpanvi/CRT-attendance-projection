@@ -184,6 +184,7 @@ export default function UploadPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult]   = useState(null);
   const [drag, setDrag]       = useState(false);
+  const [reupload, setReupload] = useState(false);
   const [historyKey, setHistoryKey] = useState(0);
   const inputRef = useRef();
 
@@ -217,6 +218,7 @@ export default function UploadPage() {
       const form = new FormData();
       form.append('csv', file);
       form.append('date', date);
+      form.append('reupload', reupload ? 'true' : 'false');
       const r = await fetch('/api/admin/upload-csv', { method: 'POST', body: form });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error);
@@ -296,10 +298,28 @@ export default function UploadPage() {
         <input ref={inputRef} type="file" accept=".csv" className="hidden"
                onChange={e => { setFile(e.target.files[0]); e.target.value = ''; }} />
 
+        <label className="flex items-center gap-2.5 mt-4 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={reupload}
+            onChange={e => setReupload(e.target.checked)}
+            className="w-4 h-4 rounded border-slate-300 dark:border-slate-600
+                       text-indigo-600 focus:ring-indigo-500"
+          />
+          <span className="text-sm text-slate-600 dark:text-slate-400">
+            Re-upload mode — skip creating new student accounts
+          </span>
+        </label>
+        {reupload && (
+          <p className="text-xs text-amber-600 dark:text-amber-400 mt-1.5">
+            Only attendance records will be updated. No new user accounts will be created.
+          </p>
+        )}
+
         <div className="flex gap-3 mt-4">
           <button className="btn-primary flex-1 justify-center py-2.5"
                   onClick={upload} disabled={loading || !file}>
-            {loading ? 'Importing…' : 'Upload and Import'}
+            {loading ? 'Importing…' : reupload ? 'Re-upload and Import' : 'Upload and Import'}
           </button>
           <button className="btn-outline" onClick={downloadSample}>Download Sample</button>
         </div>
@@ -338,9 +358,15 @@ export default function UploadPage() {
               <span>Slots imported: <strong>{result.slotCols.join(' · ')}</strong></span>
             </div>
           )}
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-3">
-            Student accounts were auto-created. Default username and password = Registration No.
-          </p>
+          {result.reupload ? (
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-3">
+              Re-upload mode: no new student accounts were created.
+            </p>
+          ) : (
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-3">
+              Student accounts were auto-created. Default username and password = Registration No.
+            </p>
+          )}
         </div>
       )}
 

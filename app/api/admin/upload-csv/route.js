@@ -18,6 +18,7 @@ export async function POST(request) {
     const formData = await request.formData();
     const file = formData.get('csv');
     const attendanceDate = formData.get('date') || new Date().toISOString().split('T')[0];
+    const reupload = formData.get('reupload') === 'true';
 
     if (!file) return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
 
@@ -86,23 +87,25 @@ export async function POST(request) {
       ? await Student.bulkWrite(studentBulk, { ordered: false })
       : { upsertedCount: 0, modifiedCount: 0 };
 
-    // Create missing user accounts in batches
-    const existingUsers = await User.find({ username: { $in: rollNumbers } }, { username: 1 }).lean();
-    const existingSet   = new Set(existingUsers.map(u => u.username));
-    const newRolls      = rollNumbers.filter(r => !existingSet.has(r));
+    // Create missing user accounts in batches (skipped in re-upload mode)
+    if (!reupload) {
+      const existingUsers = await User.find({ username: { $in: rollNumbers } }, { username: 1 }).lean();
+      const existingSet   = new Set(existingUsers.map(u => u.username));
+      const newRolls      = rollNumbers.filter(r => !existingSet.has(r));
 
-    if (newRolls.length) {
-      const BATCH = 50;
-      const userDocs = [];
-      for (let i = 0; i < newRolls.length; i += BATCH) {
-        const batch  = newRolls.slice(i, i + BATCH);
-        const hashed = await Promise.all(batch.map(r => bcrypt.hash(r, 6)));
-        batch.forEach((r, idx) => userDocs.push({
-          username: r, passwordHash: hashed[idx],
-          role: 'student', rollNumber: r, mustChangePassword: true,
-        }));
+      if (newRolls.length) {
+        const BATCH = 50;
+        const userDocs = [];
+        for (let i = 0; i < newRolls.length; i += BATCH) {
+          const batch  = newRolls.slice(i, i + BATCH);
+          const hashed = await Promise.all(batch.map(r => bcrypt.hash(r, 6)));
+          batch.forEach((r, idx) => userDocs.push({
+            username: r, passwordHash: hashed[idx],
+            role: 'student', rollNumber: r, mustChangePassword: true,
+          }));
+        }
+        await User.insertMany(userDocs, { ordered: false });
       }
-      await User.insertMany(userDocs, { ordered: false });
     }
 
     // Attendance in 500-op chunks
@@ -126,6 +129,7 @@ export async function POST(request) {
       total:           rollNumbers.length,
       slotCols,
       date:            attendanceDate,
+      reupload,
     });
   } catch (e) {
     return NextResponse.json({ error: e.message }, { status: 500 });
