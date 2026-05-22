@@ -102,36 +102,43 @@ export async function POST(request) {
 
     const [student, user] = await Promise.all([
       Student.findOne({ rollNumber: roll }).lean(),
-      User.findOne({ rollNumber: roll }),
+      User.findOne({ username: roll }),
     ]);
 
-    // Always return success to prevent reg-number enumeration
-    if (student && user) {
-      const token  = crypto.randomBytes(32).toString('hex');
-      const expiry = new Date(Date.now() + 2 * 60 * 1000); // 2 minutes
+    // Always return success to prevent enumeration
+    if (user) {
+      const isAdmin  = user.role === 'admin' || user.role === 'aprameya';
+      const toEmail  = isAdmin ? user.email?.trim() : `${roll.toLowerCase()}@kluniversity.in`;
+      const toName   = isAdmin ? (user.username) : (student?.name || roll);
 
-      user.resetToken       = token;
-      user.resetTokenExpiry = expiry;
-      await user.save();
+      // For admins without a stored email, silently skip (return success below)
+      if (toEmail) {
+        const token  = crypto.randomBytes(32).toString('hex');
+        const expiry = new Date(Date.now() + 2 * 60 * 1000); // 2 minutes
 
-      const origin    = request.headers.get('origin') || `https://${request.headers.get('host')}`;
-      const resetLink = `${origin}/reset-password?token=${token}`;
+        user.resetToken       = token;
+        user.resetTokenExpiry = expiry;
+        await user.save();
 
-      const { subject, html } = resetEmailTemplate({
-        name:       student.name,
-        rollNumber: roll,
-        resetLink,
-        expiresIn:  '2 minutes',
-      });
+        const origin    = request.headers.get('origin') || `https://${request.headers.get('host')}`;
+        const resetLink = `${origin}/reset-password?token=${token}`;
 
-      const resend = new Resend(process.env.RESEND_API_KEY);
-      const result = await resend.emails.send({
-        from:    'Change Password <noreply@kluniversity.me>',
-        to:      `${roll.toLowerCase()}@kluniversity.in`,
-        subject,
-        html,
-      });
-      if (result.error) throw new Error(result.error.message);
+        const { subject, html } = resetEmailTemplate({
+          name:       toName,
+          rollNumber: roll,
+          resetLink,
+          expiresIn:  '2 minutes',
+        });
+
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        const result = await resend.emails.send({
+          from:    'Change Password <noreply@kluniversity.me>',
+          to:      toEmail,
+          subject,
+          html,
+        });
+        if (result.error) throw new Error(result.error.message);
+      }
     }
 
     return NextResponse.json({ success: true });

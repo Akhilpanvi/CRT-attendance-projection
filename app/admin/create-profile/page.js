@@ -18,7 +18,7 @@ export default function CreateProfilePage() {
   const { toast, show } = useToast();
   const [form, setForm] = useState({
     name: '', rollNumber: '', branch: '', dept: '',
-    cluster: '', crtSec: '', crtRoom: '', role: 'student',
+    cluster: '', crtSec: '', crtRoom: '', role: 'student', email: '',
   });
   const [permissions,  setPermissions]  = useState([]);
   const [fullAccess,   setFullAccess]   = useState(false);
@@ -145,6 +145,22 @@ export default function CreateProfilePage() {
               </>
             )}
           </div>
+
+          {/* Admin email */}
+          {isAdmin && (
+            <div>
+              <label className="form-label">
+                Email <span className="text-slate-400 dark:text-slate-500 font-normal">(for password reset)</span>
+              </label>
+              <input
+                className="form-input"
+                type="email"
+                placeholder="e.g. admin@example.com"
+                value={form.email}
+                onChange={e => set('email', e.target.value)}
+              />
+            </div>
+          )}
 
           {/* Admin permissions */}
           {isAdmin && (
