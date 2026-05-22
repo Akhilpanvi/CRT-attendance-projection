@@ -11,12 +11,16 @@ function PctBadge({ pct }) {
   );
 }
 
+const PAGE_SIZES = [10, 50, 100];
+
 export default function ProgressionPage() {
-  const [data,    setData]    = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error,   setError]   = useState('');
-  const [search,  setSearch]  = useState('');
+  const [data,     setData]     = useState(null);
+  const [loading,  setLoading]  = useState(true);
+  const [error,    setError]    = useState('');
+  const [search,   setSearch]   = useState('');
   const [expanded, setExpanded] = useState({});
+  const [pageSize, setPageSize] = useState(50);
+  const [page,     setPage]     = useState(1);
 
   useEffect(() => {
     fetch('/api/admin/self-progression')
@@ -37,6 +41,10 @@ export default function ProgressionPage() {
         s.crtSec.toLowerCase().includes(search.toLowerCase())
       )
     : [];
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const safePage   = Math.min(page, totalPages);
+  const paged      = filtered.slice((safePage - 1) * pageSize, safePage * pageSize);
 
   if (loading) return (
     <div className="flex items-center justify-center py-24">
@@ -68,7 +76,7 @@ export default function ProgressionPage() {
         {[
           { label: 'Students Tracking', value: totalStudents },
           { label: 'Total Dates Tracked', value: totalDates },
-          { label: 'Showing', value: filtered.length },
+          { label: 'Matched', value: filtered.length },
         ].map(c => (
           <div key={c.label}
                className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
@@ -81,15 +89,28 @@ export default function ProgressionPage() {
         ))}
       </div>
 
-      {/* Search */}
-      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3">
+      {/* Search + page size */}
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
+                      rounded-lg p-3 flex gap-3 items-center">
         <input
           type="text"
           placeholder="Search by name, reg. no. or CRT section…"
           value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="form-input w-full text-sm"
+          onChange={e => { setSearch(e.target.value); setPage(1); }}
+          className="form-input flex-1 text-sm"
         />
+        <div className="flex items-center gap-1 shrink-0">
+          <span className="text-[10px] text-slate-400 dark:text-slate-500 mr-1">View</span>
+          {PAGE_SIZES.map(n => (
+            <button key={n} onClick={() => { setPageSize(n); setPage(1); }}
+              className={`text-xs px-2.5 py-1 rounded border transition-colors font-medium
+                ${pageSize === n
+                  ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 border-slate-800 dark:border-slate-200'
+                  : 'border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:border-slate-400'}`}>
+              {n}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Table */}
@@ -113,7 +134,7 @@ export default function ProgressionPage() {
             <span></span>
           </div>
 
-          {filtered.map(s => (
+          {paged.map(s => (
             <div key={s.rollNumber} className="border-b border-slate-100 dark:border-slate-700 last:border-0">
               {/* Student row — same grid template as header */}
               <button
@@ -175,6 +196,54 @@ export default function ProgressionPage() {
               )}
             </div>
           ))}
+          {/* Pagination footer */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3
+                            border-t border-slate-100 dark:border-slate-700
+                            bg-slate-50 dark:bg-slate-800/60">
+              <span className="text-xs text-slate-400 dark:text-slate-500">
+                {(safePage - 1) * pageSize + 1}–{Math.min(safePage * pageSize, filtered.length)} of {filtered.length}
+              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={safePage === 1}
+                  className="text-xs px-2.5 py-1 rounded border border-slate-200 dark:border-slate-600
+                             text-slate-500 dark:text-slate-400 hover:border-slate-400 disabled:opacity-40
+                             disabled:cursor-not-allowed transition-colors">
+                  Prev
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(n => n === 1 || n === totalPages || Math.abs(n - safePage) <= 1)
+                  .reduce((acc, n, i, arr) => {
+                    if (i > 0 && n - arr[i - 1] > 1) acc.push('…');
+                    acc.push(n);
+                    return acc;
+                  }, [])
+                  .map((n, i) => n === '…'
+                    ? <span key={`ellipsis-${i}`} className="text-xs px-1 text-slate-400">…</span>
+                    : (
+                      <button key={n} onClick={() => setPage(n)}
+                        className={`text-xs px-2.5 py-1 rounded border transition-colors font-medium
+                          ${safePage === n
+                            ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 border-slate-800 dark:border-slate-200'
+                            : 'border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:border-slate-400'}`}>
+                        {n}
+                      </button>
+                    )
+                  )
+                }
+                <button
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={safePage === totalPages}
+                  className="text-xs px-2.5 py-1 rounded border border-slate-200 dark:border-slate-600
+                             text-slate-500 dark:text-slate-400 hover:border-slate-400 disabled:opacity-40
+                             disabled:cursor-not-allowed transition-colors">
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
