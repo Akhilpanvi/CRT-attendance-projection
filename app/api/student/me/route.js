@@ -21,12 +21,14 @@ export async function GET() {
     const total   = records.length;
     const present = records.filter(r => r.status === 'present' || r.status === 'sp').length;
 
+    const normalizeSlot = s => s.replace(/\b(\d):/g, '0$1:');
     const byDate = {};
     const slots  = new Set();
     for (const r of records) {
+      const slot = normalizeSlot(r.slot);
       if (!byDate[r.date]) byDate[r.date] = {};
-      byDate[r.date][r.slot] = r.status;
-      slots.add(r.slot);
+      byDate[r.date][slot] = r.status;
+      slots.add(slot);
     }
 
     const orderedSlots = [
