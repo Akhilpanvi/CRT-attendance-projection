@@ -1,12 +1,14 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
 
+// permission key must match the key used in ALL_PERMISSIONS on create-profile page
 const navItems = [
   {
     href: '/admin/upload',
+    permission: 'upload',
     label: 'Upload CSV',
     icon: (
       <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -16,6 +18,7 @@ const navItems = [
   },
   {
     href: '/admin/students',
+    permission: 'students',
     label: 'All Students',
     icon: (
       <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -25,6 +28,7 @@ const navItems = [
   },
   {
     href: '/admin/mark',
+    permission: 'mark',
     label: 'Mark Attendance',
     icon: (
       <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -34,6 +38,7 @@ const navItems = [
   },
   {
     href: '/admin/removal',
+    permission: 'removal',
     label: 'Removal List',
     icon: (
       <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -43,6 +48,7 @@ const navItems = [
   },
   {
     href: '/admin/irregular',
+    permission: 'irregular',
     label: 'Irregular',
     icon: (
       <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -52,6 +58,7 @@ const navItems = [
   },
   {
     href: '/admin/progression',
+    permission: 'progression',
     label: 'Progression',
     icon: (
       <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -61,6 +68,7 @@ const navItems = [
   },
   {
     href: '/admin/create-profile',
+    permission: 'create-profile',
     label: 'Create Profile',
     icon: (
       <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -70,6 +78,7 @@ const navItems = [
   },
   {
     href: '/admin/updates',
+    permission: 'updates',
     label: 'Updates',
     icon: (
       <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -79,6 +88,7 @@ const navItems = [
   },
   {
     href: '/admin/feedback',
+    permission: 'feedback',
     label: 'Feedback',
     icon: (
       <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -92,6 +102,20 @@ export default function AdminLayout({ children }) {
   const pathname = usePathname();
   const router   = useRouter();
   const [open, setOpen] = useState(false);
+  // null = not yet loaded; [] = loaded but restricted; array with items = specific perms; 'full' = no restrictions
+  const [myPerms, setMyPerms] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/admin/me')
+      .then(r => r.json())
+      .then(d => setMyPerms(d.permissions ?? 'full'))
+      .catch(() => setMyPerms('full'));
+  }, []);
+
+  // Show nav item if: perms not loaded yet, OR full access, OR permission is in the array
+  const visibleNav = navItems.filter(item =>
+    myPerms === null || myPerms === 'full' || myPerms.includes(item.permission)
+  );
 
   async function logout() {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -115,7 +139,7 @@ export default function AdminLayout({ children }) {
         <p className="px-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-white/40">
           Navigation
         </p>
-        {navItems.map(item => {
+        {visibleNav.map(item => {
           const active = pathname === item.href;
           return (
             <Link

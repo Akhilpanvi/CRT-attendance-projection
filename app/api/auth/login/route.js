@@ -21,6 +21,7 @@ export async function POST(request) {
       role:               user.role,
       rollNumber:         user.rollNumber,
       mustChangePassword: user.mustChangePassword,
+      permissions:        user.permissions ?? null,
     });
 
     const res = NextResponse.json({
