@@ -17,7 +17,7 @@ export async function GET() {
         { $group: {
           _id:     '$rollNumber',
           total:   { $sum: 1 },
-          present: { $sum: { $cond: [{ $eq: ['$status', 'present'] }, 1, 0] } },
+          present: { $sum: { $cond: [{ $in: ['$status', ['present', 'sp']] }, 1, 0] } },
         }},
       ]),
     ]);

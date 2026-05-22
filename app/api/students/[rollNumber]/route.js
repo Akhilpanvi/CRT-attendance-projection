@@ -20,7 +20,7 @@ export async function GET(request, { params }) {
 
     const records = await Attendance.find({ rollNumber: roll }).sort({ date: 1, slot: 1 }).lean();
     const total   = records.length;
-    const present = records.filter(r => r.status === 'present').length;
+    const present = records.filter(r => r.status === 'present' || r.status === 'sp').length;
 
     // Group by date
     const byDate = {};
@@ -37,7 +37,7 @@ export async function GET(request, { params }) {
       const key = `${r.year}-W${String(r.week).padStart(2, '0')}`;
       if (!weekMap[key]) weekMap[key] = { total: 0, present: 0, week: r.week, year: r.year };
       weekMap[key].total++;
-      if (r.status === 'present') weekMap[key].present++;
+      if (r.status === 'present' || r.status === 'sp') weekMap[key].present++;
     }
     const weeks = Object.values(weekMap).map(w => ({
       ...w,
