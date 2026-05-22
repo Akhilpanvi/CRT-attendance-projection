@@ -105,7 +105,18 @@ export default function StudentPage() {
           byDate[r.date][r.slot] = r.status;
         }
         setSelfByDate(byDate);
-        setTrackerEntries([{ id: 1, date: today, slots: byDate[today] || {}, saving: false, saved: !!byDate[today], expanded: !byDate[today] }]);
+        // Build entries for every saved date + today, most recent first
+        const allDates = [...new Set([...Object.keys(byDate).sort().reverse(), today])];
+        setTrackerEntries(
+          allDates.map((date, i) => ({
+            id: i + 1,
+            date,
+            slots:    byDate[date] || {},
+            saving:   false,
+            saved:    !!byDate[date],
+            expanded: !byDate[date], // saved entries start collapsed, new entry starts open
+          }))
+        );
       })
       .catch(() => {});
   }, []);
