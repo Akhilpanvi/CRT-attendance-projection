@@ -496,18 +496,49 @@ export default function StudentPage() {
 
             {/* Advice */}
             {advice.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
-                <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-                  Advice
+              <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700 space-y-4">
+                {/* Official advice */}
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      Advice
+                    </span>
+                    {liveHasData && (
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500">· Official</span>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    {advice.map((line, i) => (
+                      <div key={i} className="flex items-start gap-2.5 text-sm">
+                        <span className={`w-2 h-2 rounded-full mt-1 shrink-0 ${ADVICE_DOT[line.type]}`} />
+                        <span className={ADVICE_STYLE[line.type]}>{line.text}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  {advice.map((line, i) => (
-                    <div key={i} className="flex items-start gap-2.5 text-sm">
-                      <span className={`w-2 h-2 rounded-full mt-1 shrink-0 ${ADVICE_DOT[line.type]}`} />
-                      <span className={ADVICE_STYLE[line.type]}>{line.text}</span>
+
+                {/* Projected advice */}
+                {liveHasData && (() => {
+                  const projAdvice = generateAdvice(liveProjPresent, liveProjTotal, liveProjPct);
+                  return (
+                    <div className="pt-3 border-t border-indigo-100 dark:border-indigo-900/40">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">
+                          Advice
+                        </span>
+                        <span className="text-[10px] text-indigo-400 dark:text-indigo-500">· Projected</span>
+                      </div>
+                      <div className="space-y-2">
+                        {projAdvice.map((line, i) => (
+                          <div key={i} className="flex items-start gap-2.5 text-sm">
+                            <span className={`w-2 h-2 rounded-full mt-1 shrink-0 ${ADVICE_DOT[line.type]}`} />
+                            <span className={ADVICE_STYLE[line.type]}>{line.text}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  ))}
-                </div>
+                  );
+                })()}
               </div>
             )}
           </div>
