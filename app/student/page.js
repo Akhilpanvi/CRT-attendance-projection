@@ -285,7 +285,7 @@ export default function StudentPage() {
         {/* Track Your Attendance */}
         <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
           <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700">
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Track Your Attendance</h2>
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Attendance Progression</h2>
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
               Mark your own attendance to see a projected percentage.
             </p>
