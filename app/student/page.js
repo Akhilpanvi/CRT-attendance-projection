@@ -787,24 +787,38 @@ export default function StudentPage() {
                         </td>
                         {allSlots.map(sl => {
                           const v = rowData[sl];
-                          const canMarkSP = isOfficial && v === 'absent';
-                          const isOpen    = canMarkSP && slotEditing?.date === dt && slotEditing?.slot === sl;
+                          const canEdit = isOfficial && (v === 'absent' || v === 'sp');
+                          const isOpen  = canEdit && slotEditing?.date === dt && slotEditing?.slot === sl;
+                          const isRevert = v === 'sp';
                           return (
                             <td key={sl} className="tbl-cell text-center relative">
                               {isOpen && (
                                 <div className="absolute z-20 bottom-full left-1/2 -translate-x-1/2 mb-1
                                                 bg-white dark:bg-slate-800 border border-slate-200
                                                 dark:border-slate-600 rounded-lg shadow-xl p-2 min-w-[110px]">
-                                  <p className="text-[9px] text-slate-400 mb-1.5 text-center">Placement drive?</p>
+                                  <p className="text-[9px] text-slate-400 mb-1.5 text-center">
+                                    {isRevert ? 'Remove SP?' : 'Placement drive?'}
+                                  </p>
                                   <div className="flex gap-1 justify-center mb-2">
-                                    <button
-                                      onClick={() => setSlotEditing(e => ({ ...e, pending: e?.pending === 'sp' ? null : 'sp' }))}
-                                      className={`text-[10px] font-bold px-3 py-1.5 rounded border-2 transition-all
-                                        bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400
-                                        border-yellow-300 dark:border-yellow-700
-                                        ${slotEditing?.pending === 'sp' ? 'ring-2 ring-offset-1 ring-yellow-400 scale-110' : 'opacity-70 hover:opacity-100'}`}>
-                                      SP
-                                    </button>
+                                    {isRevert ? (
+                                      <button
+                                        onClick={() => setSlotEditing(e => ({ ...e, pending: e?.pending === 'absent' ? null : 'absent' }))}
+                                        className={`text-[10px] font-bold px-3 py-1.5 rounded border-2 transition-all
+                                          bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400
+                                          border-red-300 dark:border-red-700
+                                          ${slotEditing?.pending === 'absent' ? 'ring-2 ring-offset-1 ring-red-400 scale-110' : 'opacity-70 hover:opacity-100'}`}>
+                                        A
+                                      </button>
+                                    ) : (
+                                      <button
+                                        onClick={() => setSlotEditing(e => ({ ...e, pending: e?.pending === 'sp' ? null : 'sp' }))}
+                                        className={`text-[10px] font-bold px-3 py-1.5 rounded border-2 transition-all
+                                          bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400
+                                          border-yellow-300 dark:border-yellow-700
+                                          ${slotEditing?.pending === 'sp' ? 'ring-2 ring-offset-1 ring-yellow-400 scale-110' : 'opacity-70 hover:opacity-100'}`}>
+                                        SP
+                                      </button>
+                                    )}
                                   </div>
                                   <div className="flex gap-1">
                                     <button
@@ -825,8 +839,8 @@ export default function StudentPage() {
                               )}
                               {isOfficial ? (
                                 <button
-                                  onClick={() => canMarkSP ? setSlotEditing(isOpen ? null : { date: dt, slot: sl, pending: null }) : undefined}
-                                  className={canMarkSP ? 'cursor-pointer hover:opacity-70 transition-opacity' : 'cursor-default'}>
+                                  onClick={() => canEdit ? setSlotEditing(isOpen ? null : { date: dt, slot: sl, pending: null }) : undefined}
+                                  className={canEdit ? 'cursor-pointer hover:opacity-70 transition-opacity' : 'cursor-default'}>
                                   {v === 'present' ? <span className="badge-present">P</span>
                                    : v === 'absent'  ? <span className="badge-absent">A</span>
                                    : v === 'sp'      ? <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400">SP</span>
