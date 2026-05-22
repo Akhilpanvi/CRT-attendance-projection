@@ -36,7 +36,7 @@ export async function PATCH(request) {
   if (!session || !isSuperAdmin(session))
     return NextResponse.json({ error: 'Super-admin only' }, { status: 403 });
 
-  const { username, action, email } = await request.json();
+  const { username, action, email, permissions } = await request.json();
   if (!username) return NextResponse.json({ error: 'username required' }, { status: 400 });
 
   await connectDB();
@@ -52,6 +52,14 @@ export async function PATCH(request) {
 
   if (action === 'update-email') {
     user.email = email?.trim() || '';
+    await user.save();
+    return NextResponse.json({ success: true });
+  }
+
+  if (action === 'update-permissions') {
+    // null = full access, array = restricted
+    user.permissions = Array.isArray(permissions) ? permissions : null;
+    if (email !== undefined) user.email = email?.trim() || '';
     await user.save();
     return NextResponse.json({ success: true });
   }
