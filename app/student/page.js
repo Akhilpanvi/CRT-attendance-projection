@@ -202,13 +202,20 @@ export default function StudentPage() {
   const advice = generateAdvice(stats.present, stats.total, pct, stats.weeks || []);
   const dates  = Object.keys(stats.byDate || {}).sort().reverse();
 
-  // Projected stats
-  const selfEntries   = Object.values(selfByDate).flatMap(bySlot => Object.values(bySlot));
-  const selfTotal     = selfEntries.length;
-  const selfPresent   = selfEntries.filter(s => s === 'present').length;
-  const projTotal     = stats.total + selfTotal;
-  const projPresent   = stats.present + selfPresent;
-  const projPct       = projTotal > 0 ? Math.round((projPresent / projTotal) * 100) : 0;
+  // Live projected stats — uses current unsaved trackerSlots for trackerDate,
+  // plus saved selfByDate entries for all other dates
+  const otherSelfEntries = Object.entries(selfByDate)
+    .filter(([d]) => d !== trackerDate)
+    .flatMap(([, slots]) => Object.values(slots));
+  const currentEntries = Object.values(trackerSlots);
+  const liveAllSelf    = [...otherSelfEntries, ...currentEntries];
+  const liveProjTotal   = stats.total + liveAllSelf.length;
+  const liveProjPresent = stats.present + liveAllSelf.filter(v => v === 'present').length;
+  const liveProjPct     = liveProjTotal > 0 ? Math.round((liveProjPresent / liveProjTotal) * 100) : 0;
+  const liveHasData     = liveAllSelf.length > 0;
+
+  const trackerPresent = Object.values(trackerSlots).filter(v => v === 'present').length;
+  const trackerAbsent  = Object.values(trackerSlots).filter(v => v === 'absent').length;
 
   // Merged attendance log
   const officialDateSet = new Set(dates);
@@ -355,16 +362,38 @@ export default function StudentPage() {
               ))}
             </div>
 
-            {/* Save row */}
-            <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-700">
-              <p className="text-[10px] text-slate-400 dark:text-slate-500">
-                {Object.keys(trackerSlots).length > 0
-                  ? `${Object.values(trackerSlots).filter(v => v === 'present').length} present · ${Object.values(trackerSlots).filter(v => v === 'absent').length} absent marked`
-                  : 'No slots marked for this date'}
-              </p>
+            {/* Live projection */}
+            {liveHasData && (
+              <div className="rounded-lg border border-slate-200 dark:border-slate-600
+                              bg-slate-50 dark:bg-slate-700/30 px-4 py-3">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                      Projected Attendance
+                    </p>
+                    {(trackerPresent > 0 || trackerAbsent > 0) && (
+                      <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
+                        Today's entry: {trackerPresent} present · {trackerAbsent} absent
+                      </p>
+                    )}
+                    <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
+                      {liveProjPresent}/{liveProjTotal} sessions
+                    </p>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <div className="text-2xl font-bold" style={{ color: pctColor(liveProjPct) }}>
+                      {liveProjPct}%
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Save */}
+            <div className="flex justify-end pt-1 border-t border-slate-100 dark:border-slate-700">
               <button
                 onClick={handleTrackerSave}
-                disabled={trackerSaving}
+                disabled={trackerSaving || Object.keys(trackerSlots).length === 0}
                 className={`text-xs font-medium px-4 py-1.5 rounded transition-colors ${
                   trackerSaved
                     ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800'
@@ -375,25 +404,6 @@ export default function StudentPage() {
             </div>
           </div>
         </div>
-
-        {/* Projected stats banner */}
-        {selfTotal > 0 && (
-          <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800
-                          rounded-lg px-4 py-3 flex items-center justify-between gap-4">
-            <div className="min-w-0">
-              <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-400">
-                Projected Attendance
-              </p>
-              <p className="text-xs text-indigo-600 dark:text-indigo-500 mt-0.5">
-                Official: {stats.present}/{stats.total} · Self-tracked: +{selfPresent} present, +{selfTotal - selfPresent} absent ({selfTotal} sessions not yet uploaded)
-              </p>
-            </div>
-            <div className="shrink-0 text-right">
-              <div className="text-2xl font-bold" style={{ color: pctColor(projPct) }}>{projPct}%</div>
-              <div className="text-[10px] text-indigo-500 dark:text-indigo-400">{projPresent}/{projTotal}</div>
-            </div>
-          </div>
-        )}
 
         {/* Session Planner */}
         {stats.total > 0 && (
