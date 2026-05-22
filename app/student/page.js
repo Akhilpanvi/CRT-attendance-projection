@@ -221,10 +221,10 @@ export default function StudentPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ rollNumber: data.student.rollNumber, date, slot, status: pending }),
       });
-      if (!r.ok) return;
-      // Re-fetch to get accurate updated % from server
-      const fresh = await fetch('/api/student/me').then(res => res.json());
-      if (!fresh.error) setData(fresh);
+      if (r.ok) {
+        const fresh = await fetch('/api/student/me').then(res => res.json());
+        if (!fresh.error) setData(fresh);
+      }
     } catch (_) {}
     setSlotSaving(false);
     setSlotEditing(null);
