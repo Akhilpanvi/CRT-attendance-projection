@@ -100,10 +100,11 @@ export default function ProgressionPage() {
         </div>
       ) : (
         <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
-          {/* Column headers */}
-          <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-3 px-4 py-2
+          {/* Column headers — same grid template as rows */}
+          <div className="grid items-center px-4 py-2
                           bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700
-                          text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                          text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500"
+               style={{ gridTemplateColumns: '1fr 56px 56px 84px 84px 20px' }}>
             <span>Student</span>
             <span className="text-right">Self P</span>
             <span className="text-right">Self A</span>
@@ -114,11 +115,12 @@ export default function ProgressionPage() {
 
           {filtered.map(s => (
             <div key={s.rollNumber} className="border-b border-slate-100 dark:border-slate-700 last:border-0">
-              {/* Student row */}
+              {/* Student row — same grid template as header */}
               <button
                 onClick={() => toggle(s.rollNumber)}
-                className="w-full grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-3 px-4 py-3
-                           hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors text-left items-center">
+                className="w-full grid items-center px-4 py-3
+                           hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors text-left"
+                style={{ gridTemplateColumns: '1fr 56px 56px 84px 84px 20px' }}>
                 <div className="min-w-0">
                   <div className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{s.name}</div>
                   <div className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
@@ -126,14 +128,14 @@ export default function ProgressionPage() {
                     {' · '}{s.dates.length} date{s.dates.length !== 1 ? 's' : ''} tracked
                   </div>
                 </div>
-                <span className="text-xs font-semibold text-green-600 dark:text-green-400 text-right">
+                <span className="text-xs font-semibold text-green-600 dark:text-green-400 text-right block">
                   {s.selfPresent}
                 </span>
-                <span className="text-xs font-semibold text-red-500 dark:text-red-400 text-right">
+                <span className="text-xs font-semibold text-red-500 dark:text-red-400 text-right block">
                   {s.selfAbsent}
                 </span>
-                <PctBadge pct={s.officialPct} />
-                <PctBadge pct={s.projPct} />
+                <div className="flex justify-end"><PctBadge pct={s.officialPct} /></div>
+                <div className="flex justify-end"><PctBadge pct={s.projPct} /></div>
                 <svg className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${expanded[s.rollNumber] ? 'rotate-180' : ''}`}
                      fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
