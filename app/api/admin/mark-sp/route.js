@@ -27,20 +27,13 @@ export async function PATCH(request) {
     const slotRegex = new RegExp('^' + normalizedSlot.replace(/0(\d):/g, '0?$1:') + '$');
 
     await connectDB();
-    // Try to update existing record (handles un-normalized slot names in DB)
-    let result = await Attendance.findOneAndUpdate(
-      { rollNumber: rollNumber.toUpperCase(), date, slot: slotRegex },
-      { $set: { status, week, year, slot: normalizedSlot, markedAt: new Date() } },
-      { new: true }
-    );
-    // If no existing record found, upsert with normalized slot (admin adding new)
-    if (!result) {
-      result = await Attendance.findOneAndUpdate(
-        { rollNumber: rollNumber.toUpperCase(), date, slot: normalizedSlot },
-        { $set: { status, week, year, markedAt: new Date() } },
-        { upsert: true, new: true }
-      );
-    }
+    const roll = rollNumber.toUpperCase();
+
+    // Delete ALL records matching this slot (cleans up duplicates from normalized/un-normalized forms)
+    await Attendance.deleteMany({ rollNumber: roll, date, slot: slotRegex });
+
+    // Insert a single clean record with the normalized slot name
+    const result = await Attendance.create({ rollNumber: roll, date, slot: normalizedSlot, status, week, year, markedAt: new Date() });
 
     return NextResponse.json({ success: true, status: result.status });
   } catch (e) {
