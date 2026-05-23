@@ -8,15 +8,12 @@ import { logAction } from '@/lib/auditLog';
 export async function PATCH(request) {
   try {
     const session = await getSession();
-    if (!session || (session.role !== 'admin' && session.role !== 'student'))
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!session || session.role !== 'admin')
+      return NextResponse.json({ error: 'Admin only' }, { status: 403 });
 
     const { rollNumber, date, slot, status } = await request.json();
     if (!rollNumber || !date || !slot || !['present', 'absent', 'sp'].includes(status))
       return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
-
-    if (session.role === 'student' && session.rollNumber.toUpperCase() !== rollNumber.toUpperCase())
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
 
     const week = getWeekNumber(date);
     const year = new Date(date).getFullYear();
@@ -36,12 +33,10 @@ export async function PATCH(request) {
     // Insert a single clean record with the normalized slot name
     const result = await Attendance.create({ rollNumber: roll, date, slot: normalizedSlot, status, week, year, markedAt: new Date() });
 
-    if (session.role === 'admin') {
-      logAction(
-        session.username, 'MARK_SP', roll,
-        `Marked ${roll} slot "${normalizedSlot}" on ${date} as ${status.toUpperCase()}`
-      );
-    }
+    logAction(
+      session.username, 'MARK_SP', roll,
+      `Marked ${roll} slot "${normalizedSlot}" on ${date} as ${status.toUpperCase()}`
+    );
 
     return NextResponse.json({ success: true, status: result.status });
   } catch (e) {
