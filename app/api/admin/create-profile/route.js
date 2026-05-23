@@ -4,6 +4,7 @@ import { connectDB } from '@/lib/mongodb';
 import Student from '@/lib/models/Student';
 import User from '@/lib/models/User';
 import { getSession } from '@/lib/auth';
+import { logAction } from '@/lib/auditLog';
 
 export async function POST(request) {
   try {
@@ -53,6 +54,11 @@ export async function POST(request) {
           )
         : Promise.resolve(),
     ]);
+
+    logAction(
+      session.username, 'CREATE_PROFILE', roll,
+      `Created ${effectiveRole} account for ${name.trim().toUpperCase()} (${roll})`
+    );
 
     return NextResponse.json({ success: true, rollNumber: roll, role: effectiveRole, permissions: effectivePerms });
   } catch (e) {

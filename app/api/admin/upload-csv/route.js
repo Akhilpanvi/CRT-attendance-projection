@@ -8,6 +8,7 @@ import Attendance from '@/lib/models/Attendance';
 import { getSession } from '@/lib/auth';
 import { getWeekNumber } from '@/lib/helpers';
 import SelfAttendance from '@/lib/models/SelfAttendance';
+import { logAction } from '@/lib/auditLog';
 
 export async function POST(request) {
   try {
@@ -125,6 +126,11 @@ export async function POST(request) {
     if (rollNumbers.length) {
       await SelfAttendance.deleteMany({ rollNumber: { $in: rollNumbers }, date: attendanceDate });
     }
+
+    logAction(
+      session.username, 'UPLOAD_CSV', attendanceDate,
+      `Uploaded CSV for ${attendanceDate} — ${rollNumbers.length} students, ${slotCols.length} slot(s)${reupload ? ' [reupload]' : ''}`
+    );
 
     return NextResponse.json({
       success: true,

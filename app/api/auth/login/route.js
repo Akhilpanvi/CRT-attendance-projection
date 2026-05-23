@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { connectDB } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import { signToken, setTokenCookie } from '@/lib/auth';
+import { logAction } from '@/lib/auditLog';
 
 export async function POST(request) {
   try {
@@ -14,6 +15,13 @@ export async function POST(request) {
     const user = await User.findOne({ username: username.trim() });
     if (!user || !(await bcrypt.compare(password, user.passwordHash)))
       return NextResponse.json({ error: 'Invalid username or password' }, { status: 401 });
+
+    // Track last login and log for admin accounts
+    if (user.role === 'admin' || user.role === 'aprameya') {
+      user.lastLoginAt = new Date();
+      await user.save();
+      logAction(user.username, 'LOGIN', '', 'Logged in to admin panel');
+    }
 
     const token = await signToken({
       userId:             user._id.toString(),

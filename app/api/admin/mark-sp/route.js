@@ -3,6 +3,7 @@ import { connectDB } from '@/lib/mongodb';
 import Attendance from '@/lib/models/Attendance';
 import { getSession } from '@/lib/auth';
 import { getWeekNumber } from '@/lib/helpers';
+import { logAction } from '@/lib/auditLog';
 
 export async function PATCH(request) {
   try {
@@ -34,6 +35,13 @@ export async function PATCH(request) {
 
     // Insert a single clean record with the normalized slot name
     const result = await Attendance.create({ rollNumber: roll, date, slot: normalizedSlot, status, week, year, markedAt: new Date() });
+
+    if (session.role === 'admin') {
+      logAction(
+        session.username, 'MARK_SP', roll,
+        `Marked ${roll} slot "${normalizedSlot}" on ${date} as ${status.toUpperCase()}`
+      );
+    }
 
     return NextResponse.json({ success: true, status: result.status });
   } catch (e) {
