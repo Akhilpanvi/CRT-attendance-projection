@@ -16,11 +16,9 @@ const ACTION_LABELS = {
 function fmt(iso) {
   if (!iso) return '—';
   const d = new Date(iso);
-  return d.toLocaleString('en-IN', {
-    day: '2-digit', month: 'short', year: 'numeric',
-    hour: '2-digit', minute: '2-digit', second: '2-digit',
-    hour12: true,
-  });
+  const date = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  const time = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+  return `${date}, ${time}`;
 }
 
 const PAGE_SIZES = [25, 50, 100];
@@ -216,42 +214,47 @@ export default function LogsPage() {
           <div className="text-center py-10 text-sm text-slate-400">No logs found</div>
         ) : (
           <>
-            {/* Header */}
-            <div className="hidden sm:grid text-[10px] font-semibold uppercase tracking-wider text-slate-400
-                            px-3 pb-1.5 border-b border-slate-100 dark:border-slate-700"
-                 style={{ gridTemplateColumns: '160px 80px 130px 1fr' }}>
-              <span>Timestamp</span>
-              <span>Admin</span>
-              <span>Action</span>
-              <span>Detail</span>
-            </div>
-
-            <div className="divide-y divide-slate-100 dark:divide-slate-700/60">
-              {logs.map(log => {
-                const meta = ACTION_LABELS[log.action] || { label: log.action, color: 'bg-slate-100 text-slate-500' };
-                return (
-                  <div key={log._id}
-                       className="sm:grid items-start gap-3 px-3 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/20 transition-colors"
-                       style={{ gridTemplateColumns: '160px 80px 130px 1fr' }}>
-                    {/* Timestamp */}
-                    <span className="text-[11px] text-slate-400 dark:text-slate-500 font-mono whitespace-nowrap">
-                      {fmt(log.createdAt)}
-                    </span>
-                    {/* Admin */}
-                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 truncate">
-                      {log.admin}
-                    </span>
-                    {/* Action badge */}
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full w-fit ${meta.color}`}>
-                      {meta.label}
-                    </span>
-                    {/* Detail */}
-                    <span className="text-xs text-slate-500 dark:text-slate-400">
-                      {log.detail || log.target || '—'}
-                    </span>
-                  </div>
-                );
-              })}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-100 dark:border-slate-700">
+                    <th className="text-[10px] font-semibold uppercase tracking-wider text-slate-400
+                                   px-3 pb-2 whitespace-nowrap w-44">Timestamp</th>
+                    <th className="text-[10px] font-semibold uppercase tracking-wider text-slate-400
+                                   px-3 pb-2 whitespace-nowrap w-24">Admin</th>
+                    <th className="text-[10px] font-semibold uppercase tracking-wider text-slate-400
+                                   px-3 pb-2 whitespace-nowrap w-36">Action</th>
+                    <th className="text-[10px] font-semibold uppercase tracking-wider text-slate-400
+                                   px-3 pb-2">Detail</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60">
+                  {logs.map(log => {
+                    const meta = ACTION_LABELS[log.action] || { label: log.action, color: 'bg-slate-100 text-slate-500' };
+                    return (
+                      <tr key={log._id}
+                          className="hover:bg-slate-50 dark:hover:bg-slate-700/20 transition-colors">
+                        <td className="px-3 py-2.5 text-[11px] text-slate-400 dark:text-slate-500
+                                       font-mono whitespace-nowrap align-top">
+                          {fmt(log.createdAt)}
+                        </td>
+                        <td className="px-3 py-2.5 text-xs font-semibold text-slate-700
+                                       dark:text-slate-300 whitespace-nowrap align-top">
+                          {log.admin}
+                        </td>
+                        <td className="px-3 py-2.5 align-top">
+                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${meta.color}`}>
+                            {meta.label}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2.5 text-xs text-slate-500 dark:text-slate-400 align-top">
+                          {log.detail || log.target || '—'}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
 
             {/* Pagination */}
