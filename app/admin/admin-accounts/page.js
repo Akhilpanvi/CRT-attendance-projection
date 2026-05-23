@@ -2,6 +2,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useToast, Toast } from '@/components/Toast';
 
+function fmtDate(iso) {
+  if (!iso) return 'Never';
+  return new Date(iso).toLocaleString('en-IN', {
+    day: '2-digit', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', hour12: true,
+  });
+}
+
 const ALL_PERMISSIONS = [
   { key: 'upload',         label: 'Upload CSV',      desc: 'Import daily attendance CSVs' },
   { key: 'students',       label: 'All Students',    desc: 'View and edit student attendance' },
@@ -299,6 +307,14 @@ export default function AdminAccountsPage() {
                       {!admin.isSelf && admin.mustChangePassword && (
                         <span className="text-[10px] text-amber-500 font-medium">· must change password</span>
                       )}
+                    </div>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <svg className="w-3 h-3 text-slate-300 dark:text-slate-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500">
+                        Last login: <span className="text-slate-500 dark:text-slate-400">{fmtDate(admin.lastLoginAt)}</span>
+                      </span>
                     </div>
                   </div>
 
