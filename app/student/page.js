@@ -226,7 +226,7 @@ export default function StudentPage() {
     const { date, slot, pending } = slotEditing;
     setSlotSaving(true);
     try {
-      const r = await fetch('/api/admin/mark-sp', {
+      const r = await fetch('/api/student/mark-sp', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ rollNumber: data.student.rollNumber, date, slot, status: pending }),

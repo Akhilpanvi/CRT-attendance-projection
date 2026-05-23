@@ -25,7 +25,11 @@ export async function middleware(request) {
       return NextResponse.redirect(new URL('/student', request.url));
     }
 
-    // Role guards
+    // Block non-admins from all /api/admin/* endpoints at the edge
+    if (pathname.startsWith('/api/admin') && payload.role !== 'admin')
+      return NextResponse.json({ error: 'Admin only' }, { status: 403 });
+
+    // Role guards for pages
     if (pathname.startsWith('/admin') && payload.role !== 'admin')
       return NextResponse.redirect(new URL(payload.role === 'aprameya' ? '/aprameya' : '/student', request.url));
 

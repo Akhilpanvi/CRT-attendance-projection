@@ -138,14 +138,15 @@ export default function AdminLayout({ children }) {
 
   useEffect(() => {
     fetch('/api/admin/me')
-      .then(r => r.json())
-      .then(d => {
+      .then(async r => {
+        if (!r.ok) { router.replace('/login'); return; }
+        const d = await r.json();
         setMyUsername(d.username || '');
-        // preserve null (super-admin); only fall back to 'full' on undefined/error
+        // preserve null (super-admin); fall back to 'full' only if field is truly absent
         setMyPerms(d.permissions === undefined ? 'full' : d.permissions);
       })
-      .catch(() => setMyPerms('full'));
-  }, []);
+      .catch(() => router.replace('/login'));
+  }, [router]);
 
   // Show nav item if: still loading, OR super-admin (null), OR full access, OR permission in array
   // alwaysVisible = shown to all admins; superAdminOnly = only null-permission admins
