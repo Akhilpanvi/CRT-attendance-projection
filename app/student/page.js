@@ -70,12 +70,25 @@ const UPDATE_COLORS = {
 
 const today = new Date().toISOString().split('T')[0];
 
+const DEFAULT_POLICY = {
+  removed: [
+    'Students must meet Director CRT along with Parents to be added back to the program.',
+    'Until then, their status remains REMOVED.',
+    'Students must continue attending CRT sections and attendance will continue to be monitored.',
+  ],
+  redzone: [
+    'Students will face limited placement opportunities or restricted placement eligibility.',
+    'Students must continue in CRT sections and their attendance will be monitored carefully.',
+  ],
+};
+
 export default function StudentPage() {
   const router = useRouter();
   const [data, setData]       = useState(null);
   const [error, setError]     = useState('');
   const [loading, setLoading] = useState(true);
   const [updates, setUpdates] = useState([]);
+  const [policy, setPolicy]   = useState(DEFAULT_POLICY);
   const [isDark, setIsDark]   = useState(true);
 
   useEffect(() => {
@@ -104,6 +117,7 @@ export default function StudentPage() {
       .finally(() => setLoading(false));
 
     fetch('/api/updates').then(r => r.json()).then(d => setUpdates(Array.isArray(d) ? d : [])).catch(() => {});
+    fetch('/api/policy').then(r => r.json()).then(d => setPolicy(d)).catch(() => {});
 
     fetch('/api/student/self-attendance')
       .then(r => r.json())
@@ -416,11 +430,7 @@ export default function StudentPage() {
                 </span>
               </div>
               <div className="px-4 py-3 space-y-2">
-                {[
-                  'Students must meet Director CRT along with Parents to be added back to the program.',
-                  'Until then, their status remains REMOVED.',
-                  'Students must continue attending CRT sections and attendance will continue to be monitored.',
-                ].map((line, i) => (
+                {policy.removed.map((line, i) => (
                   <div key={i} className="flex items-start gap-2.5">
                     <span className="text-red-400 dark:text-red-500 mt-[3px] shrink-0 text-[10px]">—</span>
                     <p className="text-xs leading-relaxed text-red-700 dark:text-red-300">{line}</p>
@@ -447,10 +457,7 @@ export default function StudentPage() {
                 </span>
               </div>
               <div className="px-4 py-3 space-y-2">
-                {[
-                  'Students will face limited placement opportunities or restricted placement eligibility.',
-                  'Students must continue in CRT sections and their attendance will be monitored carefully.',
-                ].map((line, i) => (
+                {policy.redzone.map((line, i) => (
                   <div key={i} className="flex items-start gap-2.5">
                     <span className="text-amber-400 dark:text-amber-500 mt-[3px] shrink-0 text-[10px]">—</span>
                     <p className="text-xs leading-relaxed text-amber-700 dark:text-amber-300">{line}</p>
