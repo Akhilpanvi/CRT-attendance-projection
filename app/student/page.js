@@ -396,8 +396,8 @@ export default function StudentPage() {
         )}
 
         {/* Category notice — REMOVED or REDZONE */}
-        {pct < 85 && stats.total > 0 && (
-          pct < 75 ? (
+        {pct < 75 && stats.total > 0 && (
+          pct < 50 ? (
             /* ── REMOVED ────────────────────────────────────────────────── */
             <div style={isDark
               ? { background: 'rgba(185,28,28,0.10)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: '10px' }
