@@ -5,6 +5,174 @@ import { pctColor } from '@/lib/helpers';
 
 const PRESETS = [75, 80, 85, 90];
 
+const DEFAULT_POLICY = {
+  removed: [
+    'Students must meet Director CRT along with Parents to be added back to the program.',
+    'Until then, their status remains REMOVED.',
+    'Students must continue attending CRT sections and attendance will continue to be monitored.',
+  ],
+  redzone: [
+    'Students will face limited placement opportunities or restricted placement eligibility.',
+    'Students must continue in CRT sections and their attendance will be monitored carefully.',
+  ],
+};
+
+function PolicyEditor({ show }) {
+  const { toast, show: showToast } = useToast();
+  const [policy,  setPolicy]  = useState(DEFAULT_POLICY);
+  const [draft,   setDraft]   = useState(null);   // null = not editing
+  const [saving,  setSaving]  = useState('');      // 'removed' | 'redzone' | ''
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!show) return;
+    fetch('/api/policy')
+      .then(r => r.json())
+      .then(d => { setPolicy(d); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [show]);
+
+  function startEdit(key) {
+    setDraft({ key, lines: [...policy[key]] });
+  }
+
+  function setLine(i, val) {
+    setDraft(d => ({ ...d, lines: d.lines.map((l, idx) => idx === i ? val : l) }));
+  }
+
+  function addLine() {
+    setDraft(d => ({ ...d, lines: [...d.lines, ''] }));
+  }
+
+  function removeLine(i) {
+    setDraft(d => ({ ...d, lines: d.lines.filter((_, idx) => idx !== i) }));
+  }
+
+  async function save() {
+    setSaving(draft.key);
+    try {
+      const r = await fetch('/api/policy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: draft.key, lines: draft.lines }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error);
+      setPolicy(p => ({ ...p, [draft.key]: d.lines }));
+      setDraft(null);
+      showToast(`${draft.key === 'removed' ? 'Removed' : 'Redzone'} policy updated`);
+    } catch (e) { showToast(e.message, 'error'); }
+    finally { setSaving(''); }
+  }
+
+  if (!show) return null;
+
+  const cats = [
+    { key: 'removed', label: 'Removed Category', range: 'Below 50%',
+      header: 'border-red-200 dark:border-red-800/40 bg-red-100/60 dark:bg-red-900/20',
+      dot: 'bg-red-500', title: 'text-red-700 dark:text-red-400', range_cls: 'text-red-500 dark:text-red-400',
+      body: 'border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-900/10',
+      line: 'text-red-700 dark:text-red-300', dash: 'text-red-300 dark:text-red-700',
+      btn: 'border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30',
+    },
+    { key: 'redzone', label: 'Redzone Category', range: '50% – 74%',
+      header: 'border-amber-200 dark:border-amber-800/40 bg-amber-100/60 dark:bg-amber-900/20',
+      dot: 'bg-amber-500', title: 'text-amber-700 dark:text-amber-400', range_cls: 'text-amber-600 dark:text-amber-400',
+      body: 'border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-900/10',
+      line: 'text-amber-700 dark:text-amber-300', dash: 'text-amber-300 dark:text-amber-700',
+      btn: 'border-amber-300 dark:border-amber-700 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30',
+    },
+  ];
+
+  return (
+    <div className="mb-4 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+      <Toast toast={toast} />
+      <div className="px-4 py-3 bg-slate-50 dark:bg-slate-700/30 border-b border-slate-200 dark:border-slate-700">
+        <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">Edit Category Policies</p>
+        <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
+          Changes are saved to the database and reflected on student pages immediately.
+        </p>
+      </div>
+
+      {loading ? (
+        <div className="px-4 py-6 text-sm text-slate-400 text-center">Loading…</div>
+      ) : (
+        <div className="p-4 grid sm:grid-cols-2 gap-4">
+          {cats.map(c => (
+            <div key={c.key} className={`rounded-lg overflow-hidden border ${c.body}`}>
+              {/* Header */}
+              <div className={`flex items-center gap-2.5 px-4 py-2.5 border-b ${c.header}`}>
+                <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${c.dot}`} />
+                <span className={`text-[10px] font-bold uppercase tracking-widest ${c.title}`}>{c.label}</span>
+                <span className={`ml-auto text-[10px] font-bold ${c.range_cls}`}>{c.range}</span>
+              </div>
+
+              {/* Lines or editor */}
+              {draft?.key === c.key ? (
+                <div className="px-4 py-3 space-y-2">
+                  {draft.lines.map((line, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <textarea
+                        rows={2}
+                        className="flex-1 text-[11px] px-2 py-1.5 rounded border border-slate-200 dark:border-slate-600
+                                   bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 resize-none outline-none
+                                   focus:border-blue-400 dark:focus:border-blue-500 transition-colors leading-relaxed"
+                        value={line}
+                        onChange={e => setLine(i, e.target.value)}
+                      />
+                      <button
+                        onClick={() => removeLine(i)}
+                        disabled={draft.lines.length <= 1}
+                        className="mt-1 text-slate-400 hover:text-red-500 disabled:opacity-30 transition-colors shrink-0">
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    onClick={addLine}
+                    className="text-[10px] text-blue-500 dark:text-blue-400 hover:underline">
+                    + Add line
+                  </button>
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      onClick={save}
+                      disabled={!!saving}
+                      className="btn-primary py-1 px-3 text-[11px]">
+                      {saving === c.key ? 'Saving…' : 'Save'}
+                    </button>
+                    <button
+                      onClick={() => setDraft(null)}
+                      className="px-3 py-1 text-[11px] rounded border border-slate-200 dark:border-slate-600
+                                 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="px-4 py-3 space-y-1.5">
+                  {policy[c.key].map((line, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <span className={`mt-[3px] shrink-0 text-[10px] ${c.dash}`}>—</span>
+                      <p className={`text-[11px] leading-relaxed ${c.line}`}>{line}</p>
+                    </div>
+                  ))}
+                  <button
+                    onClick={() => startEdit(c.key)}
+                    className={`mt-2 text-[10px] font-medium px-2.5 py-1 rounded border transition-colors ${c.btn}`}>
+                    Edit
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function downloadExcel(students, threshold) {
   import('xlsx').then(XLSX => {
     const rows = students.map((s, i) => ({
@@ -43,11 +211,12 @@ function PctBar({ pct }) {
 
 export default function RemovalPage() {
   const { toast, show } = useToast();
-  const [students, setStudents] = useState([]);
-  const [loading, setLoading]   = useState(true);
-  const [q, setQ]               = useState('');
+  const [students, setStudents]   = useState([]);
+  const [loading, setLoading]     = useState(true);
+  const [q, setQ]                 = useState('');
   const [threshold, setThreshold] = useState(85);
   const [customInput, setCustomInput] = useState('');
+  const [showEditor, setShowEditor]   = useState(false);
   const customRef = useRef(null);
 
   useEffect(() => {
@@ -86,6 +255,17 @@ export default function RemovalPage() {
           </p>
         </div>
         <div className="ml-auto flex items-center gap-2 flex-wrap">
+          <button
+            onClick={() => setShowEditor(v => !v)}
+            className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded border transition-colors
+              ${showEditor
+                ? 'bg-slate-800 dark:bg-slate-200 border-slate-800 dark:border-slate-200 text-white dark:text-slate-900'
+                : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'}`}>
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487z" />
+            </svg>
+            {showEditor ? 'Hide Editor' : 'Edit Policies'}
+          </button>
           <input
             className="form-input text-xs w-48"
             placeholder="Search name or reg. no."
@@ -152,6 +332,9 @@ export default function RemovalPage() {
           </div>
         </div>
       </div>
+
+      {/* Policy editor — collapsible */}
+      <PolicyEditor show={showEditor} />
 
       {/* Threshold selector */}
       <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
