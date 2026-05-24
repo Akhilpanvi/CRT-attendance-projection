@@ -409,64 +409,7 @@ export default function StudentPage() {
           </div>
         )}
 
-        {/* Category notice — REMOVED or REDZONE */}
-        {pct < 75 && stats.total > 0 && (
-          pct < 50 ? (
-            /* ── REMOVED ────────────────────────────────────────────────── */
-            <div style={isDark
-              ? { background: 'rgba(185,28,28,0.10)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: '10px' }
-              : { background: '#fff5f5', border: '1px solid #fca5a5', borderRadius: '10px' }}>
-              <div className="flex items-center gap-3 px-4 py-3"
-                   style={{ borderBottom: isDark ? '1px solid rgba(239,68,68,0.15)' : '1px solid #fecaca' }}>
-                <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-red-600 dark:text-red-400">
-                  Removed Category
-                </span>
-                <span className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded"
-                      style={isDark
-                        ? { background: 'rgba(239,68,68,0.15)', color: '#f87171' }
-                        : { background: '#fee2e2', color: '#dc2626' }}>
-                  {pct}% attendance
-                </span>
-              </div>
-              <div className="px-4 py-3 space-y-2">
-                {policy.removed.map((line, i) => (
-                  <div key={i} className="flex items-start gap-2.5">
-                    <span className="text-red-400 dark:text-red-500 mt-[3px] shrink-0 text-[10px]">—</span>
-                    <p className="text-xs leading-relaxed text-red-700 dark:text-red-300">{line}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            /* ── REDZONE ─────────────────────────────────────────────────── */
-            <div style={isDark
-              ? { background: 'rgba(180,83,9,0.10)', border: '1px solid rgba(251,191,36,0.22)', borderRadius: '10px' }
-              : { background: '#fffbeb', border: '1px solid #fcd34d', borderRadius: '10px' }}>
-              <div className="flex items-center gap-3 px-4 py-3"
-                   style={{ borderBottom: isDark ? '1px solid rgba(251,191,36,0.12)' : '1px solid #fde68a' }}>
-                <div className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">
-                  Redzone Category
-                </span>
-                <span className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded"
-                      style={isDark
-                        ? { background: 'rgba(251,191,36,0.15)', color: '#fbbf24' }
-                        : { background: '#fef3c7', color: '#d97706' }}>
-                  {pct}% attendance
-                </span>
-              </div>
-              <div className="px-4 py-3 space-y-2">
-                {policy.redzone.map((line, i) => (
-                  <div key={i} className="flex items-start gap-2.5">
-                    <span className="text-amber-400 dark:text-amber-500 mt-[3px] shrink-0 text-[10px]">—</span>
-                    <p className="text-xs leading-relaxed text-amber-700 dark:text-amber-300">{line}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )
-        )}
+        {/* Category notice — REMOVED or REDZONE (hidden until re-enabled) */}
 
         {/* Profile */}
         <div className="rounded-lg p-4" style={card}>
