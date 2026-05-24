@@ -19,7 +19,7 @@ function downloadExcel(students, threshold) {
       'Total':         s.stats.total,
       'Absent':        s.stats.absent,
       'Attendance %':  s.stats.pct,
-      'Status':        s.stats.pct < 75 ? 'Critical' : 'Warning',
+      'Status':        s.stats.pct < 75 ? 'Removed' : 'Redzone',
       'Threshold':     `${threshold}%`,
     }));
     const ws = XLSX.utils.json_to_sheet(rows);
@@ -101,6 +101,58 @@ export default function RemovalPage() {
         </div>
       </div>
 
+      {/* Category policy reference */}
+      <div className="grid sm:grid-cols-2 gap-3 mb-4">
+        {/* REMOVED */}
+        <div className="rounded-lg overflow-hidden border border-red-200 dark:border-red-800/50
+                        bg-red-50 dark:bg-red-900/10">
+          <div className="flex items-center gap-2.5 px-4 py-2.5 border-b border-red-200 dark:border-red-800/40
+                          bg-red-100/60 dark:bg-red-900/20">
+            <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-red-700 dark:text-red-400">
+              Removed Category
+            </span>
+            <span className="ml-auto text-[10px] font-bold text-red-500 dark:text-red-400">Below 75%</span>
+          </div>
+          <div className="px-4 py-3 space-y-1.5">
+            {[
+              'Students must meet Director CRT along with Parents to be added back to the program.',
+              'Until then, their status remains REMOVED.',
+              'Students must continue attending CRT sections and attendance will continue to be monitored.',
+            ].map((line, i) => (
+              <div key={i} className="flex items-start gap-2">
+                <span className="text-red-300 dark:text-red-700 mt-[3px] shrink-0 text-[10px]">—</span>
+                <p className="text-[11px] leading-relaxed text-red-700 dark:text-red-300">{line}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* REDZONE */}
+        <div className="rounded-lg overflow-hidden border border-amber-200 dark:border-amber-800/50
+                        bg-amber-50 dark:bg-amber-900/10">
+          <div className="flex items-center gap-2.5 px-4 py-2.5 border-b border-amber-200 dark:border-amber-800/40
+                          bg-amber-100/60 dark:bg-amber-900/20">
+            <div className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-amber-700 dark:text-amber-400">
+              Redzone Category
+            </span>
+            <span className="ml-auto text-[10px] font-bold text-amber-600 dark:text-amber-400">75% – 85%</span>
+          </div>
+          <div className="px-4 py-3 space-y-1.5">
+            {[
+              'Students will face limited placement opportunities or restricted placement eligibility.',
+              'Students must continue in CRT sections and their attendance will be monitored carefully.',
+            ].map((line, i) => (
+              <div key={i} className="flex items-start gap-2">
+                <span className="text-amber-300 dark:text-amber-700 mt-[3px] shrink-0 text-[10px]">—</span>
+                <p className="text-[11px] leading-relaxed text-amber-700 dark:text-amber-300">{line}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Threshold selector */}
       <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
                       rounded-lg p-3 mb-4 flex items-center gap-3 flex-wrap">
@@ -158,13 +210,13 @@ export default function RemovalPage() {
       <div className="grid grid-cols-3 gap-3 mb-4">
         {[
           {
-            label: 'Below 75% — Critical',
+            label: 'Below 75% — Removed',
             count: critical.length,
             color: 'text-red-600 dark:text-red-400',
             bg:    'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20',
           },
           {
-            label: threshold > 75 ? `75–${threshold}% — Warning` : `Below ${threshold}% — Warning`,
+            label: threshold > 75 ? `75–${threshold}% — Redzone` : `Below ${threshold}% — Redzone`,
             count: threshold > 75 ? warning.length : 0,
             color: 'text-amber-600 dark:text-amber-400',
             bg:    'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20',
@@ -225,8 +277,8 @@ export default function RemovalPage() {
                   <td className="tbl-cell"><PctBar pct={s.stats.pct} /></td>
                   <td className="tbl-cell">
                     {s.stats.pct < 75
-                      ? <span className="badge-absent">Critical</span>
-                      : <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">Warning</span>
+                      ? <span className="badge-absent">Removed</span>
+                      : <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">Redzone</span>
                     }
                   </td>
                 </tr>
