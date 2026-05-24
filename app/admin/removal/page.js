@@ -19,7 +19,7 @@ function downloadExcel(students, threshold) {
       'Total':         s.stats.total,
       'Absent':        s.stats.absent,
       'Attendance %':  s.stats.pct,
-      'Status':        s.stats.pct < 75 ? 'Removed' : 'Redzone',
+      'Status':        s.stats.pct < 50 ? 'Removed' : s.stats.pct < 75 ? 'Redzone' : 'Warning',
       'Threshold':     `${threshold}%`,
     }));
     const ws = XLSX.utils.json_to_sheet(rows);
@@ -71,8 +71,8 @@ export default function RemovalPage() {
     s.rollNumber.toLowerCase().includes(q.toLowerCase())
   );
 
-  const critical = filtered.filter(s => s.stats.pct < 75);
-  const warning  = filtered.filter(s => s.stats.pct >= 75);
+  const critical = filtered.filter(s => s.stats.pct < 50);
+  const warning  = filtered.filter(s => s.stats.pct >= 50 && s.stats.pct < 75);
 
   return (
     <div>
@@ -112,7 +112,7 @@ export default function RemovalPage() {
             <span className="text-[10px] font-bold uppercase tracking-widest text-red-700 dark:text-red-400">
               Removed Category
             </span>
-            <span className="ml-auto text-[10px] font-bold text-red-500 dark:text-red-400">Below 75%</span>
+            <span className="ml-auto text-[10px] font-bold text-red-500 dark:text-red-400">Below 50%</span>
           </div>
           <div className="px-4 py-3 space-y-1.5">
             {[
@@ -137,7 +137,7 @@ export default function RemovalPage() {
             <span className="text-[10px] font-bold uppercase tracking-widest text-amber-700 dark:text-amber-400">
               Redzone Category
             </span>
-            <span className="ml-auto text-[10px] font-bold text-amber-600 dark:text-amber-400">75% – 85%</span>
+            <span className="ml-auto text-[10px] font-bold text-amber-600 dark:text-amber-400">50% – 74%</span>
           </div>
           <div className="px-4 py-3 space-y-1.5">
             {[
@@ -210,13 +210,13 @@ export default function RemovalPage() {
       <div className="grid grid-cols-3 gap-3 mb-4">
         {[
           {
-            label: 'Below 75% — Removed',
+            label: 'Below 50% — Removed',
             count: critical.length,
             color: 'text-red-600 dark:text-red-400',
             bg:    'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20',
           },
           {
-            label: threshold > 75 ? `75–${threshold}% — Redzone` : `Below ${threshold}% — Redzone`,
+            label: `50–74% — Redzone`,
             count: threshold > 75 ? warning.length : 0,
             color: 'text-amber-600 dark:text-amber-400',
             bg:    'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20',
@@ -276,9 +276,11 @@ export default function RemovalPage() {
                   <td className="tbl-cell text-center">{s.stats.total}</td>
                   <td className="tbl-cell"><PctBar pct={s.stats.pct} /></td>
                   <td className="tbl-cell">
-                    {s.stats.pct < 75
+                    {s.stats.pct < 50
                       ? <span className="badge-absent">Removed</span>
-                      : <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">Redzone</span>
+                      : s.stats.pct < 75
+                        ? <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">Redzone</span>
+                        : <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">Warning</span>
                     }
                   </td>
                 </tr>
