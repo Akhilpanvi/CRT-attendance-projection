@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useToast, Toast } from '@/components/Toast';
 import { pctColor } from '@/lib/helpers';
 
@@ -17,11 +17,21 @@ const DEFAULT_POLICY = {
   ],
 };
 
+/* ─── CSV helper ──────────────────────────────────────────────────── */
+function parseCSV(text) {
+  // Take the first column of each row; skip rows with no digits (headers / blanks)
+  return text
+    .split('\n')
+    .map(line => line.split(',')[0].trim().replace(/["']/g, ''))
+    .filter(val => val && /\d/.test(val));
+}
+
+/* ─── PolicyEditor ─────────────────────────────────────────────────── */
 function PolicyEditor({ show }) {
   const { toast, show: showToast } = useToast();
   const [policy,  setPolicy]  = useState(DEFAULT_POLICY);
-  const [draft,   setDraft]   = useState(null);   // null = not editing
-  const [saving,  setSaving]  = useState('');      // 'removed' | 'redzone' | ''
+  const [draft,   setDraft]   = useState(null);
+  const [saving,  setSaving]  = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,28 +42,16 @@ function PolicyEditor({ show }) {
       .catch(() => setLoading(false));
   }, [show]);
 
-  function startEdit(key) {
-    setDraft({ key, lines: [...policy[key]] });
-  }
-
-  function setLine(i, val) {
-    setDraft(d => ({ ...d, lines: d.lines.map((l, idx) => idx === i ? val : l) }));
-  }
-
-  function addLine() {
-    setDraft(d => ({ ...d, lines: [...d.lines, ''] }));
-  }
-
-  function removeLine(i) {
-    setDraft(d => ({ ...d, lines: d.lines.filter((_, idx) => idx !== i) }));
-  }
+  function startEdit(key) { setDraft({ key, lines: [...policy[key]] }); }
+  function setLine(i, val) { setDraft(d => ({ ...d, lines: d.lines.map((l, idx) => idx === i ? val : l) })); }
+  function addLine()       { setDraft(d => ({ ...d, lines: [...d.lines, ''] })); }
+  function removeLine(i)   { setDraft(d => ({ ...d, lines: d.lines.filter((_, idx) => idx !== i) })); }
 
   async function save() {
     setSaving(draft.key);
     try {
       const r = await fetch('/api/policy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ key: draft.key, lines: draft.lines }),
       });
       const d = await r.json();
@@ -93,36 +91,27 @@ function PolicyEditor({ show }) {
           Changes are saved to the database and reflected on student pages immediately.
         </p>
       </div>
-
       {loading ? (
         <div className="px-4 py-6 text-sm text-slate-400 text-center">Loading…</div>
       ) : (
         <div className="p-4 grid sm:grid-cols-2 gap-4">
           {cats.map(c => (
             <div key={c.key} className={`rounded-lg overflow-hidden border ${c.body}`}>
-              {/* Header */}
               <div className={`flex items-center gap-2.5 px-4 py-2.5 border-b ${c.header}`}>
                 <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${c.dot}`} />
                 <span className={`text-[10px] font-bold uppercase tracking-widest ${c.title}`}>{c.label}</span>
                 <span className={`ml-auto text-[10px] font-bold ${c.range_cls}`}>{c.range}</span>
               </div>
-
-              {/* Lines or editor */}
               {draft?.key === c.key ? (
                 <div className="px-4 py-3 space-y-2">
                   {draft.lines.map((line, i) => (
                     <div key={i} className="flex items-start gap-2">
-                      <textarea
-                        rows={2}
+                      <textarea rows={2}
                         className="flex-1 text-[11px] px-2 py-1.5 rounded border border-slate-200 dark:border-slate-600
                                    bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 resize-none outline-none
                                    focus:border-blue-400 dark:focus:border-blue-500 transition-colors leading-relaxed"
-                        value={line}
-                        onChange={e => setLine(i, e.target.value)}
-                      />
-                      <button
-                        onClick={() => removeLine(i)}
-                        disabled={draft.lines.length <= 1}
+                        value={line} onChange={e => setLine(i, e.target.value)} />
+                      <button onClick={() => removeLine(i)} disabled={draft.lines.length <= 1}
                         className="mt-1 text-slate-400 hover:text-red-500 disabled:opacity-30 transition-colors shrink-0">
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -130,20 +119,14 @@ function PolicyEditor({ show }) {
                       </button>
                     </div>
                   ))}
-                  <button
-                    onClick={addLine}
-                    className="text-[10px] text-blue-500 dark:text-blue-400 hover:underline">
+                  <button onClick={addLine} className="text-[10px] text-blue-500 dark:text-blue-400 hover:underline">
                     + Add line
                   </button>
                   <div className="flex gap-2 pt-1">
-                    <button
-                      onClick={save}
-                      disabled={!!saving}
-                      className="btn-primary py-1 px-3 text-[11px]">
+                    <button onClick={save} disabled={!!saving} className="btn-primary py-1 px-3 text-[11px]">
                       {saving === c.key ? 'Saving…' : 'Save'}
                     </button>
-                    <button
-                      onClick={() => setDraft(null)}
+                    <button onClick={() => setDraft(null)}
                       className="px-3 py-1 text-[11px] rounded border border-slate-200 dark:border-slate-600
                                  text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                       Cancel
@@ -158,8 +141,7 @@ function PolicyEditor({ show }) {
                       <p className={`text-[11px] leading-relaxed ${c.line}`}>{line}</p>
                     </div>
                   ))}
-                  <button
-                    onClick={() => startEdit(c.key)}
+                  <button onClick={() => startEdit(c.key)}
                     className={`mt-2 text-[10px] font-medium px-2.5 py-1 rounded border transition-colors ${c.btn}`}>
                     Edit
                   </button>
@@ -173,6 +155,192 @@ function PolicyEditor({ show }) {
   );
 }
 
+/* ─── ManualUploader ───────────────────────────────────────────────── */
+function ManualUploader({ show, manualList, onUpdated, globalShow }) {
+  const { toast, show: showToast } = useToast();
+  const [uploading, setUploading] = useState(''); // 'removed' | 'redzone' | ''
+  const [clearing,  setClearing]  = useState('');
+  const removedRef = useRef(null);
+  const redzoneRef = useRef(null);
+
+  async function handleFile(e, status) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(status);
+    try {
+      const text = await file.text();
+      const rollNumbers = parseCSV(text);
+      if (!rollNumbers.length) throw new Error('No valid roll numbers found in the CSV');
+
+      const r = await fetch('/api/admin/manual-list', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, rollNumbers }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error);
+      showToast(`${d.added} student${d.added !== 1 ? 's' : ''} added to ${status === 'removed' ? 'Removed' : 'Redzone'} list`);
+      onUpdated();
+    } catch (e) { showToast(e.message, 'error'); }
+    finally {
+      setUploading('');
+      // Reset file input so the same file can be re-uploaded after clearing
+      if (status === 'removed' && removedRef.current) removedRef.current.value = '';
+      if (status === 'redzone' && redzoneRef.current) redzoneRef.current.value = '';
+    }
+  }
+
+  async function clear(status) {
+    if (!confirm(`Clear entire ${status} manual list?`)) return;
+    setClearing(status);
+    try {
+      const r = await fetch('/api/admin/manual-list', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error);
+      showToast(`${status === 'removed' ? 'Removed' : 'Redzone'} manual list cleared`);
+      onUpdated();
+    } catch (e) { showToast(e.message, 'error'); }
+    finally { setClearing(''); }
+  }
+
+  async function removeOne(rollNumber) {
+    try {
+      const r = await fetch('/api/admin/manual-list', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rollNumber }),
+      });
+      if (!r.ok) throw new Error((await r.json()).error);
+      onUpdated();
+    } catch (e) { showToast(e.message, 'error'); }
+  }
+
+  if (!show) return null;
+
+  const cats = [
+    {
+      key: 'removed', label: 'Removed List', range: 'Formally Removed',
+      entries: manualList.removed,
+      inputRef: removedRef,
+      header: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800/40',
+      dot:    'bg-red-500',
+      title:  'text-red-700 dark:text-red-400',
+      badge:  'bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400',
+      btn:    'bg-red-600 hover:bg-red-700',
+      clear:  'border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20',
+      row:    'text-red-600 dark:text-red-400',
+    },
+    {
+      key: 'redzone', label: 'Redzone List', range: 'Formally Redzone',
+      entries: manualList.redzone,
+      inputRef: redzoneRef,
+      header: 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800/40',
+      dot:    'bg-amber-500',
+      title:  'text-amber-700 dark:text-amber-400',
+      badge:  'bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400',
+      btn:    'bg-amber-500 hover:bg-amber-600',
+      clear:  'border-amber-300 dark:border-amber-700 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20',
+      row:    'text-amber-600 dark:text-amber-400',
+    },
+  ];
+
+  return (
+    <div className="mb-4 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+      <Toast toast={toast} />
+      <div className="px-4 py-3 bg-slate-50 dark:bg-slate-700/30 border-b border-slate-200 dark:border-slate-700">
+        <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">Manual Student Lists</p>
+        <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
+          Upload a CSV (roll numbers in the first column) to manually flag students.
+          These appear in the table alongside auto-detected students.
+        </p>
+      </div>
+
+      <div className="p-4 grid sm:grid-cols-2 gap-4">
+        {cats.map(c => (
+          <div key={c.key} className={`rounded-lg border overflow-hidden ${c.header}`}>
+            {/* Card header */}
+            <div className={`flex items-center gap-2 px-4 py-2.5 border-b ${c.header}`}>
+              <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${c.dot}`} />
+              <span className={`text-[10px] font-bold uppercase tracking-widest ${c.title}`}>{c.label}</span>
+              <span className={`ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded ${c.badge}`}>
+                {c.entries.length} student{c.entries.length !== 1 ? 's' : ''}
+              </span>
+            </div>
+
+            {/* Upload row */}
+            <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700/60 flex items-center gap-2 flex-wrap">
+              <input
+                ref={c.inputRef}
+                type="file"
+                accept=".csv,.txt"
+                className="hidden"
+                id={`csv-${c.key}`}
+                onChange={e => handleFile(e, c.key)}
+              />
+              <label
+                htmlFor={`csv-${c.key}`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium text-white rounded
+                            cursor-pointer transition-colors ${c.btn}
+                            ${uploading === c.key ? 'opacity-60 pointer-events-none' : ''}`}>
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round"
+                    d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                </svg>
+                {uploading === c.key ? 'Uploading…' : 'Upload CSV'}
+              </label>
+              {c.entries.length > 0 && (
+                <button
+                  onClick={() => clear(c.key)}
+                  disabled={clearing === c.key}
+                  className={`px-3 py-1.5 text-[11px] font-medium rounded border transition-colors
+                              disabled:opacity-50 ${c.clear}`}>
+                  {clearing === c.key ? 'Clearing…' : 'Clear All'}
+                </button>
+              )}
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 ml-auto">
+                First column = roll number
+              </span>
+            </div>
+
+            {/* Entry list */}
+            {c.entries.length === 0 ? (
+              <div className="px-4 py-4 text-[11px] text-slate-400 text-center">
+                No students manually added yet
+              </div>
+            ) : (
+              <div className="max-h-44 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700/40">
+                {c.entries.map(e => (
+                  <div key={e.rollNumber}
+                    className="flex items-center gap-2 px-4 py-1.5 hover:bg-white/60 dark:hover:bg-slate-800/40 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <span className={`text-[11px] font-semibold ${c.row}`}>{e.rollNumber}</span>
+                      {e.name && (
+                        <span className="ml-2 text-[10px] text-slate-500 dark:text-slate-400 truncate">{e.name}</span>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => removeOne(e.rollNumber)}
+                      className="text-slate-300 dark:text-slate-600 hover:text-red-500 transition-colors shrink-0">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Excel download ───────────────────────────────────────────────── */
 function downloadExcel(students, threshold) {
   import('xlsx').then(XLSX => {
     const rows = students.map((s, i) => ({
@@ -183,11 +351,13 @@ function downloadExcel(students, threshold) {
       'Department':    s.dept    || '',
       'CRT Section':   s.crtSec  || '',
       'CRT Room':      s.crtRoom || '',
-      'Present':       s.stats.present,
-      'Total':         s.stats.total,
-      'Absent':        s.stats.absent,
-      'Attendance %':  s.stats.pct,
-      'Status':        s.stats.pct < 50 ? 'Removed' : s.stats.pct < 75 ? 'Redzone' : 'Warning',
+      'Present':       s.stats?.present ?? '—',
+      'Total':         s.stats?.total   ?? '—',
+      'Absent':        s.stats?.absent  ?? '—',
+      'Attendance %':  s.stats?.pct     ?? '—',
+      'Status':        s.isManualOnly
+        ? (s.manualStatus === 'removed' ? 'Removed (Manual)' : 'Redzone (Manual)')
+        : (s.stats?.pct < 50 ? 'Removed' : s.stats?.pct < 75 ? 'Redzone' : 'Warning'),
       'Threshold':     `${threshold}%`,
     }));
     const ws = XLSX.utils.json_to_sheet(rows);
@@ -197,6 +367,7 @@ function downloadExcel(students, threshold) {
   });
 }
 
+/* ─── PctBar ───────────────────────────────────────────────────────── */
 function PctBar({ pct }) {
   const color = pctColor(pct);
   return (
@@ -209,14 +380,17 @@ function PctBar({ pct }) {
   );
 }
 
+/* ─── RemovalPage ──────────────────────────────────────────────────── */
 export default function RemovalPage() {
   const { toast, show } = useToast();
-  const [students, setStudents]   = useState([]);
-  const [loading, setLoading]     = useState(true);
-  const [q, setQ]                 = useState('');
-  const [threshold, setThreshold] = useState(85);
+  const [students,    setStudents]    = useState([]);
+  const [manualList,  setManualList]  = useState({ removed: [], redzone: [] });
+  const [loading,     setLoading]     = useState(true);
+  const [q,           setQ]           = useState('');
+  const [threshold,   setThreshold]   = useState(85);
   const [customInput, setCustomInput] = useState('');
-  const [showEditor, setShowEditor]   = useState(false);
+  const [showEditor,  setShowEditor]  = useState(false);
+  const [showManual,  setShowManual]  = useState(false);
   const customRef = useRef(null);
 
   useEffect(() => {
@@ -227,26 +401,69 @@ export default function RemovalPage() {
       .catch(e => { show(e.message, 'error'); setLoading(false); });
   }, [threshold]);
 
+  const loadManualList = useCallback(() => {
+    fetch('/api/admin/manual-list')
+      .then(r => r.json())
+      .then(d => setManualList(d))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => { loadManualList(); }, [loadManualList]);
+
   function applyCustom() {
     const v = parseInt(customInput, 10);
-    if (!isNaN(v) && v > 0 && v <= 100) {
-      setThreshold(v);
-      setCustomInput('');
-    }
+    if (!isNaN(v) && v > 0 && v <= 100) { setThreshold(v); setCustomInput(''); }
   }
 
+  // ── Merge auto + manual ──────────────────────────────────────────
   const filtered = students.filter(s =>
-    !q || s.name.toLowerCase().includes(q.toLowerCase()) ||
+    !q ||
+    s.name.toLowerCase().includes(q.toLowerCase()) ||
     s.rollNumber.toLowerCase().includes(q.toLowerCase())
   );
 
-  const critical = filtered.filter(s => s.stats.pct < 50);
-  const warning  = filtered.filter(s => s.stats.pct >= 50 && s.stats.pct < 75);
+  // Sets for quick lookup
+  const autoRollSet   = new Set(filtered.map(s => s.rollNumber));
+  const manualRollSet = new Set([
+    ...manualList.removed.map(m => m.rollNumber),
+    ...manualList.redzone.map(m => m.rollNumber),
+  ]);
+
+  // Manual-only students (in manual list but not already in auto-threshold list)
+  const manualOnly = [
+    ...manualList.removed
+      .filter(m => !autoRollSet.has(m.rollNumber))
+      .filter(m => !q ||
+        m.name.toLowerCase().includes(q.toLowerCase()) ||
+        m.rollNumber.toLowerCase().includes(q.toLowerCase())
+      )
+      .map(m => ({ ...m, isManualOnly: true, manualStatus: 'removed' })),
+    ...manualList.redzone
+      .filter(m => !autoRollSet.has(m.rollNumber))
+      .filter(m => !q ||
+        m.name.toLowerCase().includes(q.toLowerCase()) ||
+        m.rollNumber.toLowerCase().includes(q.toLowerCase())
+      )
+      .map(m => ({ ...m, isManualOnly: true, manualStatus: 'redzone' })),
+  ];
+
+  // All rows for the table: auto first, manual-only after
+  const allRows = [
+    ...filtered.map(s => ({ ...s, isManualOnly: false, isInManual: manualRollSet.has(s.rollNumber) })),
+    ...manualOnly,
+  ];
+
+  // Summary counts
+  const critical     = filtered.filter(s => s.stats.pct < 50).length;
+  const redzoneCount = threshold > 75
+    ? filtered.filter(s => s.stats.pct >= 50 && s.stats.pct < 75).length
+    : 0;
 
   return (
     <div>
       <Toast toast={toast} />
 
+      {/* ── Header ──────────────────────────────────────────────── */}
       <div className="mb-4 flex items-center gap-3 flex-wrap">
         <div>
           <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100">Removal List</h1>
@@ -255,8 +472,9 @@ export default function RemovalPage() {
           </p>
         </div>
         <div className="ml-auto flex items-center gap-2 flex-wrap">
+          {/* Edit Policies toggle */}
           <button
-            onClick={() => setShowEditor(v => !v)}
+            onClick={() => { setShowEditor(v => !v); setShowManual(false); }}
             className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded border transition-colors
               ${showEditor
                 ? 'bg-slate-800 dark:bg-slate-200 border-slate-800 dark:border-slate-200 text-white dark:text-slate-900'
@@ -266,6 +484,26 @@ export default function RemovalPage() {
             </svg>
             {showEditor ? 'Hide Editor' : 'Edit Policies'}
           </button>
+
+          {/* Upload Lists toggle */}
+          <button
+            onClick={() => { setShowManual(v => !v); setShowEditor(false); }}
+            className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded border transition-colors
+              ${showManual
+                ? 'bg-slate-800 dark:bg-slate-200 border-slate-800 dark:border-slate-200 text-white dark:text-slate-900'
+                : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'}`}>
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round"
+                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+            </svg>
+            {showManual ? 'Hide Lists' : 'Upload Lists'}
+            {(manualList.removed.length + manualList.redzone.length) > 0 && (
+              <span className="ml-0.5 bg-blue-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                {manualList.removed.length + manualList.redzone.length}
+              </span>
+            )}
+          </button>
+
           <input
             className="form-input text-xs w-48"
             placeholder="Search name or reg. no."
@@ -274,29 +512,28 @@ export default function RemovalPage() {
           />
           <button
             className="btn-outline btn-sm shrink-0"
-            disabled={loading || students.length === 0}
-            onClick={() => downloadExcel(filtered, threshold)}>
+            disabled={loading || allRows.length === 0}
+            onClick={() => downloadExcel(allRows, threshold)}>
             Download Excel
           </button>
         </div>
       </div>
 
-      {/* Policy editor — collapsible */}
+      {/* ── Collapsible panels ──────────────────────────────────── */}
       <PolicyEditor show={showEditor} />
+      <ManualUploader
+        show={showManual}
+        manualList={manualList}
+        onUpdated={loadManualList}
+      />
 
-      {/* Threshold selector */}
+      {/* ── Threshold selector ───────────────────────────────────── */}
       <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
                       rounded-lg p-3 mb-4 flex items-center gap-3 flex-wrap">
-        <span className="text-xs font-medium text-slate-600 dark:text-slate-400 shrink-0">
-          Threshold:
-        </span>
-
-        {/* Preset buttons */}
+        <span className="text-xs font-medium text-slate-600 dark:text-slate-400 shrink-0">Threshold:</span>
         <div className="flex gap-1.5">
           {PRESETS.map(p => (
-            <button
-              key={p}
-              onClick={() => setThreshold(p)}
+            <button key={p} onClick={() => setThreshold(p)}
               className={`px-3 py-1.5 rounded text-xs font-semibold border transition-colors
                 ${threshold === p
                   ? 'bg-slate-800 dark:bg-slate-600 text-white border-slate-800 dark:border-slate-600'
@@ -305,31 +542,15 @@ export default function RemovalPage() {
             </button>
           ))}
         </div>
-
         <span className="text-slate-300 dark:text-slate-600 text-xs">|</span>
-
-        {/* Custom input */}
         <div className="flex items-center gap-1.5">
           <span className="text-xs text-slate-400 shrink-0">Custom:</span>
-          <input
-            ref={customRef}
-            type="number"
-            min="1"
-            max="100"
-            className="form-input text-xs w-20 py-1.5"
-            placeholder="e.g. 78"
-            value={customInput}
-            onChange={e => setCustomInput(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && applyCustom()}
-          />
-          <button
-            className="btn-outline btn-sm"
-            onClick={applyCustom}>
-            Apply
-          </button>
+          <input ref={customRef} type="number" min="1" max="100"
+            className="form-input text-xs w-20 py-1.5" placeholder="e.g. 78"
+            value={customInput} onChange={e => setCustomInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && applyCustom()} />
+          <button className="btn-outline btn-sm" onClick={applyCustom}>Apply</button>
         </div>
-
-        {/* Active indicator if not a preset */}
         {!PRESETS.includes(threshold) && (
           <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 ml-1">
             Active: {threshold}%
@@ -337,18 +558,18 @@ export default function RemovalPage() {
         )}
       </div>
 
-      {/* Summary cards */}
-      <div className="grid grid-cols-3 gap-3 mb-4">
+      {/* ── Summary cards ───────────────────────────────────────── */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
         {[
           {
             label: 'Below 50% — Removed',
-            count: critical.length,
+            count: critical,
             color: 'text-red-600 dark:text-red-400',
             bg:    'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20',
           },
           {
-            label: `50–74% — Redzone`,
-            count: threshold > 75 ? warning.length : 0,
+            label: '50–74% — Redzone',
+            count: redzoneCount,
             color: 'text-amber-600 dark:text-amber-400',
             bg:    'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20',
           },
@@ -358,6 +579,12 @@ export default function RemovalPage() {
             color: 'text-slate-800 dark:text-slate-200',
             bg:    'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800',
           },
+          {
+            label: 'Manual flags',
+            count: manualList.removed.length + manualList.redzone.length,
+            color: 'text-blue-600 dark:text-blue-400',
+            bg:    'border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20',
+          },
         ].map(c => (
           <div key={c.label} className={`border rounded-lg p-4 text-center ${c.bg}`}>
             <div className={`text-3xl font-bold ${c.color}`}>{c.count}</div>
@@ -366,10 +593,13 @@ export default function RemovalPage() {
         ))}
       </div>
 
+      {/* ── Main table ──────────────────────────────────────────── */}
       <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
         <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-700
                         text-xs text-slate-400 dark:text-slate-500">
-          {loading ? 'Loading…' : `${filtered.length} student${filtered.length !== 1 ? 's' : ''} below ${threshold}%`}
+          {loading
+            ? 'Loading…'
+            : `${allRows.length} student${allRows.length !== 1 ? 's' : ''} — ${filtered.length} auto-detected, ${manualOnly.length} manual-only`}
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -384,19 +614,29 @@ export default function RemovalPage() {
               {loading && (
                 <tr><td colSpan={10} className="text-center text-slate-400 py-10 text-sm">Loading…</td></tr>
               )}
-              {!loading && filtered.length === 0 && (
+              {!loading && allRows.length === 0 && (
                 <tr>
                   <td colSpan={10} className="text-center text-slate-400 py-10 text-sm">
-                    {students.length === 0
+                    {students.length === 0 && manualList.removed.length + manualList.redzone.length === 0
                       ? `All students are at or above ${threshold}% — no one at risk.`
                       : 'No results found.'}
                   </td>
                 </tr>
               )}
+
+              {/* Auto-detected rows */}
               {filtered.map((s, i) => (
                 <tr key={s.rollNumber} className="tbl-row">
                   <td className="tbl-cell text-center text-slate-400">{i + 1}</td>
-                  <td className="tbl-cell font-medium text-slate-900 dark:text-slate-100">{s.name}</td>
+                  <td className="tbl-cell font-medium text-slate-900 dark:text-slate-100">
+                    {s.name}
+                    {manualRollSet.has(s.rollNumber) && (
+                      <span className="ml-1.5 text-[9px] font-bold uppercase tracking-wide px-1 py-0.5
+                                       bg-blue-100 dark:bg-blue-900/40 text-blue-500 dark:text-blue-400 rounded">
+                        Manual
+                      </span>
+                    )}
+                  </td>
                   <td className="tbl-cell"><span className="badge-purple">{s.rollNumber}</span></td>
                   <td className="tbl-cell">{s.branch || '—'}</td>
                   <td className="tbl-cell">{s.dept   || '—'}</td>
@@ -410,8 +650,56 @@ export default function RemovalPage() {
                     {s.stats.pct < 50
                       ? <span className="badge-absent">Removed</span>
                       : s.stats.pct < 75
-                        ? <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">Redzone</span>
-                        : <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">Warning</span>
+                        ? <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-xs font-semibold
+                                           bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400
+                                           border border-amber-200 dark:border-amber-800">Redzone</span>
+                        : <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-xs font-semibold
+                                           bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">Warning</span>
+                    }
+                  </td>
+                </tr>
+              ))}
+
+              {/* Manual-only rows (not in auto-threshold list) */}
+              {manualOnly.length > 0 && (
+                <tr>
+                  <td colSpan={10}
+                    className="px-4 py-1.5 text-[10px] font-semibold uppercase tracking-widest
+                               text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-700/30
+                               border-t border-b border-slate-100 dark:border-slate-700">
+                    Manually flagged — above auto-threshold
+                  </td>
+                </tr>
+              )}
+              {manualOnly.map((s, i) => (
+                <tr key={s.rollNumber} className="tbl-row bg-blue-50/30 dark:bg-blue-900/5">
+                  <td className="tbl-cell text-center text-slate-400">{filtered.length + i + 1}</td>
+                  <td className="tbl-cell font-medium text-slate-900 dark:text-slate-100">
+                    {s.name || '—'}
+                    <span className="ml-1.5 text-[9px] font-bold uppercase tracking-wide px-1 py-0.5
+                                     bg-blue-100 dark:bg-blue-900/40 text-blue-500 dark:text-blue-400 rounded">
+                      Manual
+                    </span>
+                  </td>
+                  <td className="tbl-cell"><span className="badge-purple">{s.rollNumber}</span></td>
+                  <td className="tbl-cell">{s.branch || '—'}</td>
+                  <td className="tbl-cell">{s.dept   || '—'}</td>
+                  <td className="tbl-cell">{s.crtSec || '—'}</td>
+                  <td className="tbl-cell text-center text-slate-300 dark:text-slate-600">—</td>
+                  <td className="tbl-cell text-center text-slate-300 dark:text-slate-600">—</td>
+                  <td className="tbl-cell text-slate-300 dark:text-slate-600 text-xs">N/A</td>
+                  <td className="tbl-cell">
+                    {s.manualStatus === 'removed'
+                      ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold
+                                         bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400
+                                         border border-red-200 dark:border-red-800">
+                          Removed
+                        </span>
+                      : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold
+                                         bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400
+                                         border border-amber-200 dark:border-amber-800">
+                          Redzone
+                        </span>
                     }
                   </td>
                 </tr>
