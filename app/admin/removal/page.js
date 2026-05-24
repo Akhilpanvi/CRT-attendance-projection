@@ -281,58 +281,6 @@ export default function RemovalPage() {
         </div>
       </div>
 
-      {/* Category policy reference */}
-      <div className="grid sm:grid-cols-2 gap-3 mb-4">
-        {/* REMOVED */}
-        <div className="rounded-lg overflow-hidden border border-red-200 dark:border-red-800/50
-                        bg-red-50 dark:bg-red-900/10">
-          <div className="flex items-center gap-2.5 px-4 py-2.5 border-b border-red-200 dark:border-red-800/40
-                          bg-red-100/60 dark:bg-red-900/20">
-            <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-red-700 dark:text-red-400">
-              Removed Category
-            </span>
-            <span className="ml-auto text-[10px] font-bold text-red-500 dark:text-red-400">Below 50%</span>
-          </div>
-          <div className="px-4 py-3 space-y-1.5">
-            {[
-              'Students must meet Director CRT along with Parents to be added back to the program.',
-              'Until then, their status remains REMOVED.',
-              'Students must continue attending CRT sections and attendance will continue to be monitored.',
-            ].map((line, i) => (
-              <div key={i} className="flex items-start gap-2">
-                <span className="text-red-300 dark:text-red-700 mt-[3px] shrink-0 text-[10px]">—</span>
-                <p className="text-[11px] leading-relaxed text-red-700 dark:text-red-300">{line}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* REDZONE */}
-        <div className="rounded-lg overflow-hidden border border-amber-200 dark:border-amber-800/50
-                        bg-amber-50 dark:bg-amber-900/10">
-          <div className="flex items-center gap-2.5 px-4 py-2.5 border-b border-amber-200 dark:border-amber-800/40
-                          bg-amber-100/60 dark:bg-amber-900/20">
-            <div className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-amber-700 dark:text-amber-400">
-              Redzone Category
-            </span>
-            <span className="ml-auto text-[10px] font-bold text-amber-600 dark:text-amber-400">50% – 74%</span>
-          </div>
-          <div className="px-4 py-3 space-y-1.5">
-            {[
-              'Students will face limited placement opportunities or restricted placement eligibility.',
-              'Students must continue in CRT sections and their attendance will be monitored carefully.',
-            ].map((line, i) => (
-              <div key={i} className="flex items-start gap-2">
-                <span className="text-amber-300 dark:text-amber-700 mt-[3px] shrink-0 text-[10px]">—</span>
-                <p className="text-[11px] leading-relaxed text-amber-700 dark:text-amber-300">{line}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
       {/* Policy editor — collapsible */}
       <PolicyEditor show={showEditor} />
 
