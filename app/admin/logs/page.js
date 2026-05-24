@@ -11,6 +11,7 @@ const ACTION_LABELS = {
   DELETE_ADMIN:        { label: 'Delete Admin',       color: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' },
   UPDATE_PERMISSIONS:  { label: 'Update Permissions', color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400' },
   UPDATE_EMAIL:        { label: 'Update Email',       color: 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400' },
+  UPDATE_MANUAL_LIST:  { label: 'Manual List',        color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' },
 };
 
 function fmt(iso) {
