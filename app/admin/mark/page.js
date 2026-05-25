@@ -226,6 +226,71 @@ function BulkSPUpload() {
   );
 }
 
+/* ─── CleanupSP ────────────────────────────────────────────────────── */
+function CleanupSP({ show }) {
+  const [running,  setRunning]  = useState(false);
+  const [done,     setDone]     = useState(null); // number of reverted records
+
+  async function run() {
+    if (!confirm(
+      'This will revert ALL existing SP records to Absent.\n\n' +
+      'After this, re-upload legitimate SPs using the Bulk SP Upload above.\n\n' +
+      'Proceed?'
+    )) return;
+
+    setRunning(true);
+    try {
+      const r = await fetch('/api/admin/cleanup-sp', { method: 'POST' });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error);
+      setDone(d.reverted);
+      show(`${d.reverted} SP record${d.reverted !== 1 ? 's' : ''} reverted to Absent`);
+    } catch (e) { show(e.message, 'error'); }
+    finally { setRunning(false); }
+  }
+
+  return (
+    <div className="mt-5 border border-red-200 dark:border-red-800/50 rounded-lg overflow-hidden">
+      <div className="px-4 py-3 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800/50
+                      flex items-center gap-3">
+        <svg className="w-4 h-4 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round"
+            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+        </svg>
+        <div>
+          <p className="text-xs font-semibold text-red-700 dark:text-red-400">Revert All SP → Absent</p>
+          <p className="text-[10px] text-red-500 dark:text-red-500 mt-0.5">
+            One-time cleanup — removes all student-marked SP records from the database.
+          </p>
+        </div>
+      </div>
+      <div className="px-4 py-3 flex items-center gap-4">
+        {done !== null ? (
+          <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400 font-medium">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            Done — {done} record{done !== 1 ? 's' : ''} reverted to Absent
+          </div>
+        ) : (
+          <>
+            <button
+              onClick={run}
+              disabled={running}
+              className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded
+                         bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white transition-colors">
+              {running ? 'Reverting…' : 'Revert All SP to Absent'}
+            </button>
+            <p className="text-[11px] text-slate-400 dark:text-slate-500">
+              Use this once after disabling student SP marking.
+            </p>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ─── MarkPage ─────────────────────────────────────────────────────── */
 export default function MarkPage() {
   const { toast, show } = useToast();
@@ -347,6 +412,9 @@ export default function MarkPage() {
 
       {/* ── Bulk SP upload ──────────────────────────────────────── */}
       <BulkSPUpload />
+
+      {/* ── One-time cleanup ────────────────────────────────────── */}
+      <CleanupSP show={show} />
     </div>
   );
 }
