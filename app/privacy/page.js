@@ -65,18 +65,20 @@ export default function PrivacyPage() {
             <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">Legal</p>
             <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-3">Privacy Policy</h1>
             <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-slate-500 dark:text-slate-400">
-              <span>Effective: 20 May 2026</span>
+              <span>Effective: 25 May 2026</span>
               <span>CRT Attendance Tracker</span>
               <span>Y-23 Batch · KL University</span>
             </div>
           </div>
 
-          {/* Disclaimer notice */}
-          <div className="mb-10 px-4 py-4 border-l-2 border-amber-400 bg-amber-50 dark:bg-amber-900/10">
+          {/* Management review notice */}
+          <div className="mb-10 px-4 py-4 border-l-2 border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/40">
             <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-              <span className="font-semibold">Notice:</span> This is not an official KL University platform.
-              It is an independently developed tool built by a Y-23 student for voluntary attendance tracking
-              during the Summer CRT Training programme. It is not affiliated with or endorsed by KLEF.
+              This platform has been reviewed by the <span className="font-semibold">Pro Vice Chancellor</span> and
+              the <span className="font-semibold">Director, CRT</span> at KL University.
+              Attendance data is sourced directly from the <span className="font-semibold">Department of CRT</span>.
+              The platform operates with the knowledge of university management; no formal letter of endorsement
+              has been issued.
             </p>
           </div>
 
@@ -86,13 +88,14 @@ export default function PrivacyPage() {
               <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-4">Overview</h2>
               <div className="prose-sm space-y-3 text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
                 <p>
-                  This Privacy Policy describes how the CRT Attendance Tracker ("we", "the platform", "the tracker")
-                  collects, stores, and protects information belonging to students and staff of the Y-23 Summer CRT
-                  Training at KL University.
+                  This Privacy Policy describes how the CRT Attendance Tracker ("the platform", "we")
+                  collects, stores, and protects information belonging to students and staff of the Y-23
+                  Summer CRT Training at KL University.
                 </p>
                 <p>
-                  By accessing this platform, you acknowledge that you have read and understood this policy.
-                  Use of the tracker is entirely voluntary.
+                  Attendance records displayed on this platform are sourced from the Department of CRT and
+                  reflect data maintained by the CRT administration. By accessing this platform, you
+                  acknowledge that you have read and understood this policy.
                 </p>
               </div>
             </section>
@@ -115,9 +118,9 @@ export default function PrivacyPage() {
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                     {[
                       ['Registration number', 'Serves as the unique account identifier (username)'],
-                      ['Full name', 'Displayed on the student dashboard and included in system emails'],
+                      ['Full name', 'Displayed on the student dashboard and in system-generated emails'],
                       ['Password hash', 'Enables secure authentication; the plain-text password is never stored'],
-                      ['Attendance records', 'Core purpose of the platform — slots marked Present or Absent per session'],
+                      ['Attendance records', 'Core purpose of the platform — slots marked Present, Absent, or SP per session; sourced from the Department of CRT'],
                       ['Section and batch', 'Groups students correctly within the attendance system'],
                     ].map(([d, p]) => (
                       <tr key={d} className="bg-white dark:bg-slate-900">
@@ -163,7 +166,7 @@ export default function PrivacyPage() {
               <div className="space-y-4 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                 <div>
                   <p className="font-semibold text-slate-800 dark:text-slate-200 mb-1">Password Storage</p>
-                  <p>All passwords are hashed using bcrypt with a unique salt per account before being written to the database. The plain-text password is never stored, logged, or transmitted. It is computationally infeasible to reverse a bcrypt hash.</p>
+                  <p>All passwords are hashed using bcrypt with a unique salt per account before being written to the database. The plain-text password is never stored, logged, or transmitted.</p>
                 </div>
                 <div>
                   <p className="font-semibold text-slate-800 dark:text-slate-200 mb-1">Session Management</p>
@@ -171,7 +174,7 @@ export default function PrivacyPage() {
                 </div>
                 <div>
                   <p className="font-semibold text-slate-800 dark:text-slate-200 mb-1">Password Reset Tokens</p>
-                  <p>Reset tokens are generated using <code className="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded font-mono">crypto.randomBytes(32)</code>, making them cryptographically random and unpredictable. Tokens expire after 2 minutes and are invalidated immediately upon use.</p>
+                  <p>Reset tokens are cryptographically random, expire after 2 minutes, and are invalidated immediately upon use.</p>
                 </div>
                 <div>
                   <p className="font-semibold text-slate-800 dark:text-slate-200 mb-1">Data at Rest and in Transit</p>
@@ -189,12 +192,12 @@ export default function PrivacyPage() {
             <section id="access">
               <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-4">Access Control</h2>
               <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
-                Access to data is strictly role-based. Each role can only access data that is necessary for their function.
+                Access to data is strictly role-based. Each role can only access data necessary for their function.
               </p>
               <div className="space-y-3 text-sm">
                 {[
-                  { role: 'Student', desc: 'May view only their own attendance records, session history, and dashboard statistics. Student data belonging to other students is not accessible.' },
-                  { role: 'Admin', desc: 'May upload attendance CSVs, manage student accounts, view all records, and post notices. Cannot export or access password hashes through the interface.' },
+                  { role: 'Student', desc: 'May view only their own attendance records, session history, and dashboard statistics. No other student\'s data is accessible.' },
+                  { role: 'Admin', desc: 'May upload attendance data sourced from the Department of CRT, manage student accounts, and view all records. Cannot access password hashes through the interface.' },
                 ].map(({ role, desc }) => (
                   <div key={role} className="flex gap-4 text-sm text-slate-600 dark:text-slate-400">
                     <span className="shrink-0 w-28 font-semibold text-slate-700 dark:text-slate-300 pt-0.5">{role}</span>
@@ -211,12 +214,10 @@ export default function PrivacyPage() {
               <div className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed space-y-3">
                 <p>
                   The only automated email this platform sends is a password reset link, delivered to the student's
-                  official KL University email address (<code className="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded font-mono">rollnumber@kluniversity.in</code>).
+                  official KL University email address.
                 </p>
                 <p>
-                  Emails are sent via Resend using the verified domain <code className="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded font-mono">kluniversity.me</code>,
-                  with properly configured SPF and DKIM records to prevent spoofing. We do not send marketing,
-                  promotional, or unsolicited emails.
+                  We do not send marketing, promotional, or unsolicited emails of any kind.
                 </p>
               </div>
             </section>
@@ -231,8 +232,8 @@ export default function PrivacyPage() {
                   Password reset tokens are automatically invalidated within 2 minutes of generation.
                 </p>
                 <p>
-                  There is no automated data purge after the programme concludes. Requests for data deletion
-                  can be submitted to <a href="mailto:support@kluniversity.me" className="underline underline-offset-2">support@kluniversity.me</a>.
+                  Requests for data deletion can be submitted to{' '}
+                  <a href="mailto:support@kluniversity.me" className="underline underline-offset-2">support@kluniversity.me</a>.
                 </p>
               </div>
             </section>
@@ -248,7 +249,6 @@ export default function PrivacyPage() {
                     'Change your account password at any time from the student dashboard.',
                     'Know what data is associated with your account — your dashboard reflects all stored records.',
                     'Request deletion of your account and associated data by writing to support@kluniversity.me.',
-                    'Discontinue use of this tracker at any time. Use is entirely voluntary.',
                   ].map((r, i) => (
                     <li key={i} className="flex items-start gap-3">
                       <span className="mt-1.5 w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-500 shrink-0" />
@@ -265,8 +265,7 @@ export default function PrivacyPage() {
               <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-4">Contact</h2>
               <div className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed space-y-3">
                 <p>
-                  This platform is built and maintained by a Y-23 student of KL University. For any questions,
-                  data requests, or concerns regarding this privacy policy, reach out at:
+                  For any questions, data requests, or concerns regarding this privacy policy, reach out at:
                 </p>
                 <p>
                   <a href="mailto:support@kluniversity.me"
@@ -282,7 +281,7 @@ export default function PrivacyPage() {
           {/* Footer */}
           <div className="mt-16 pt-8 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <p className="text-xs text-slate-400 dark:text-slate-500">
-              © {new Date().getFullYear()} CRT Attendance Tracker · Not an official KL University platform
+              © {new Date().getFullYear()} CRT Attendance Tracker · KL University · Y-23 Summer CRT Training
             </p>
             <div className="flex gap-6 text-xs text-slate-400 dark:text-slate-500">
               <Link href="/terms" className="hover:text-slate-700 dark:hover:text-slate-200 transition-colors">Terms of Service</Link>
