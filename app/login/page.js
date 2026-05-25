@@ -180,8 +180,8 @@ export default function LoginPage() {
           for the Y-23 Summer CRT Training at KL University.<br />
           Made by{' '}
           <a href="https://akhilpanvi.com" target="_blank" rel="noopener noreferrer"
-             style={{ color: 'rgba(255,255,255,0.35)', textDecoration: 'underline', textUnderlineOffset: '2px' }}>
-            Akhil Panvi Chakkapalli
+             style={{ color: 'rgba(255,255,255,0.45)', textDecoration: 'underline', textUnderlineOffset: '2px' }}>
+            Akhil Panvi
           </a>
           {' '}· Y-23, KL University
         </p>
@@ -404,27 +404,35 @@ export default function LoginPage() {
               </div>
             )}
 
-            <p className="text-xs mt-5 leading-relaxed" style={{ color: isDark ? 'rgba(255,255,255,0.35)' : '#94a3b8' }}>
-              Students: use your registration number as username.<br />
-              First-time login will prompt a password change.
-            </p>
-            <p className="text-[10px] mt-4 leading-relaxed text-center" style={{ color: isDark ? 'rgba(255,255,255,0.2)' : '#94a3b8' }}>
-              A student-built attendance tracking platform for the Y-23 Summer CRT Training at KL University.<br />
-              Made by{' '}
-              <a href="https://akhilpanvi.com" target="_blank" rel="noopener noreferrer"
-                 style={{ color: isDark ? 'rgba(255,255,255,0.35)' : '#64748b', textDecoration: 'underline', textUnderlineOffset: '2px' }}>
-                Akhil Panvi Chakkapalli
-              </a>
-              {' '}· with personal interest and easy tracking.
-            </p>
-            <div className="flex items-center justify-center gap-3 mt-3">
-              <a href="/privacy" className="text-[10px] transition-colors" style={{ color: isDark ? 'rgba(255,255,255,0.25)' : '#94a3b8' }}>
-                Privacy Policy
-              </a>
-              <span style={{ color: isDark ? 'rgba(255,255,255,0.15)' : '#cbd5e1', fontSize: '10px' }}>·</span>
-              <a href="/terms" className="text-[10px] transition-colors" style={{ color: isDark ? 'rgba(255,255,255,0.25)' : '#94a3b8' }}>
-                Terms of Service
-              </a>
+            <div className="mt-6 pt-5 border-t space-y-2 text-center"
+                 style={{ borderColor: isDark ? 'rgba(255,255,255,0.07)' : '#f1f5f9' }}>
+              <p className="text-[11px] leading-relaxed"
+                 style={{ color: isDark ? 'rgba(255,255,255,0.38)' : '#94a3b8' }}>
+                Students: use your registration number as username.
+                First-time login will prompt a password change.
+              </p>
+              <p className="text-[11px]" style={{ color: isDark ? 'rgba(255,255,255,0.38)' : '#94a3b8' }}>
+                A student-built attendance tracking platform for the Y-23 Summer CRT Training at KL University.
+              </p>
+              <p className="text-[11px]" style={{ color: isDark ? 'rgba(255,255,255,0.38)' : '#94a3b8' }}>
+                Made by{' '}
+                <a href="https://akhilpanvi.com" target="_blank" rel="noopener noreferrer"
+                   style={{ color: isDark ? 'rgba(255,255,255,0.65)' : '#64748b', textDecoration: 'underline', textUnderlineOffset: '2px' }}>
+                  Akhil Panvi
+                </a>
+                {' '}· with personal interest and easy tracking.
+              </p>
+              <div className="flex items-center justify-center gap-3 pt-1">
+                <a href="/privacy" className="text-[11px] transition-colors"
+                   style={{ color: isDark ? 'rgba(255,255,255,0.38)' : '#94a3b8' }}>
+                  Privacy Policy
+                </a>
+                <span style={{ color: isDark ? 'rgba(255,255,255,0.2)' : '#cbd5e1', fontSize: '11px' }}>·</span>
+                <a href="/terms" className="text-[11px] transition-colors"
+                   style={{ color: isDark ? 'rgba(255,255,255,0.38)' : '#94a3b8' }}>
+                  Terms of Service
+                </a>
+              </div>
             </div>
           </div>
 
