@@ -176,9 +176,14 @@ export default function LoginPage() {
           </p>
         </div>
         <p className="text-[10px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.2)' }}>
-          Not an official KL University platform.<br />
-          Made by a Y23 student with personal interest.<br />
-          © {new Date().getFullYear()} KL University
+          A student-built attendance tracking platform<br />
+          for the Y-23 Summer CRT Training at KL University.<br />
+          Made by{' '}
+          <a href="https://akhilpanvi.com" target="_blank" rel="noopener noreferrer"
+             style={{ color: 'rgba(255,255,255,0.35)', textDecoration: 'underline', textUnderlineOffset: '2px' }}>
+            Akhil Panvi Chakkapalli
+          </a>
+          {' '}· Y-23, KL University
         </p>
       </div>
 
@@ -404,8 +409,13 @@ export default function LoginPage() {
               First-time login will prompt a password change.
             </p>
             <p className="text-[10px] mt-4 leading-relaxed text-center" style={{ color: isDark ? 'rgba(255,255,255,0.2)' : '#94a3b8' }}>
-              Not an official KL University platform.<br />
-              Made by a student of Y23 KL University with personal interest and easy tracking.
+              A student-built attendance tracking platform for the Y-23 Summer CRT Training at KL University.<br />
+              Made by{' '}
+              <a href="https://akhilpanvi.com" target="_blank" rel="noopener noreferrer"
+                 style={{ color: isDark ? 'rgba(255,255,255,0.35)' : '#64748b', textDecoration: 'underline', textUnderlineOffset: '2px' }}>
+                Akhil Panvi Chakkapalli
+              </a>
+              {' '}· with personal interest and easy tracking.
             </p>
             <div className="flex items-center justify-center gap-3 mt-3">
               <a href="/privacy" className="text-[10px] transition-colors" style={{ color: isDark ? 'rgba(255,255,255,0.25)' : '#94a3b8' }}>
