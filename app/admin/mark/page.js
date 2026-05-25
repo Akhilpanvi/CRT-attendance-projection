@@ -5,16 +5,24 @@ import { TIME_SLOTS } from '@/lib/helpers';
 
 function today() { return new Date().toISOString().split('T')[0]; }
 
-/* ─── CSV template ─────────────────────────────────────────────────── */
-const TEMPLATE_HEADER = 'Roll Number,Date,Slot';
-const TEMPLATE_EXAMPLE = [
-  '2200030001,2026-05-15,09:20-10:10',
-  '2200030002,2026-05-15,10:10-11:00',
-  '2200030003,2026-05-16,09:20-10:10',
-].join('\n');
+/* ─── CSV template (wide / grid format) ───────────────────────────── */
+// Format:  Roll Number | Date | 09:20-10:10 | 10:10-11:00 | … (one col per slot)
+// Put "SP" in a slot cell to mark that slot; leave empty to skip.
+// Date may be DD/MM/YY, DD/MM/YYYY, or YYYY-MM-DD.
+
+function buildTemplateCSV() {
+  const header = ['Roll Number', 'Date', ...TIME_SLOTS].join(',');
+  // Sample data matching the image
+  const rows = [
+    ['2200030001', '15/05/26', 'SP', '', 'SP', '', '', 'SP', 'SP', ''],
+    ['2200030002', '15/05/26', '',   '', '',   '', '', 'SP', 'SP', ''],
+    ['2200030003', '16/05/26', 'SP', '', '',   '', '', '',   'SP', 'SP'],
+  ].map(r => r.join(','));
+  return [header, ...rows].join('\n');
+}
 
 function downloadTemplate() {
-  const csv  = `${TEMPLATE_HEADER}\n${TEMPLATE_EXAMPLE}`;
+  const csv  = buildTemplateCSV();
   const blob = new Blob([csv], { type: 'text/csv' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
@@ -24,21 +32,47 @@ function downloadTemplate() {
   URL.revokeObjectURL(url);
 }
 
+/* ─── Date parser ──────────────────────────────────────────────────── */
+// Accepts DD/MM/YY, DD/MM/YYYY, or YYYY-MM-DD → always returns YYYY-MM-DD
+function parseDate(raw) {
+  const s = raw.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;                          // already ISO
+  const m2 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})$/);
+  if (m2) return `20${m2[3]}-${m2[2].padStart(2,'0')}-${m2[1].padStart(2,'0')}`;
+  const m4 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m4) return `${m4[3]}-${m4[2].padStart(2,'0')}-${m4[1].padStart(2,'0')}`;
+  return null;
+}
+
 /* ─── CSV parser ───────────────────────────────────────────────────── */
+// Wide format: Roll Number, Date, [slot cols…]
+// Each cell with "SP" (case-insensitive) generates one entry.
 function parseSpCSV(text) {
   const lines   = text.split('\n').map(l => l.trim()).filter(Boolean);
   const entries = [];
   const errors  = [];
+  if (!lines.length) return { entries, errors };
 
-  for (let i = 0; i < lines.length; i++) {
-    const cols = lines[i].split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
-    const [rollNumber, date, slot] = cols;
-    // Skip header row
-    if (i === 0 && /roll|reg/i.test(rollNumber)) continue;
-    if (!rollNumber || !date || !slot) { errors.push(`Row ${i + 1}: missing fields`); continue; }
-    // Basic date format check
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { errors.push(`Row ${i + 1}: date must be YYYY-MM-DD`); continue; }
-    entries.push({ rollNumber: rollNumber.toUpperCase(), date, slot });
+  // Header row — extract slot column names (everything after the first two cols)
+  const headers    = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, ''));
+  const slotCols   = headers.slice(2); // indices 2..n are slot names
+
+  for (let i = 1; i < lines.length; i++) {
+    const cols       = lines[i].split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
+    const rollNumber = cols[0]?.toUpperCase();
+    const rawDate    = cols[1];
+
+    if (!rollNumber || !rawDate) { errors.push(`Row ${i + 1}: missing Roll Number or Date`); continue; }
+
+    const date = parseDate(rawDate);
+    if (!date) { errors.push(`Row ${i + 1}: unrecognised date "${rawDate}" — use DD/MM/YY or YYYY-MM-DD`); continue; }
+
+    // Any cell in a slot column that contains "SP" (case-insensitive) → mark that slot
+    for (let j = 0; j < slotCols.length; j++) {
+      if ((cols[j + 2] || '').toUpperCase() === 'SP') {
+        entries.push({ rollNumber, date, slot: slotCols[j] });
+      }
+    }
   }
   return { entries, errors };
 }
@@ -111,9 +145,11 @@ function BulkSPUpload() {
 
       {/* Format hint */}
       <div className="mb-4 px-3 py-2 rounded bg-slate-50 dark:bg-slate-700/40
-                      border border-slate-200 dark:border-slate-700 text-xs text-slate-500 dark:text-slate-400 font-mono">
-        <span className="text-slate-400 dark:text-slate-500 mr-1">CSV columns:</span>
-        Roll Number · Date (YYYY-MM-DD) · Slot (e.g. 09:20-10:10)
+                      border border-slate-200 dark:border-slate-700 text-xs text-slate-500 dark:text-slate-400">
+        <p className="font-semibold mb-1 text-slate-600 dark:text-slate-300">CSV format (grid style)</p>
+        <p className="font-mono">Roll Number · Date · 09:20-10:10 · 10:10-11:00 · …</p>
+        <p className="mt-1">Type <span className="font-semibold text-yellow-600 dark:text-yellow-400">SP</span> in a slot column to mark it; leave empty to skip.
+          Date formats accepted: <span className="font-mono">DD/MM/YY</span>, <span className="font-mono">DD/MM/YYYY</span>, <span className="font-mono">YYYY-MM-DD</span>.</p>
       </div>
 
       {/* File picker */}
@@ -152,29 +188,44 @@ function BulkSPUpload() {
           {preview.entries.length > 0 ? (
             <>
               <div className="mb-3 text-sm text-slate-600 dark:text-slate-300 font-medium">
-                {preview.entries.length} entr{preview.entries.length !== 1 ? 'ies' : 'y'} parsed — ready to upload
+                {preview.entries.length} SP slot{preview.entries.length !== 1 ? 's' : ''} across{' '}
+                {new Set(preview.entries.map(e => e.rollNumber + '|' + e.date)).size} student-date pair{new Set(preview.entries.map(e => e.rollNumber + '|' + e.date)).size !== 1 ? 's' : ''} — ready to upload
               </div>
-              <div className="max-h-48 overflow-y-auto rounded border border-slate-200 dark:border-slate-700 mb-4">
+              {/* Group by roll + date for a grid-style preview */}
+              <div className="max-h-52 overflow-y-auto rounded border border-slate-200 dark:border-slate-700 mb-4">
                 <table className="w-full text-xs">
                   <thead className="bg-slate-50 dark:bg-slate-700/50 sticky top-0">
                     <tr>
-                      {['#', 'Roll Number', 'Date', 'Slot'].map(h => (
-                        <th key={h} className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase
-                                               tracking-wider text-slate-400">{h}</th>
+                      <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-400 whitespace-nowrap">Roll Number</th>
+                      <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-400 whitespace-nowrap">Date</th>
+                      {TIME_SLOTS.map(s => (
+                        <th key={s} className="px-2 py-1.5 text-center text-[9px] font-semibold uppercase tracking-wider text-slate-400 whitespace-nowrap">{s}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
-                    {preview.entries.map((e, i) => (
-                      <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-700/20">
-                        <td className="px-3 py-1.5 text-slate-400">{i + 1}</td>
-                        <td className="px-3 py-1.5 font-mono font-semibold text-slate-700 dark:text-slate-300">
-                          {e.rollNumber}
-                        </td>
-                        <td className="px-3 py-1.5 text-slate-500">{e.date}</td>
-                        <td className="px-3 py-1.5 text-slate-500">{e.slot}</td>
-                      </tr>
-                    ))}
+                    {(() => {
+                      // Group entries by rollNumber + date
+                      const groups = {};
+                      for (const e of preview.entries) {
+                        const key = `${e.rollNumber}||${e.date}`;
+                        if (!groups[key]) groups[key] = { rollNumber: e.rollNumber, date: e.date, slots: new Set() };
+                        groups[key].slots.add(e.slot);
+                      }
+                      return Object.values(groups).map((g, i) => (
+                        <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-700/20">
+                          <td className="px-3 py-1.5 font-mono font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">{g.rollNumber}</td>
+                          <td className="px-3 py-1.5 text-slate-500 whitespace-nowrap">{g.date}</td>
+                          {TIME_SLOTS.map(s => (
+                            <td key={s} className="px-2 py-1.5 text-center">
+                              {g.slots.has(s)
+                                ? <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400">SP</span>
+                                : <span className="text-slate-200 dark:text-slate-700">—</span>}
+                            </td>
+                          ))}
+                        </tr>
+                      ));
+                    })()}
                   </tbody>
                 </table>
               </div>
