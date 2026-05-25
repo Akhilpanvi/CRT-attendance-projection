@@ -77,8 +77,7 @@ export default function PrivacyPage() {
               This platform has been reviewed by the <span className="font-semibold">Pro Vice Chancellor</span> and
               the <span className="font-semibold">Director, CRT</span> at KL University.
               Attendance data is sourced directly from the <span className="font-semibold">Department of CRT</span>.
-              The platform operates with the knowledge of university management; no formal letter of endorsement
-              has been issued.
+              The platform operates with the knowledge of university management.
             </p>
           </div>
 
@@ -233,7 +232,7 @@ export default function PrivacyPage() {
                 </p>
                 <p>
                   Requests for data deletion can be submitted to{' '}
-                  <a href="mailto:support@kluniversity.me" className="underline underline-offset-2">support@kluniversity.me</a>.
+                  <a href="mailto:2300033181@kluniversity.in" className="underline underline-offset-2">2300033181@kluniversity.in</a>.
                 </p>
               </div>
             </section>
@@ -248,7 +247,7 @@ export default function PrivacyPage() {
                   {[
                     'Change your account password at any time from the student dashboard.',
                     'Know what data is associated with your account — your dashboard reflects all stored records.',
-                    'Request deletion of your account and associated data by writing to support@kluniversity.me.',
+                    'Request deletion of your account and associated data by writing to 2300033181@kluniversity.in.',
                   ].map((r, i) => (
                     <li key={i} className="flex items-start gap-3">
                       <span className="mt-1.5 w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-500 shrink-0" />
@@ -268,9 +267,9 @@ export default function PrivacyPage() {
                   For any questions, data requests, or concerns regarding this privacy policy, reach out at:
                 </p>
                 <p>
-                  <a href="mailto:support@kluniversity.me"
+                  <a href="mailto:2300033181@kluniversity.in"
                      className="font-medium text-slate-800 dark:text-slate-200 underline underline-offset-2">
-                    support@kluniversity.me
+                    2300033181@kluniversity.in
                   </a>
                 </p>
               </div>
@@ -280,9 +279,19 @@ export default function PrivacyPage() {
 
           {/* Footer */}
           <div className="mt-16 pt-8 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <p className="text-xs text-slate-400 dark:text-slate-500">
-              © {new Date().getFullYear()} CRT Attendance Tracker · KL University · Y-23 Summer CRT Training
-            </p>
+            <div className="space-y-0.5">
+              <p className="text-xs text-slate-400 dark:text-slate-500">
+                Not an official KL University platform.
+              </p>
+              <p className="text-xs text-slate-400 dark:text-slate-500">
+                Made by{' '}
+                <a href="https://akhilpanvi.com" target="_blank" rel="noopener noreferrer"
+                   className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 underline underline-offset-2 transition-colors">
+                  Akhil Panvi Chakkapalli
+                </a>
+                {' '}· Y-23, KL University · with personal interest and easy tracking.
+              </p>
+            </div>
             <div className="flex gap-6 text-xs text-slate-400 dark:text-slate-500">
               <Link href="/terms" className="hover:text-slate-700 dark:hover:text-slate-200 transition-colors">Terms of Service</Link>
               <Link href="/login" className="hover:text-slate-700 dark:hover:text-slate-200 transition-colors">Sign In</Link>
