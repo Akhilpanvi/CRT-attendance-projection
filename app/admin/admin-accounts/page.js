@@ -258,16 +258,11 @@ export default function AdminAccountsPage() {
                    className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
 
                 {/* Card header */}
-                <div className={`flex items-center gap-3 px-4 py-3
-                  ${admin.isSelf
-                    ? 'bg-slate-100 dark:bg-slate-700/60'
-                    : 'bg-slate-50 dark:bg-slate-700/30'}`}>
+                <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 dark:bg-slate-700/30">
                   {/* Avatar */}
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center
                                    text-sm font-bold shrink-0
-                    ${admin.isSelf
-                      ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400'
-                      : 'bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300'}`}>
+                                   bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300">
                     {admin.username[0]}
                   </div>
 
@@ -277,34 +272,23 @@ export default function AdminAccountsPage() {
                       <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
                         {admin.username}
                       </span>
-                      {admin.isSelf && (
-                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded
-                                         bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400">
-                          Super Admin · You
-                        </span>
-                      )}
                     </div>
                     <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                      {!admin.isSelf && (
-                        <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded
-                          ${admin.permissions === null || (Array.isArray(admin.permissions) && admin.permissions.length === ALL_PERMISSIONS.length)
-                            ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                            : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'}`}>
-                          {admin.permissions === null || (Array.isArray(admin.permissions) && admin.permissions.length === ALL_PERMISSIONS.length)
-                            ? 'Full access'
-                            : `${admin.permissions?.length ?? 0} permission${admin.permissions?.length !== 1 ? 's' : ''}`}
-                        </span>
-                      )}
-                      {!admin.isSelf && admin.email && (
+                      <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded
+                        ${admin.permissions === null || (Array.isArray(admin.permissions) && admin.permissions.length === ALL_PERMISSIONS.length)
+                          ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                          : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'}`}>
+                        {admin.permissions === null || (Array.isArray(admin.permissions) && admin.permissions.length === ALL_PERMISSIONS.length)
+                          ? 'Full access'
+                          : `${admin.permissions?.length ?? 0} permission${admin.permissions?.length !== 1 ? 's' : ''}`}
+                      </span>
+                      {admin.email && (
                         <span className="text-[10px] text-slate-400 truncate max-w-[160px]">{admin.email}</span>
                       )}
-                      {!admin.isSelf && !admin.email && (
+                      {!admin.email && (
                         <span className="text-[10px] text-slate-300 dark:text-slate-600">no email set</span>
                       )}
-                      {admin.isSelf && (
-                        <span className="text-[10px] text-slate-400 dark:text-slate-500">Full access · cannot be edited here</span>
-                      )}
-                      {!admin.isSelf && admin.mustChangePassword && (
+                      {admin.mustChangePassword && (
                         <span className="text-[10px] text-amber-500 font-medium">· must change password</span>
                       )}
                     </div>
@@ -318,37 +302,35 @@ export default function AdminAccountsPage() {
                     </div>
                   </div>
 
-                  {/* Actions — hidden for self */}
-                  {!admin.isSelf && (
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <button
-                        onClick={() => setEditing(editing === admin.username ? null : admin.username)}
-                        className={`px-2.5 py-1 text-[11px] font-medium rounded border transition-colors
-                          ${editing === admin.username
-                            ? 'bg-slate-200 dark:bg-slate-600 border-slate-300 dark:border-slate-500 text-slate-700 dark:text-slate-200'
-                            : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'}`}>
-                        {editing === admin.username ? 'Close' : 'Edit'}
-                      </button>
-                      <button
-                        onClick={() => setConfirm({ type: 'reset', username: admin.username })}
-                        className="px-2.5 py-1 text-[11px] font-medium rounded border
-                                   border-amber-200 dark:border-amber-700/50 text-amber-600 dark:text-amber-400
-                                   hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors">
-                        Reset pwd
-                      </button>
-                      <button
-                        onClick={() => setConfirm({ type: 'delete', username: admin.username })}
-                        className="px-2.5 py-1 text-[11px] font-medium rounded border
-                                   border-red-200 dark:border-red-700/50 text-red-500 dark:text-red-400
-                                   hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-                        Delete
-                      </button>
-                    </div>
-                  )}
+                  {/* Actions */}
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      onClick={() => setEditing(editing === admin.username ? null : admin.username)}
+                      className={`px-2.5 py-1 text-[11px] font-medium rounded border transition-colors
+                        ${editing === admin.username
+                          ? 'bg-slate-200 dark:bg-slate-600 border-slate-300 dark:border-slate-500 text-slate-700 dark:text-slate-200'
+                          : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'}`}>
+                      {editing === admin.username ? 'Close' : 'Edit'}
+                    </button>
+                    <button
+                      onClick={() => setConfirm({ type: 'reset', username: admin.username })}
+                      className="px-2.5 py-1 text-[11px] font-medium rounded border
+                                 border-amber-200 dark:border-amber-700/50 text-amber-600 dark:text-amber-400
+                                 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors">
+                      Reset pwd
+                    </button>
+                    <button
+                      onClick={() => setConfirm({ type: 'delete', username: admin.username })}
+                      className="px-2.5 py-1 text-[11px] font-medium rounded border
+                                 border-red-200 dark:border-red-700/50 text-red-500 dark:text-red-400
+                                 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                      Delete
+                    </button>
+                  </div>
                 </div>
 
-                {/* Edit panel — expands inline, never for self */}
-                {editing === admin.username && !admin.isSelf && (
+                {/* Edit panel — expands inline */}
+                {editing === admin.username && (
                   <EditPanel
                     admin={admin}
                     onSave={() => { setEditing(null); load(); show('Changes saved'); }}

@@ -99,7 +99,7 @@ const navItems = [
   {
     href: '/admin/logs',
     permission: null,
-    alwaysVisible: true,
+    superAdminOnly: true,
     label: 'Logs',
     icon: (
       <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
