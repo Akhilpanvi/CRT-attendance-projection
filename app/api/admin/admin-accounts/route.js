@@ -18,7 +18,8 @@ export async function GET() {
     return NextResponse.json({ error: 'Super-admin only' }, { status: 403 });
 
   await connectDB();
-  const admins = await User.find({ role: 'admin' })
+  // Exclude the super-admin's own account — they cannot edit themselves here
+  const admins = await User.find({ role: 'admin', username: { $ne: session.username } })
     .select('username email permissions mustChangePassword createdAt lastLoginAt')
     .lean();
 
@@ -29,7 +30,7 @@ export async function GET() {
     mustChangePassword: a.mustChangePassword,
     createdAt:          a.createdAt,
     lastLoginAt:        a.lastLoginAt || null,
-    isSelf:             a.username === session.username,
+    isSelf:             false,
   })));
 }
 

@@ -11,8 +11,8 @@ function isSuperAdmin(session) {
 
 export async function GET(request) {
   const session = await getSession();
-  if (!session || session.role !== 'admin')
-    return NextResponse.json({ error: 'Admin only' }, { status: 403 });
+  if (!session || !isSuperAdmin(session))
+    return NextResponse.json({ error: 'Super-admin only' }, { status: 403 });
 
   await connectDB();
 
