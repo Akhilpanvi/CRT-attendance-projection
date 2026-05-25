@@ -122,6 +122,40 @@ export async function POST(request) {
       attCount += (r.upsertedCount || 0) + (r.modifiedCount || 0);
     }
 
+    // ── Mark absent for every student NOT in this CSV ────────────────
+    // This ensures students who were absent (not listed) get explicit absent records,
+    // so their total slot count is always correct even with simple counting.
+    let absentMarked = 0;
+    if (slotCols.length > 0) {
+      const csvRollSet  = new Set(rollNumbers);
+      const otherStudents = await Student.find(
+        { rollNumber: { $nin: rollNumbers } },
+        { rollNumber: 1 }
+      ).lean();
+
+      if (otherStudents.length) {
+        const absentBulk = [];
+        for (const stu of otherStudents) {
+          for (const slotCol of slotCols) {
+            const slot      = normalizeSlot(slotCol);
+            const slotRegex = new RegExp('^' + slot.replace(/0(\d):/g, '0?$1:') + '$');
+            absentBulk.push({
+              updateOne: {
+                filter: { rollNumber: stu.rollNumber, date: attendanceDate, slot: slotRegex },
+                // Only set absent if no record exists yet; don't overwrite SP or present
+                update: { $setOnInsert: { status: 'absent', slot, week, year, markedAt: new Date() } },
+                upsert: true,
+              },
+            });
+          }
+        }
+        for (let i = 0; i < absentBulk.length; i += CHUNK) {
+          const r = await Attendance.bulkWrite(absentBulk.slice(i, i + CHUNK), { ordered: false });
+          absentMarked += r.upsertedCount || 0;
+        }
+      }
+    }
+
     // Clear self-tracked data for this date — official records now supersede them
     if (rollNumbers.length) {
       await SelfAttendance.deleteMany({ rollNumber: { $in: rollNumbers }, date: attendanceDate });
@@ -129,7 +163,7 @@ export async function POST(request) {
 
     logAction(
       session.username, 'UPLOAD_CSV', attendanceDate,
-      `Uploaded CSV for ${attendanceDate} — ${rollNumbers.length} students, ${slotCols.length} slot(s)${reupload ? ' [reupload]' : ''}`
+      `Uploaded CSV for ${attendanceDate} — ${rollNumbers.length} students, ${slotCols.length} slot(s), ${absentMarked} absent records created${reupload ? ' [reupload]' : ''}`
     );
 
     return NextResponse.json({
@@ -137,6 +171,7 @@ export async function POST(request) {
       created:         stuResult.upsertedCount  || 0,
       updated:         stuResult.modifiedCount  || 0,
       attendanceCount: attCount,
+      absentMarked,
       total:           rollNumbers.length,
       slotCols: slotCols.map(normalizeSlot),
       date:            attendanceDate,
