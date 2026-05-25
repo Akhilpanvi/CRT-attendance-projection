@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useToast, Toast } from '@/components/Toast';
 import { pctColor } from '@/lib/helpers';
 
@@ -384,13 +384,11 @@ function PctBar({ pct }) {
 export default function RemovalPage() {
   const { toast, show } = useToast();
   const [students,    setStudents]    = useState([]);
-  const [manualList,  setManualList]  = useState({ removed: [], redzone: [] });
   const [loading,     setLoading]     = useState(true);
   const [q,           setQ]           = useState('');
   const [threshold,   setThreshold]   = useState(85);
   const [customInput, setCustomInput] = useState('');
   const [showEditor,  setShowEditor]  = useState(false);
-  const [showManual,  setShowManual]  = useState(false);
   const customRef = useRef(null);
 
   useEffect(() => {
@@ -401,63 +399,19 @@ export default function RemovalPage() {
       .catch(e => { show(e.message, 'error'); setLoading(false); });
   }, [threshold]);
 
-  const loadManualList = useCallback(() => {
-    fetch('/api/admin/manual-list')
-      .then(r => r.json())
-      .then(d => setManualList(d))
-      .catch(() => {});
-  }, []);
-
-  useEffect(() => { loadManualList(); }, [loadManualList]);
-
   function applyCustom() {
     const v = parseInt(customInput, 10);
     if (!isNaN(v) && v > 0 && v <= 100) { setThreshold(v); setCustomInput(''); }
   }
 
-  // ── Merge auto + manual ──────────────────────────────────────────
   const filtered = students.filter(s =>
     !q ||
     s.name.toLowerCase().includes(q.toLowerCase()) ||
     s.rollNumber.toLowerCase().includes(q.toLowerCase())
   );
 
-  // Sets for quick lookup
-  const autoRollSet   = new Set(filtered.map(s => s.rollNumber));
-  const manualRollSet = new Set([
-    ...manualList.removed.map(m => m.rollNumber),
-    ...manualList.redzone.map(m => m.rollNumber),
-  ]);
-
-  // Manual-only students (in manual list but not already in auto-threshold list)
-  const manualOnly = [
-    ...manualList.removed
-      .filter(m => !autoRollSet.has(m.rollNumber))
-      .filter(m => !q ||
-        m.name.toLowerCase().includes(q.toLowerCase()) ||
-        m.rollNumber.toLowerCase().includes(q.toLowerCase())
-      )
-      .map(m => ({ ...m, isManualOnly: true, manualStatus: 'removed' })),
-    ...manualList.redzone
-      .filter(m => !autoRollSet.has(m.rollNumber))
-      .filter(m => !q ||
-        m.name.toLowerCase().includes(q.toLowerCase()) ||
-        m.rollNumber.toLowerCase().includes(q.toLowerCase())
-      )
-      .map(m => ({ ...m, isManualOnly: true, manualStatus: 'redzone' })),
-  ];
-
-  // All rows for the table: auto first, manual-only after
-  const allRows = [
-    ...filtered.map(s => ({ ...s, isManualOnly: false, isInManual: manualRollSet.has(s.rollNumber) })),
-    ...manualOnly,
-  ];
-
-  // Summary counts
-  const critical     = filtered.filter(s => s.stats.pct < 50).length;
-  const redzoneCount = threshold > 75
-    ? filtered.filter(s => s.stats.pct >= 50 && s.stats.pct < 75).length
-    : 0;
+  const critical = filtered.filter(s => s.stats.pct < 50).length;
+  const warning  = filtered.filter(s => s.stats.pct >= 50 && s.stats.pct < 75).length;
 
   return (
     <div>
@@ -472,9 +426,8 @@ export default function RemovalPage() {
           </p>
         </div>
         <div className="ml-auto flex items-center gap-2 flex-wrap">
-          {/* Edit Policies toggle */}
           <button
-            onClick={() => { setShowEditor(v => !v); setShowManual(false); }}
+            onClick={() => setShowEditor(v => !v)}
             className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded border transition-colors
               ${showEditor
                 ? 'bg-slate-800 dark:bg-slate-200 border-slate-800 dark:border-slate-200 text-white dark:text-slate-900'
@@ -484,26 +437,6 @@ export default function RemovalPage() {
             </svg>
             {showEditor ? 'Hide Editor' : 'Edit Policies'}
           </button>
-
-          {/* Upload Lists toggle */}
-          <button
-            onClick={() => { setShowManual(v => !v); setShowEditor(false); }}
-            className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded border transition-colors
-              ${showManual
-                ? 'bg-slate-800 dark:bg-slate-200 border-slate-800 dark:border-slate-200 text-white dark:text-slate-900'
-                : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'}`}>
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round"
-                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-            </svg>
-            {showManual ? 'Hide Lists' : 'Upload Lists'}
-            {(manualList.removed.length + manualList.redzone.length) > 0 && (
-              <span className="ml-0.5 bg-blue-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                {manualList.removed.length + manualList.redzone.length}
-              </span>
-            )}
-          </button>
-
           <input
             className="form-input text-xs w-48"
             placeholder="Search name or reg. no."
@@ -512,20 +445,15 @@ export default function RemovalPage() {
           />
           <button
             className="btn-outline btn-sm shrink-0"
-            disabled={loading || allRows.length === 0}
-            onClick={() => downloadExcel(allRows, threshold)}>
+            disabled={loading || filtered.length === 0}
+            onClick={() => downloadExcel(filtered, threshold)}>
             Download Excel
           </button>
         </div>
       </div>
 
-      {/* ── Collapsible panels ──────────────────────────────────── */}
+      {/* ── Policy editor (collapsible) ──────────────────────────── */}
       <PolicyEditor show={showEditor} />
-      <ManualUploader
-        show={showManual}
-        manualList={manualList}
-        onUpdated={loadManualList}
-      />
 
       {/* ── Threshold selector ───────────────────────────────────── */}
       <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
@@ -559,47 +487,29 @@ export default function RemovalPage() {
       </div>
 
       {/* ── Summary cards ───────────────────────────────────────── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-        {[
-          {
-            label: 'Below 50% — Removed',
-            count: critical,
-            color: 'text-red-600 dark:text-red-400',
-            bg:    'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20',
-          },
-          {
-            label: '50–74% — Redzone',
-            count: redzoneCount,
-            color: 'text-amber-600 dark:text-amber-400',
-            bg:    'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20',
-          },
-          {
-            label: `Total below ${threshold}%`,
-            count: filtered.length,
-            color: 'text-slate-800 dark:text-slate-200',
-            bg:    'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800',
-          },
-          {
-            label: 'Manual flags',
-            count: manualList.removed.length + manualList.redzone.length,
-            color: 'text-blue-600 dark:text-blue-400',
-            bg:    'border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20',
-          },
-        ].map(c => (
-          <div key={c.label} className={`border rounded-lg p-4 text-center ${c.bg}`}>
-            <div className={`text-3xl font-bold ${c.color}`}>{c.count}</div>
-            <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{c.label}</div>
-          </div>
-        ))}
+      <div className="grid grid-cols-3 gap-3 mb-4">
+        <div className="border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-lg p-4 text-center">
+          <div className="text-3xl font-bold text-red-600 dark:text-red-400">{critical}</div>
+          <div className="text-xs font-semibold text-red-500 dark:text-red-400 mt-1 uppercase tracking-wide">Critical</div>
+          <div className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Below 50%</div>
+        </div>
+        <div className="border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 text-center">
+          <div className="text-3xl font-bold text-amber-600 dark:text-amber-400">{warning}</div>
+          <div className="text-xs font-semibold text-amber-500 dark:text-amber-400 mt-1 uppercase tracking-wide">Warning</div>
+          <div className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">50% – 74%</div>
+        </div>
+        <div className="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg p-4 text-center">
+          <div className="text-3xl font-bold text-slate-800 dark:text-slate-200">{filtered.length}</div>
+          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wide">Total</div>
+          <div className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Below {threshold}%</div>
+        </div>
       </div>
 
       {/* ── Main table ──────────────────────────────────────────── */}
       <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
         <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-700
                         text-xs text-slate-400 dark:text-slate-500">
-          {loading
-            ? 'Loading…'
-            : `${allRows.length} student${allRows.length !== 1 ? 's' : ''} — ${filtered.length} auto-detected, ${manualOnly.length} manual-only`}
+          {loading ? 'Loading…' : `${filtered.length} student${filtered.length !== 1 ? 's' : ''} below ${threshold}%`}
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -614,29 +524,19 @@ export default function RemovalPage() {
               {loading && (
                 <tr><td colSpan={10} className="text-center text-slate-400 py-10 text-sm">Loading…</td></tr>
               )}
-              {!loading && allRows.length === 0 && (
+              {!loading && filtered.length === 0 && (
                 <tr>
                   <td colSpan={10} className="text-center text-slate-400 py-10 text-sm">
-                    {students.length === 0 && manualList.removed.length + manualList.redzone.length === 0
+                    {students.length === 0
                       ? `All students are at or above ${threshold}% — no one at risk.`
                       : 'No results found.'}
                   </td>
                 </tr>
               )}
-
-              {/* Auto-detected rows */}
               {filtered.map((s, i) => (
                 <tr key={s.rollNumber} className="tbl-row">
                   <td className="tbl-cell text-center text-slate-400">{i + 1}</td>
-                  <td className="tbl-cell font-medium text-slate-900 dark:text-slate-100">
-                    {s.name}
-                    {manualRollSet.has(s.rollNumber) && (
-                      <span className="ml-1.5 text-[9px] font-bold uppercase tracking-wide px-1 py-0.5
-                                       bg-blue-100 dark:bg-blue-900/40 text-blue-500 dark:text-blue-400 rounded">
-                        Manual
-                      </span>
-                    )}
-                  </td>
+                  <td className="tbl-cell font-medium text-slate-900 dark:text-slate-100">{s.name}</td>
                   <td className="tbl-cell"><span className="badge-purple">{s.rollNumber}</span></td>
                   <td className="tbl-cell">{s.branch || '—'}</td>
                   <td className="tbl-cell">{s.dept   || '—'}</td>
@@ -655,51 +555,6 @@ export default function RemovalPage() {
                                            border border-amber-200 dark:border-amber-800">Redzone</span>
                         : <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-xs font-semibold
                                            bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">Warning</span>
-                    }
-                  </td>
-                </tr>
-              ))}
-
-              {/* Manual-only rows (not in auto-threshold list) */}
-              {manualOnly.length > 0 && (
-                <tr>
-                  <td colSpan={10}
-                    className="px-4 py-1.5 text-[10px] font-semibold uppercase tracking-widest
-                               text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-700/30
-                               border-t border-b border-slate-100 dark:border-slate-700">
-                    Manually flagged — above auto-threshold
-                  </td>
-                </tr>
-              )}
-              {manualOnly.map((s, i) => (
-                <tr key={s.rollNumber} className="tbl-row bg-blue-50/30 dark:bg-blue-900/5">
-                  <td className="tbl-cell text-center text-slate-400">{filtered.length + i + 1}</td>
-                  <td className="tbl-cell font-medium text-slate-900 dark:text-slate-100">
-                    {s.name || '—'}
-                    <span className="ml-1.5 text-[9px] font-bold uppercase tracking-wide px-1 py-0.5
-                                     bg-blue-100 dark:bg-blue-900/40 text-blue-500 dark:text-blue-400 rounded">
-                      Manual
-                    </span>
-                  </td>
-                  <td className="tbl-cell"><span className="badge-purple">{s.rollNumber}</span></td>
-                  <td className="tbl-cell">{s.branch || '—'}</td>
-                  <td className="tbl-cell">{s.dept   || '—'}</td>
-                  <td className="tbl-cell">{s.crtSec || '—'}</td>
-                  <td className="tbl-cell text-center text-slate-300 dark:text-slate-600">—</td>
-                  <td className="tbl-cell text-center text-slate-300 dark:text-slate-600">—</td>
-                  <td className="tbl-cell text-slate-300 dark:text-slate-600 text-xs">N/A</td>
-                  <td className="tbl-cell">
-                    {s.manualStatus === 'removed'
-                      ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold
-                                         bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400
-                                         border border-red-200 dark:border-red-800">
-                          Removed
-                        </span>
-                      : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold
-                                         bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400
-                                         border border-amber-200 dark:border-amber-800">
-                          Redzone
-                        </span>
                     }
                   </td>
                 </tr>
