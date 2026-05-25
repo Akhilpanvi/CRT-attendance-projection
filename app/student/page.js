@@ -103,8 +103,6 @@ export default function StudentPage() {
   const trackerRef = useRef(null);
 
   const [selfByDate,     setSelfByDate]     = useState({});
-  const [slotEditing,    setSlotEditing]    = useState(null); // { date, slot, pending: null|status }
-  const [slotSaving,     setSlotSaving]     = useState(false);
   const [trackerEntries, setTrackerEntries] = useState([
     { id: 1, date: today, slots: {}, saving: false, saved: false, expanded: true },
   ]);
@@ -233,25 +231,6 @@ export default function StudentPage() {
         return kept.length > 0 ? kept : [{ id: Date.now(), date: today, slots: {}, saving: false, saved: false, expanded: true }];
       });
     } catch (_) {}
-  }
-
-  async function saveSlotEdit() {
-    if (!slotEditing?.pending) return;
-    const { date, slot, pending } = slotEditing;
-    setSlotSaving(true);
-    try {
-      const r = await fetch('/api/student/mark-sp', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rollNumber: data.student.rollNumber, date, slot, status: pending }),
-      });
-      if (r.ok) {
-        const fresh = await fetch('/api/student/me').then(res => res.json());
-        if (!fresh.error) setData(fresh);
-      }
-    } catch (_) {}
-    setSlotSaving(false);
-    setSlotEditing(null);
   }
 
   async function logout() {
@@ -828,74 +807,12 @@ export default function StudentPage() {
                         </td>
                         {allSlots.map(sl => {
                           const v = rowData[sl];
-                          const canEdit = isOfficial && (v === 'absent' || v === 'sp');
-                          const isOpen  = canEdit && slotEditing?.date === dt && slotEditing?.slot === sl;
-                          const isRevert = v === 'sp';
                           return (
-                            <td key={sl} className="tbl-cell text-center relative">
-                              {isOpen && (
-                                <div className="absolute z-20 bottom-full left-1/2 -translate-x-1/2 mb-1
-                                                rounded-lg shadow-xl p-2 min-w-[110px]"
-                                     style={isDark
-                                       ? { background: '#0d1424', border: '1px solid rgba(255,255,255,0.12)', boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }
-                                       : { background: '#ffffff', border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }}>
-                                  <p className="text-[9px] text-slate-400 mb-1.5 text-center">
-                                    {isRevert ? 'Remove SP?' : 'Placement drive?'}
-                                  </p>
-                                  <div className="flex gap-1 justify-center mb-2">
-                                    {isRevert ? (
-                                      <button
-                                        onClick={() => setSlotEditing(e => ({ ...e, pending: e?.pending === 'absent' ? null : 'absent' }))}
-                                        className={`text-[10px] font-bold px-3 py-1.5 rounded border-2 transition-all
-                                          bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400
-                                          border-red-300 dark:border-red-700
-                                          ${slotEditing?.pending === 'absent' ? 'ring-2 ring-offset-1 ring-red-400 scale-110' : 'opacity-70 hover:opacity-100'}`}>
-                                        A
-                                      </button>
-                                    ) : (
-                                      <button
-                                        onClick={() => setSlotEditing(e => ({ ...e, pending: e?.pending === 'sp' ? null : 'sp' }))}
-                                        className={`text-[10px] font-bold px-3 py-1.5 rounded border-2 transition-all
-                                          bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400
-                                          border-yellow-300 dark:border-yellow-700
-                                          ${slotEditing?.pending === 'sp' ? 'ring-2 ring-offset-1 ring-yellow-400 scale-110' : 'opacity-70 hover:opacity-100'}`}>
-                                        SP
-                                      </button>
-                                    )}
-                                  </div>
-                                  <div className="flex gap-1">
-                                    <button
-                                      disabled={!slotEditing?.pending || slotSaving}
-                                      onClick={saveSlotEdit}
-                                      className="flex-1 text-[10px] font-semibold py-1 rounded
-                                                 bg-slate-800 dark:bg-slate-600 text-white
-                                                 disabled:opacity-40 hover:bg-slate-700 transition-colors">
-                                      {slotSaving ? '…' : 'Save'}
-                                    </button>
-                                    <button onClick={() => setSlotEditing(null)}
-                                      className="text-[10px] px-2 py-1 rounded border border-slate-200
-                                                 dark:border-slate-600 text-slate-400 hover:text-slate-600">
-                                      ✕
-                                    </button>
-                                  </div>
-                                </div>
-                              )}
-                              {isOfficial ? (
-                                <button
-                                  onClick={() => canEdit ? setSlotEditing(isOpen ? null : { date: dt, slot: sl, pending: null }) : undefined}
-                                  className={canEdit ? 'cursor-pointer hover:opacity-70 transition-opacity' : 'cursor-default'}>
-                                  {v === 'present' ? <span className="badge-present">P</span>
-                                   : v === 'absent'  ? <span className="badge-absent">A</span>
-                                   : v === 'sp'      ? <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400">SP</span>
-                                   : <span className="badge-dash">—</span>}
-                                </button>
-                              ) : (
-                                <>
-                                  {v === 'present' ? <span className="badge-present">P</span>
-                                   : v === 'absent' ? <span className="badge-absent">A</span>
-                                   : <span className="badge-dash">—</span>}
-                                </>
-                              )}
+                            <td key={sl} className="tbl-cell text-center">
+                              {v === 'present' ? <span className="badge-present">P</span>
+                               : v === 'absent'  ? <span className="badge-absent">A</span>
+                               : v === 'sp'      ? <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400">SP</span>
+                               : <span className="badge-dash">—</span>}
                             </td>
                           );
                         })}

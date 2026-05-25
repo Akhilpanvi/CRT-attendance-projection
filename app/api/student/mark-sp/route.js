@@ -4,10 +4,18 @@ import Attendance from '@/lib/models/Attendance';
 import { getSession } from '@/lib/auth';
 import { getWeekNumber } from '@/lib/helpers';
 
-// Student-only SP self-marking endpoint.
-// Students may only mark their own roll number, and only 'sp' or 'absent' status
-// (they cannot force-mark themselves 'present' — that comes from uploaded CSVs only).
-export async function PATCH(request) {
+// SP marking is now handled exclusively by admin.
+// This endpoint is intentionally disabled.
+export async function PATCH() {
+  return NextResponse.json(
+    { error: 'SP marking is managed by admin. Please contact the CRT office.' },
+    { status: 403 }
+  );
+}
+
+// Keep the original handler in comments for reference only.
+// eslint-disable-next-line no-unused-vars
+async function _disabledPATCH(request) {
   try {
     const session = await getSession();
     if (!session || session.role !== 'student')
