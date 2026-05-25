@@ -65,17 +65,18 @@ export default function TermsPage() {
             <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">Legal</p>
             <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-3">Terms of Service</h1>
             <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-slate-500 dark:text-slate-400">
-              <span>Effective: 20 May 2026</span>
+              <span>Effective: 25 May 2026</span>
               <span>CRT Attendance Tracker</span>
               <span>Y-23 Batch · KL University</span>
             </div>
           </div>
 
-          {/* Disclaimer */}
-          <div className="mb-10 px-4 py-4 border-l-2 border-amber-400 bg-amber-50 dark:bg-amber-900/10">
+          {/* Management review notice */}
+          <div className="mb-10 px-4 py-4 border-l-2 border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/40">
             <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-              <span className="font-semibold">Notice:</span> This is not an official KL University platform.
-              By logging in, you agree to these terms. Use of this tracker is voluntary.
+              This platform has been reviewed by the <span className="font-semibold">Pro Vice Chancellor</span> and
+              the <span className="font-semibold">Director, CRT</span> at KL University and operates with the
+              knowledge of university management. By logging in, you agree to these terms.
             </p>
           </div>
 
@@ -85,13 +86,13 @@ export default function TermsPage() {
               <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-4">1. About This Service</h2>
               <div className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed space-y-3">
                 <p>
-                  CRT Attendance Tracker is a non-commercial web application developed independently by a Y-23 student
-                  of KL University. It is designed to help students and the training administration track attendance
-                  for the Y-23 Summer CRT Training programme.
+                  CRT Attendance Tracker is a web application developed to help students and the training
+                  administration track attendance for the Y-23 Summer CRT Training at KL University.
                 </p>
                 <p>
-                  This platform is not affiliated with, operated by, or endorsed by KL University (KLEF).
-                  It is provided free of charge and on a best-effort basis.
+                  Attendance data is sourced from the <span className="font-medium text-slate-700 dark:text-slate-300">Department of CRT</span>.
+                  The platform has been reviewed by the Pro Vice Chancellor and the Director, CRT. It is provided
+                  free of charge and on a best-effort basis. No formal letter of institutional endorsement has been issued.
                 </p>
               </div>
             </section>
@@ -105,7 +106,7 @@ export default function TermsPage() {
                 <ul className="space-y-2">
                   {[
                     'Y-23 batch students of KL University enrolled in the Summer CRT Training',
-                    'Authorised users with credentials issued by the platform maintainer',
+                    'Authorised admin users with credentials issued by the platform maintainer',
                   ].map((r, i) => (
                     <li key={i} className="flex items-start gap-3">
                       <span className="mt-1.5 w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-500 shrink-0" />
@@ -147,12 +148,12 @@ export default function TermsPage() {
               <div className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed space-y-3">
                 <p>
                   You are solely responsible for maintaining the confidentiality of your account credentials.
-                  If you believe your account has been compromised, you must change your password immediately.
+                  If you believe your account has been compromised, change your password immediately.
                 </p>
                 <p>
-                  Default passwords are assigned at account creation. You are required to set a personal
-                  password on first login. The platform is not liable for any consequences resulting from
-                  unauthorised access due to credential sharing or negligence on your part.
+                  Default passwords are assigned at account creation and must be changed on first login.
+                  The platform is not liable for any consequences resulting from unauthorised access due to
+                  credential sharing or negligence.
                 </p>
               </div>
             </section>
@@ -163,14 +164,14 @@ export default function TermsPage() {
               <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-4">5. Data Accuracy</h2>
               <div className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed space-y-3">
                 <p>
-                  Attendance records are uploaded from official registers. While accuracy is maintained
-                  to the best of our ability, this tracker is a convenience tool and does not constitute
-                  an official attendance record.
+                  Attendance records are sourced from the Department of CRT and uploaded by authorised
+                  administrators. While accuracy is maintained to the best of our ability, this tracker
+                  is a convenience tool and does not constitute an official attendance record.
                 </p>
                 <p>
-                  Any discrepancies between the data displayed here and the official record must be resolved
-                  through KL University's official processes. Do not rely solely on this platform for
-                  decisions regarding your academic standing.
+                  Any discrepancies between data shown here and the official register must be resolved
+                  through the CRT Department. Do not rely solely on this platform for decisions regarding
+                  your academic standing.
                 </p>
               </div>
             </section>
@@ -180,9 +181,9 @@ export default function TermsPage() {
             <section id="availability">
               <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-4">6. Availability</h2>
               <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                This platform is hosted on a hobby-tier deployment and is provided on a best-effort basis.
-                We do not guarantee uninterrupted availability, data persistence, or continued operation.
-                The platform may be updated, restricted, or discontinued at any time without prior notice.
+                This platform is provided on a best-effort basis. We do not guarantee uninterrupted availability,
+                data persistence, or continued operation. The platform may be updated, restricted, or discontinued
+                at any time without prior notice.
               </p>
             </section>
 
@@ -191,9 +192,9 @@ export default function TermsPage() {
             <section id="ip">
               <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-4">7. Intellectual Property</h2>
               <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                The design, code, and content of this platform are the work of the developer. The KL University
-                name and associated branding belong to KL University (KLEF) and are referenced solely for
-                identification purposes, without implying any official affiliation or endorsement.
+                The design, code, and content of this platform are the work of the developer.
+                The KL University name and associated branding belong to KL University (KLEF) and are
+                referenced solely for identification purposes.
               </p>
             </section>
 
@@ -236,7 +237,7 @@ export default function TermsPage() {
           {/* Footer */}
           <div className="mt-16 pt-8 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <p className="text-xs text-slate-400 dark:text-slate-500">
-              © {new Date().getFullYear()} CRT Attendance Tracker · Not an official KL University platform
+              © {new Date().getFullYear()} CRT Attendance Tracker · KL University · Y-23 Summer CRT Training
             </p>
             <div className="flex gap-6 text-xs text-slate-400 dark:text-slate-500">
               <Link href="/privacy" className="hover:text-slate-700 dark:hover:text-slate-200 transition-colors">Privacy Policy</Link>
