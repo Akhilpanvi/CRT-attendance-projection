@@ -238,7 +238,7 @@ export default function TermsPage() {
           <div className="mt-16 pt-8 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="space-y-0.5">
               <p className="text-xs text-slate-400 dark:text-slate-500">
-                Not an official KL University platform.
+                A student-built attendance tracking platform for the Y-23 Summer CRT Training at KL University.
               </p>
               <p className="text-xs text-slate-400 dark:text-slate-500">
                 Made by{' '}
