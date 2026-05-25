@@ -92,7 +92,7 @@ export default function TermsPage() {
                 <p>
                   Attendance data is sourced from the <span className="font-medium text-slate-700 dark:text-slate-300">Department of CRT</span>.
                   The platform has been reviewed by the Pro Vice Chancellor and the Director, CRT. It is provided
-                  free of charge and on a best-effort basis. No formal letter of institutional endorsement has been issued.
+                  free of charge and on a best-effort basis.
                 </p>
               </div>
             </section>
@@ -131,7 +131,7 @@ export default function TermsPage() {
                   'You will not attempt to access, view, or modify any other student\'s data or account.',
                   'You will not submit automated, scripted, or excessive requests that may degrade service for others.',
                   'You will not attempt to reverse-engineer, exploit, or extract data from the platform.',
-                  'You will report any security vulnerabilities to support@kluniversity.me rather than exploiting them.',
+                  'You will report any security vulnerabilities to 2300033181@kluniversity.in rather than exploiting them.',
                 ].map((t, i) => (
                   <li key={i} className="flex items-start gap-3">
                     <span className="mt-1.5 w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-500 shrink-0" />
@@ -236,9 +236,19 @@ export default function TermsPage() {
 
           {/* Footer */}
           <div className="mt-16 pt-8 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <p className="text-xs text-slate-400 dark:text-slate-500">
-              © {new Date().getFullYear()} CRT Attendance Tracker · KL University · Y-23 Summer CRT Training
-            </p>
+            <div className="space-y-0.5">
+              <p className="text-xs text-slate-400 dark:text-slate-500">
+                Not an official KL University platform.
+              </p>
+              <p className="text-xs text-slate-400 dark:text-slate-500">
+                Made by{' '}
+                <a href="https://akhilpanvi.com" target="_blank" rel="noopener noreferrer"
+                   className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 underline underline-offset-2 transition-colors">
+                  Akhil Panvi Chakkapalli
+                </a>
+                {' '}· Y-23, KL University · with personal interest and easy tracking.
+              </p>
+            </div>
             <div className="flex gap-6 text-xs text-slate-400 dark:text-slate-500">
               <Link href="/privacy" className="hover:text-slate-700 dark:hover:text-slate-200 transition-colors">Privacy Policy</Link>
               <Link href="/login" className="hover:text-slate-700 dark:hover:text-slate-200 transition-colors">Sign In</Link>
