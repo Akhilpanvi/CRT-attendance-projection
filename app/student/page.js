@@ -831,8 +831,13 @@ export default function StudentPage() {
 
         <p className="text-[10px] text-center pb-6 leading-relaxed"
            style={{ color: isDark ? 'rgba(255,255,255,0.18)' : '#cbd5e1' }}>
-          Not an official KL University platform.<br />
-          Made by a student of Y23 KL University with personal interest and easy tracking.
+          A student-built attendance tracking platform for the Y-23 Summer CRT Training at KL University.<br />
+          Made by{' '}
+          <a href="https://akhilpanvi.com" target="_blank" rel="noopener noreferrer"
+             style={{ color: isDark ? 'rgba(255,255,255,0.32)' : '#94a3b8', textDecoration: 'underline', textUnderlineOffset: '2px' }}>
+            Akhil Panvi
+          </a>
+          {' '}· with personal interest and easy tracking.
         </p>
       </main>
     </div>
