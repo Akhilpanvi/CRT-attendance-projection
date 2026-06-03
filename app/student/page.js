@@ -36,7 +36,7 @@ function generateAdvice(present, total, overallPct, weeks = []) {
   if (b75.canBunk >= 16)      lines.push({ type: 'tip', text: `Plan: ${b75.canBunk} sessions of flexibility (≈${Math.floor(b75.canBunk / 8)} full days). Spread them — no more than 1 day per week.` });
   else if (b75.canBunk >= 8)  lines.push({ type: 'tip', text: `Plan: ${b75.canBunk} sessions of flexibility. Use at most 1 full day, then maintain full attendance for 2 weeks.` });
   else if (b75.canBunk > 0)   lines.push({ type: 'tip', text: `Plan: Only ${b75.canBunk} sessions of flexibility — plan individual leaves carefully, avoid full days.` });
-  else if (b75.needAttend > 0) lines.push({ type: 'tip', text: `Recovery: Maintain full attendance for the next ${Math.ceil(b75.needAttend / 8)} week${b75.needAttend > 8 ? 's' : ''} to reach threshold.` });
+  else if (b75.needAttend > 0) lines.push({ type: 'tip', text: `Recovery: Maintain full attendance for the next ${Math.ceil(b75.needAttend / 48)} week${b75.needAttend > 48 ? 's' : ''} (${b75.needAttend} sessions) to reach threshold.` });
 
   return lines;
 }
@@ -760,7 +760,7 @@ export default function StudentPage() {
                               <div className="text-2xl font-bold text-red-600 dark:text-red-400">{data.needAttend}</div>
                               <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">sessions to recover</div>
                               <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                                ≈ {Math.ceil(data.needAttend / 8)} week{data.needAttend > 8 ? 's' : ''}
+                                ≈ {Math.ceil(data.needAttend / 48)} week{data.needAttend > 48 ? 's' : ''}
                               </div>
                             </>
                           )}
@@ -800,7 +800,7 @@ export default function StudentPage() {
                                   <div className="text-2xl font-bold text-red-600 dark:text-red-400">{data.needAttend}</div>
                                   <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">sessions to recover</div>
                                   <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                                    ≈ {Math.ceil(data.needAttend / 8)} week{data.needAttend > 8 ? 's' : ''}
+                                    ≈ {Math.ceil(data.needAttend / 48)} week{data.needAttend > 48 ? 's' : ''}
                                   </div>
                                 </>
                               )}
