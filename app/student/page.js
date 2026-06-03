@@ -505,13 +505,13 @@ export default function StudentPage() {
             </div>
             <div className="p-4 space-y-0">
               {[...stats.weeks].sort((a, b) => b.year - a.year || b.week - a.week).map(w => {
-                const seq = weekSeq[`${w.year}-${w.week}`];
-                const range = isoWeekDateRange(w.year, w.week);
-                const sd = selfWeekMap[`${w.year}-${w.week}`];
-                const hasProj = sd && sd.total > 0;
-                const pTotal   = hasProj ? w.total + sd.total   : 0;
-                const pPresent = hasProj ? w.present + sd.present : 0;
-                const pPct     = hasProj && pTotal > 0 ? Math.round((pPresent / pTotal) * 100) : 0;
+                const seq    = weekSeq[`${w.year}-${w.week}`];
+                const range  = isoWeekDateRange(w.year, w.week);
+                const sd     = selfWeekMap[`${w.year}-${w.week}`];
+                const hasSD  = sd && sd.total > 0;
+                const pTotal   = w.total   + (hasSD ? sd.total   : 0);
+                const pPresent = w.present + (hasSD ? sd.present : 0);
+                const pPct     = pTotal > 0 ? Math.round((pPresent / pTotal) * 100) : 0;
                 return (
                   <div key={`${w.year}-${w.week}`} className="py-2.5" style={{ borderBottom: divider }}>
                     {/* Official row */}
@@ -541,28 +541,35 @@ export default function StudentPage() {
                         {w.pct >= 75 ? 'Safe' : 'Low'}
                       </span>
                     </div>
-                    {/* Projected row */}
-                    {hasProj && (
-                      <div className="flex items-center gap-3 mt-1.5">
-                        <div className="shrink-0 w-40">
-                          <span className="text-[9px] font-semibold"
-                                style={{ color: isDark ? 'rgba(99,102,241,0.8)' : '#6366f1' }}>
-                            ↳ Projected
-                          </span>
-                        </div>
-                        <div className="flex-1 h-1.5 rounded-full overflow-hidden"
-                             style={{ background: isDark ? 'rgba(99,102,241,0.12)' : '#e0e7ff' }}>
-                          <div className="h-full rounded-full" style={{ width: `${pPct}%`, background: '#6366f1' }} />
-                        </div>
-                        <span className="text-[11px] font-bold w-9 text-right shrink-0 text-indigo-500 dark:text-indigo-400">{pPct}%</span>
-                        <span className="text-[10px] shrink-0 w-11 text-right text-indigo-400 dark:text-indigo-500">{pPresent}/{pTotal}</span>
-                        <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded shrink-0 ${
-                          pPct >= 75 ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400'
-                                     : 'bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400'}`}>
-                          {pPct >= 75 ? 'Safe↑' : 'Low'}
+                    {/* Projected row — always shown */}
+                    <div className="flex items-center gap-3 mt-1.5">
+                      <div className="shrink-0 w-40">
+                        <span className="text-[9px] font-semibold"
+                              style={{ color: isDark ? 'rgba(99,102,241,0.7)' : '#6366f1' }}>
+                          ↳ Projected
                         </span>
                       </div>
-                    )}
+                      {hasSD ? (
+                        <>
+                          <div className="flex-1 h-1.5 rounded-full overflow-hidden"
+                               style={{ background: isDark ? 'rgba(99,102,241,0.12)' : '#e0e7ff' }}>
+                            <div className="h-full rounded-full" style={{ width: `${pPct}%`, background: '#6366f1' }} />
+                          </div>
+                          <span className="text-[11px] font-bold w-9 text-right shrink-0 text-indigo-500 dark:text-indigo-400">{pPct}%</span>
+                          <span className="text-[10px] shrink-0 w-11 text-right text-indigo-400 dark:text-indigo-500">{pPresent}/{pTotal}</span>
+                          <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded shrink-0 ${
+                            pPct >= 75 ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400'
+                                       : 'bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400'}`}>
+                            {pPct >= 75 ? 'Safe↑' : 'Low'}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-[10px] italic"
+                              style={{ color: isDark ? 'rgba(99,102,241,0.35)' : '#a5b4fc' }}>
+                          Track your sessions above to see projection
+                        </span>
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -922,13 +929,13 @@ export default function StudentPage() {
                   ) : (
                     <div className="space-y-0">
                       {[...stats.weeks].sort((a, b) => b.year - a.year || b.week - a.week).map(w => {
-                        const seq   = weekSeq[`${w.year}-${w.week}`];
-                        const range = isoWeekDateRange(w.year, w.week);
-                        const sd = selfWeekMap[`${w.year}-${w.week}`];
-                        const hasProj  = sd && sd.total > 0;
-                        const pTotal   = hasProj ? w.total + sd.total    : 0;
-                        const pPresent = hasProj ? w.present + sd.present : 0;
-                        const pPct     = hasProj && pTotal > 0 ? Math.round((pPresent / pTotal) * 100) : 0;
+                        const seq    = weekSeq[`${w.year}-${w.week}`];
+                        const range  = isoWeekDateRange(w.year, w.week);
+                        const sd     = selfWeekMap[`${w.year}-${w.week}`];
+                        const hasSD  = sd && sd.total > 0;
+                        const pTotal   = w.total   + (hasSD ? sd.total   : 0);
+                        const pPresent = w.present + (hasSD ? sd.present : 0);
+                        const pPct     = pTotal > 0 ? Math.round((pPresent / pTotal) * 100) : 0;
                         return (
                           <div key={`${w.year}-${w.week}`} className="py-2.5 px-1" style={{ borderBottom: divider }}>
                             {/* Official row */}
@@ -958,28 +965,35 @@ export default function StudentPage() {
                                 {w.pct >= 75 ? 'Safe' : 'Low'}
                               </span>
                             </div>
-                            {/* Projected row */}
-                            {hasProj && (
-                              <div className="flex items-center gap-3 mt-1.5">
-                                <div className="shrink-0 w-36 sm:w-44">
-                                  <span className="text-[9px] font-semibold"
-                                        style={{ color: isDark ? 'rgba(99,102,241,0.8)' : '#6366f1' }}>
-                                    ↳ Projected
-                                  </span>
-                                </div>
-                                <div className="flex-1 h-2 rounded-full overflow-hidden"
-                                     style={{ background: isDark ? 'rgba(99,102,241,0.12)' : '#e0e7ff' }}>
-                                  <div className="h-full rounded-full" style={{ width: `${pPct}%`, background: '#6366f1' }} />
-                                </div>
-                                <span className="text-xs font-bold shrink-0 w-9 text-right text-indigo-500 dark:text-indigo-400">{pPct}%</span>
-                                <span className="text-[11px] shrink-0 w-10 text-right hidden sm:block text-indigo-400 dark:text-indigo-500">{pPresent}/{pTotal}</span>
-                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
-                                  pPct >= 75 ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400'
-                                             : 'bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400'}`}>
-                                  {pPct >= 75 ? 'Safe↑' : 'Low'}
+                            {/* Projected row — always shown */}
+                            <div className="flex items-center gap-3 mt-1.5">
+                              <div className="shrink-0 w-36 sm:w-44">
+                                <span className="text-[9px] font-semibold"
+                                      style={{ color: isDark ? 'rgba(99,102,241,0.7)' : '#6366f1' }}>
+                                  ↳ Projected
                                 </span>
                               </div>
-                            )}
+                              {hasSD ? (
+                                <>
+                                  <div className="flex-1 h-2 rounded-full overflow-hidden"
+                                       style={{ background: isDark ? 'rgba(99,102,241,0.12)' : '#e0e7ff' }}>
+                                    <div className="h-full rounded-full" style={{ width: `${pPct}%`, background: '#6366f1' }} />
+                                  </div>
+                                  <span className="text-xs font-bold shrink-0 w-9 text-right text-indigo-500 dark:text-indigo-400">{pPct}%</span>
+                                  <span className="text-[11px] shrink-0 w-10 text-right hidden sm:block text-indigo-400 dark:text-indigo-500">{pPresent}/{pTotal}</span>
+                                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
+                                    pPct >= 75 ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400'
+                                               : 'bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400'}`}>
+                                    {pPct >= 75 ? 'Safe↑' : 'Low'}
+                                  </span>
+                                </>
+                              ) : (
+                                <span className="text-[10px] italic"
+                                      style={{ color: isDark ? 'rgba(99,102,241,0.35)' : '#a5b4fc' }}>
+                                  Track your sessions above to see projection
+                                </span>
+                              )}
+                            </div>
                           </div>
                         );
                       })}
