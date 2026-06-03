@@ -70,6 +70,16 @@ const UPDATE_COLORS = {
 
 const today = new Date().toISOString().split('T')[0];
 
+function isoWeekDateRange(year, isoWeek) {
+  const jan4 = new Date(Date.UTC(year, 0, 4));
+  const dow  = jan4.getUTCDay() || 7; // Mon=1..Sun=7
+  const mon  = new Date(Date.UTC(year, 0, 4 - (dow - 1) + (isoWeek - 1) * 7));
+  const sun  = new Date(mon);
+  sun.setUTCDate(mon.getUTCDate() + 6);
+  const f = d => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+  return `${f(mon)} – ${f(sun)}`;
+}
+
 const DEFAULT_POLICY = {
   removed: [
     'Students must meet Director CRT along with Parents to be added back to the program.',
@@ -102,7 +112,7 @@ export default function StudentPage() {
 
   const trackerRef = useRef(null);
 
-  const [plannerView, setPlannerView] = useState('total'); // 'total' | 'weekly'
+  const [plannerView, setPlannerView] = useState('weekly'); // 'total' | 'weekly'
 
   const [selfByDate,     setSelfByDate]     = useState({});
   const [trackerEntries, setTrackerEntries] = useState([
@@ -442,23 +452,37 @@ export default function StudentPage() {
         </div>
 
         {/* Weekly Attendance */}
-        {stats.weeks && stats.weeks.length > 0 && (
+        {stats.weeks && stats.weeks.length > 0 && (() => {
+          const weekSeq = Object.fromEntries(
+            [...stats.weeks].sort((a, b) => a.year - b.year || a.week - b.week)
+              .map((w, i) => [`${w.year}-${w.week}`, i + 1])
+          );
+          return (
           <div className="rounded-lg overflow-hidden" style={card}>
             <div className="px-4 py-3" style={{ borderBottom: divider }}>
               <h2 className="text-sm font-semibold" style={{ color: isDark ? 'rgba(255,255,255,0.88)' : '#0f172a' }}>
                 Weekly Attendance
               </h2>
               <p className="text-xs mt-0.5" style={{ color: isDark ? 'rgba(255,255,255,0.35)' : '#94a3b8' }}>
-                Attendance percentage per ISO week
+                Attendance percentage per training week
               </p>
             </div>
             <div className="p-4 space-y-2">
-              {[...stats.weeks].sort((a, b) => b.year - a.year || b.week - a.week).map(w => (
+              {[...stats.weeks].sort((a, b) => b.year - a.year || b.week - a.week).map(w => {
+                const seq = weekSeq[`${w.year}-${w.week}`];
+                const range = isoWeekDateRange(w.year, w.week);
+                return (
                 <div key={`${w.year}-${w.week}`} className="flex items-center gap-3">
-                  <span className="text-[11px] font-medium shrink-0 w-16"
-                        style={{ color: isDark ? 'rgba(255,255,255,0.5)' : '#64748b' }}>
-                    Week {w.week}
-                  </span>
+                  <div className="shrink-0 w-40">
+                    <span className="text-[11px] font-semibold block"
+                          style={{ color: isDark ? 'rgba(255,255,255,0.65)' : '#334155' }}>
+                      Week {seq}
+                    </span>
+                    <span className="text-[10px]"
+                          style={{ color: isDark ? 'rgba(255,255,255,0.3)' : '#94a3b8' }}>
+                      {range}
+                    </span>
+                  </div>
                   <div className="flex-1 h-1.5 rounded-full overflow-hidden"
                        style={{ background: isDark ? 'rgba(255,255,255,0.07)' : '#f1f5f9' }}>
                     <div className="h-full rounded-full transition-all"
@@ -480,10 +504,12 @@ export default function StudentPage() {
                     {w.pct >= 75 ? 'Safe' : 'Low'}
                   </span>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
-        )}
+          );
+        })()}
 
         {/* Attendance Progression */}
         <div ref={trackerRef} className="rounded-lg overflow-hidden" style={card}>
@@ -834,40 +860,49 @@ export default function StudentPage() {
                        style={{ color: isDark ? 'rgba(255,255,255,0.3)' : '#94a3b8' }}>
                       No weekly data yet.
                     </p>
-                  ) : (
+                  ) : (() => {
+                    const weekSeq = Object.fromEntries(
+                      [...stats.weeks].sort((a, b) => a.year - b.year || a.week - b.week)
+                        .map((w, i) => [`${w.year}-${w.week}`, i + 1])
+                    );
+                    return (
                     <div className="space-y-1">
-                      {/* Column headers */}
-                      <div className="grid items-center gap-2 pb-2 mb-1 text-[10px] font-semibold uppercase tracking-wider"
-                           style={{ gridTemplateColumns: '4rem 1fr 2.5rem 3.5rem 2.5rem', color: isDark ? 'rgba(255,255,255,0.3)' : '#94a3b8', borderBottom: divider }}>
-                        <span>Week</span>
-                        <span>Progress</span>
-                        <span className="text-right">%</span>
-                        <span className="text-right">Sessions</span>
-                        <span className="text-center">Status</span>
-                      </div>
-                      {[...stats.weeks].sort((a, b) => b.year - a.year || b.week - a.week).map(w => (
-                        <div key={`${w.year}-${w.week}`}
-                             className="grid items-center gap-2 py-2 rounded-lg px-1"
-                             style={{ gridTemplateColumns: '4rem 1fr 2.5rem 3.5rem 2.5rem' }}>
-                          <span className="text-xs font-medium"
-                                style={{ color: isDark ? 'rgba(255,255,255,0.55)' : '#475569' }}>
-                            Wk {w.week}
-                          </span>
-                          <div className="h-2 rounded-full overflow-hidden"
-                               style={{ background: isDark ? 'rgba(255,255,255,0.07)' : '#f1f5f9' }}>
-                            <div className="h-full rounded-full transition-all"
-                                 style={{ width: `${w.pct}%`, background: pctColor(w.pct) }} />
-                          </div>
-                          <span className="text-xs font-bold text-right"
-                                style={{ color: pctColor(w.pct) }}>
-                            {w.pct}%
-                          </span>
-                          <span className="text-[11px] text-right"
-                                style={{ color: isDark ? 'rgba(255,255,255,0.35)' : '#94a3b8' }}>
-                            {w.present}/{w.total}
-                          </span>
-                          <div className="flex justify-center">
-                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                      {[...stats.weeks].sort((a, b) => b.year - a.year || b.week - a.week).map(w => {
+                        const seq   = weekSeq[`${w.year}-${w.week}`];
+                        const range = isoWeekDateRange(w.year, w.week);
+                        return (
+                          <div key={`${w.year}-${w.week}`}
+                               className="flex items-center gap-3 py-2.5 px-1 rounded-lg"
+                               style={{ borderBottom: divider }}>
+                            {/* Week label + date range */}
+                            <div className="shrink-0 w-36 sm:w-44">
+                              <span className="text-xs font-semibold block"
+                                    style={{ color: isDark ? 'rgba(255,255,255,0.75)' : '#334155' }}>
+                                Week {seq}
+                              </span>
+                              <span className="text-[10px]"
+                                    style={{ color: isDark ? 'rgba(255,255,255,0.3)' : '#94a3b8' }}>
+                                {range}
+                              </span>
+                            </div>
+                            {/* Progress bar */}
+                            <div className="flex-1 h-2 rounded-full overflow-hidden"
+                                 style={{ background: isDark ? 'rgba(255,255,255,0.07)' : '#f1f5f9' }}>
+                              <div className="h-full rounded-full transition-all"
+                                   style={{ width: `${w.pct}%`, background: pctColor(w.pct) }} />
+                            </div>
+                            {/* % */}
+                            <span className="text-xs font-bold shrink-0 w-9 text-right"
+                                  style={{ color: pctColor(w.pct) }}>
+                              {w.pct}%
+                            </span>
+                            {/* sessions */}
+                            <span className="text-[11px] shrink-0 w-10 text-right hidden sm:block"
+                                  style={{ color: isDark ? 'rgba(255,255,255,0.35)' : '#94a3b8' }}>
+                              {w.present}/{w.total}
+                            </span>
+                            {/* badge */}
+                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
                               w.pct >= 75
                                 ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400'
                                 : 'bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400'
@@ -875,12 +910,13 @@ export default function StudentPage() {
                               {w.pct >= 75 ? 'Safe' : 'Low'}
                             </span>
                           </div>
-                        </div>
-                      ))}
-                      {/* Weekly summary */}
-                      <div className="mt-3 pt-3 grid grid-cols-3 gap-3" style={{ borderTop: divider }}>
+                        );
+                      })}
+
+                      {/* Summary row */}
+                      <div className="pt-3 grid grid-cols-3 gap-3">
                         {(() => {
-                          const ws = stats.weeks;
+                          const ws        = stats.weeks;
                           const safeCount = ws.filter(w => w.pct >= 75).length;
                           const lowCount  = ws.length - safeCount;
                           const avgPct    = ws.length > 0 ? Math.round(ws.reduce((s, w) => s + w.pct, 0) / ws.length) : 0;
@@ -899,8 +935,42 @@ export default function StudentPage() {
                           ));
                         })()}
                       </div>
+
+                      {/* Current week advice */}
+                      {(() => {
+                        const cur = [...stats.weeks].sort((a, b) => b.year - a.year || b.week - a.week)[0];
+                        if (!cur) return null;
+                        const seq   = weekSeq[`${cur.year}-${cur.week}`];
+                        const range = isoWeekDateRange(cur.year, cur.week);
+                        let type, text;
+                        if (cur.pct === 100)      { type = 'ok';   text = `Week ${seq}: Perfect — ${cur.present}/${cur.total} sessions (100%).`; }
+                        else if (cur.pct >= 85)   { type = 'ok';   text = `Week ${seq}: Well above threshold — ${cur.present}/${cur.total} (${cur.pct}%). Great work.`; }
+                        else if (cur.pct >= 75)   { type = 'warn'; text = `Week ${seq}: Safe but close to threshold — ${cur.present}/${cur.total} (${cur.pct}%). Keep it up.`; }
+                        else if (cur.pct >= 60)   { type = 'bad';  text = `Week ${seq}: Below 75% — ${cur.present}/${cur.total} (${cur.pct}%). Prioritise attendance.`; }
+                        else                      { type = 'bad';  text = `Week ${seq}: Very low — ${cur.present}/${cur.total} (${cur.pct}%). This is pulling your overall down.`; }
+                        return (
+                          <div className="mt-3 pt-3" style={{ borderTop: divider }}>
+                            <div className="text-[10px] font-semibold uppercase tracking-wider mb-2"
+                                 style={{ color: isDark ? 'rgba(255,255,255,0.35)' : '#94a3b8' }}>
+                              Current Week · {range}
+                            </div>
+                            <div className="flex items-start gap-2.5 text-sm">
+                              <span className={`w-2 h-2 rounded-full mt-1 shrink-0 ${ADVICE_DOT[type]}`} />
+                              <span className={ADVICE_STYLE[type]}>{text}</span>
+                            </div>
+                            {/* Overall advice line */}
+                            {advice[0] && (
+                              <div className="flex items-start gap-2.5 text-sm mt-2">
+                                <span className={`w-2 h-2 rounded-full mt-1 shrink-0 ${ADVICE_DOT[advice[0].type]}`} />
+                                <span className={ADVICE_STYLE[advice[0].type]}>{advice[0].text}</span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </div>
-                  )}
+                    );
+                  })()}
                 </div>
               )}
 
