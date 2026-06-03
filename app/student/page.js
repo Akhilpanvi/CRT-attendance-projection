@@ -174,6 +174,15 @@ export default function StudentPage() {
     }));
   }
 
+  function handleAllSlots(id, status) {
+    setTrackerEntries(prev => prev.map(e => {
+      if (e.id !== id) return e;
+      const slots = {};
+      for (const slot of TIME_SLOTS) slots[slot] = status;
+      return { ...e, slots, saved: false };
+    }));
+  }
+
   async function handleSave(id) {
     const entry = trackerEntries.find(e => e.id === id);
     if (!entry) return;
@@ -430,6 +439,50 @@ export default function StudentPage() {
           ))}
         </div>
 
+        {/* Weekly Attendance */}
+        {stats.weeks && stats.weeks.length > 0 && (
+          <div className="rounded-lg overflow-hidden" style={card}>
+            <div className="px-4 py-3" style={{ borderBottom: divider }}>
+              <h2 className="text-sm font-semibold" style={{ color: isDark ? 'rgba(255,255,255,0.88)' : '#0f172a' }}>
+                Weekly Attendance
+              </h2>
+              <p className="text-xs mt-0.5" style={{ color: isDark ? 'rgba(255,255,255,0.35)' : '#94a3b8' }}>
+                Attendance percentage per ISO week
+              </p>
+            </div>
+            <div className="p-4 space-y-2">
+              {[...stats.weeks].sort((a, b) => b.year - a.year || b.week - a.week).map(w => (
+                <div key={`${w.year}-${w.week}`} className="flex items-center gap-3">
+                  <span className="text-[11px] font-medium shrink-0 w-16"
+                        style={{ color: isDark ? 'rgba(255,255,255,0.5)' : '#64748b' }}>
+                    Week {w.week}
+                  </span>
+                  <div className="flex-1 h-1.5 rounded-full overflow-hidden"
+                       style={{ background: isDark ? 'rgba(255,255,255,0.07)' : '#f1f5f9' }}>
+                    <div className="h-full rounded-full transition-all"
+                         style={{ width: `${w.pct}%`, background: pctColor(w.pct) }} />
+                  </div>
+                  <span className="text-[11px] font-bold w-10 text-right shrink-0"
+                        style={{ color: pctColor(w.pct) }}>
+                    {w.pct}%
+                  </span>
+                  <span className="text-[10px] shrink-0 w-12 text-right"
+                        style={{ color: isDark ? 'rgba(255,255,255,0.3)' : '#94a3b8' }}>
+                    {w.present}/{w.total}
+                  </span>
+                  <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded shrink-0 ${
+                    w.pct >= 75
+                      ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400'
+                      : 'bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400'
+                  }`}>
+                    {w.pct >= 75 ? 'Safe' : 'Low'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Attendance Progression */}
         <div ref={trackerRef} className="rounded-lg overflow-hidden" style={card}>
           <div className="px-4 py-3" style={{ borderBottom: divider }}>
@@ -515,6 +568,25 @@ export default function StudentPage() {
                         )}
                       </>
                     )}
+                  </div>
+
+                  {/* Bulk fill buttons */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500">Quick fill:</span>
+                    <button
+                      onClick={() => handleAllSlots(entry.id, 'present')}
+                      className="px-3 py-1 rounded text-xs font-semibold transition-colors
+                                 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800
+                                 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/40">
+                      All Present
+                    </button>
+                    <button
+                      onClick={() => handleAllSlots(entry.id, 'absent')}
+                      className="px-3 py-1 rounded text-xs font-semibold transition-colors
+                                 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800
+                                 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40">
+                      All Absent
+                    </button>
                   </div>
 
                   {/* Slot toggles */}
