@@ -3,7 +3,7 @@ import { connectDB } from '@/lib/mongodb';
 import Student from '@/lib/models/Student';
 import Attendance from '@/lib/models/Attendance';
 import { getSession } from '@/lib/auth';
-import { TIME_SLOTS } from '@/lib/helpers';
+import { TIME_SLOTS, getWeekNumber } from '@/lib/helpers';
 import { buildSlotsPerDate, computeStudentStats } from '@/lib/attendanceCalc';
 
 export async function GET() {
@@ -33,6 +33,24 @@ export async function GET() {
     // Compute stats: missing slots on training days → absent
     const { total, present, absent, sp, overallPct, byDate } = computeStudentStats(records, slotsPerDate);
 
+    // Weekly breakdown
+    const weekMap = {};
+    for (const [date, slotStatuses] of Object.entries(byDate)) {
+      const wk  = getWeekNumber(date);
+      const yr  = new Date(date + 'T00:00:00Z').getUTCFullYear();
+      const key = `${yr}-W${String(wk).padStart(2, '0')}`;
+      if (!weekMap[key]) weekMap[key] = { total: 0, present: 0, week: wk, year: yr };
+      for (const status of Object.values(slotStatuses)) {
+        weekMap[key].total++;
+        if (status === 'present' || status === 'sp') weekMap[key].present++;
+      }
+    }
+    const weeks = Object.values(weekMap).map(w => ({
+      ...w,
+      pct:  w.total > 0 ? Math.round((w.present / w.total) * 100) : 0,
+      safe: w.total > 0 ? (w.present / w.total) >= 0.75 : true,
+    })).sort((a, b) => b.year - a.year || b.week - a.week);
+
     // Ordered slot list for the UI (matches TIME_SLOTS order where possible)
     const allSlots = new Set(Object.values(slotsPerDate).flat());
     const orderedSlots = [
@@ -49,6 +67,7 @@ export async function GET() {
         sp,
         overallPct,
         byDate,
+        weeks,
         slots: orderedSlots,
       },
     });
