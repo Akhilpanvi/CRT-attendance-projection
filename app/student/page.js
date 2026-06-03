@@ -102,6 +102,8 @@ export default function StudentPage() {
 
   const trackerRef = useRef(null);
 
+  const [plannerView, setPlannerView] = useState('total'); // 'total' | 'weekly'
+
   const [selfByDate,     setSelfByDate]     = useState({});
   const [trackerEntries, setTrackerEntries] = useState([
     { id: 1, date: today, slots: {}, saving: false, saved: false, expanded: true },
@@ -672,138 +674,237 @@ export default function StudentPage() {
 
         {/* Session Planner */}
         {stats.total > 0 && (
-          <div className="rounded-lg p-4" style={card}>
-            <div className="text-sm font-semibold mb-3" style={{ color: isDark ? 'rgba(255,255,255,0.88)' : '#0f172a' }}>Session Planner</div>
-
-            {/* Official row */}
-            <div className="mb-3">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
-                  Official
-                </span>
-                {dates[0] && (
-                  <span className="text-[10px] text-slate-400 dark:text-slate-500">
-                    · till {fmtDate(dates[0])} · {stats.present}/{stats.total} sessions
-                  </span>
-                )}
+          <div className="rounded-lg overflow-hidden" style={card}>
+            {/* Header + tabs */}
+            <div className="px-4 py-3 flex items-center justify-between flex-wrap gap-2"
+                 style={{ borderBottom: divider }}>
+              <div>
+                <h2 className="text-sm font-semibold" style={{ color: isDark ? 'rgba(255,255,255,0.88)' : '#0f172a' }}>
+                  Session Planner
+                </h2>
+                <p className="text-xs mt-0.5" style={{ color: isDark ? 'rgba(255,255,255,0.35)' : '#94a3b8' }}>
+                  {plannerView === 'total' ? 'Bunk calculator based on thresholds' : 'Week-by-week attendance breakdown'}
+                </p>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                {[{ label: '75%', data: b75 }, { label: '85%', data: b85 }].map(({ label, data }) => (
-                  <div key={label} className="rounded-lg p-3" style={inner}>
-                    <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">{label} Threshold</div>
-                    {data.canBunk > 0 ? (
-                      <>
-                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">{data.canBunk}</div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">sessions flexible</div>
-                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                          ≈ {Math.floor(data.canBunk / 8)}d {data.canBunk % 8 > 0 ? `+ ${data.canBunk % 8}s` : ''}
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="text-2xl font-bold text-red-600 dark:text-red-400">{data.needAttend}</div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">sessions to recover</div>
-                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                          ≈ {Math.ceil(data.needAttend / 8)} week{data.needAttend > 8 ? 's' : ''}
-                        </div>
-                      </>
-                    )}
-                  </div>
+              {/* Tab toggle */}
+              <div className="flex rounded-lg overflow-hidden text-xs font-semibold shrink-0"
+                   style={{ border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #e2e8f0' }}>
+                {['total', 'weekly'].map(v => (
+                  <button key={v}
+                    onClick={() => setPlannerView(v)}
+                    className="px-4 py-1.5 capitalize transition-colors"
+                    style={plannerView === v
+                      ? { background: isDark ? 'rgba(255,255,255,0.12)' : '#1e293b', color: isDark ? '#ffffff' : '#ffffff' }
+                      : { background: 'transparent', color: isDark ? 'rgba(255,255,255,0.4)' : '#64748b' }}>
+                    {v === 'total' ? 'Total' : 'Weekly'}
+                  </button>
                 ))}
               </div>
             </div>
 
-            {/* Projected row — only when self-tracked data exists */}
-            {liveHasData && (() => {
-              const pb75 = calcBunk(liveProjPresent, liveProjTotal, 75);
-              const pb85 = calcBunk(liveProjPresent, liveProjTotal, 85);
-              return (
-                <div className="pt-3" style={{ borderTop: divider }}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[10px] font-semibold uppercase tracking-widest text-indigo-500 dark:text-indigo-400">
-                      Projected
-                    </span>
-                    <span className="text-[10px] text-slate-400 dark:text-slate-500">
-                      · with self-tracked · {liveProjPresent}/{liveProjTotal} sessions
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    {[{ label: '75%', data: pb75 }, { label: '85%', data: pb85 }].map(({ label, data }) => (
-                      <div key={label}
-                           className="border border-indigo-200 dark:border-indigo-800
-                                      bg-indigo-50/50 dark:bg-indigo-900/20 rounded-lg p-3">
-                        <div className="text-[10px] font-semibold text-indigo-400 uppercase tracking-wider mb-1.5">{label} Threshold</div>
-                        {data.canBunk > 0 ? (
-                          <>
-                            <div className="text-2xl font-bold text-green-600 dark:text-green-400">{data.canBunk}</div>
-                            <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">sessions flexible</div>
-                            <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                              ≈ {Math.floor(data.canBunk / 8)}d {data.canBunk % 8 > 0 ? `+ ${data.canBunk % 8}s` : ''}
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <div className="text-2xl font-bold text-red-600 dark:text-red-400">{data.needAttend}</div>
-                            <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">sessions to recover</div>
-                            <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                              ≈ {Math.ceil(data.needAttend / 8)} week{data.needAttend > 8 ? 's' : ''}
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })()}
+            <div className="p-4">
 
-            {/* Advice */}
-            {advice.length > 0 && (
-              <div className="mt-4 pt-4 space-y-4" style={{ borderTop: divider }}>
-                {/* Official advice */}
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                      Advice
-                    </span>
-                    {liveHasData && (
-                      <span className="text-[10px] text-slate-400 dark:text-slate-500">· Official</span>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    {advice.map((line, i) => (
-                      <div key={i} className="flex items-start gap-2.5 text-sm">
-                        <span className={`w-2 h-2 rounded-full mt-1 shrink-0 ${ADVICE_DOT[line.type]}`} />
-                        <span className={ADVICE_STYLE[line.type]}>{line.text}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Projected advice */}
-                {liveHasData && (() => {
-                  const projAdvice = generateAdvice(liveProjPresent, liveProjTotal, liveProjPct);
-                  return (
-                    <div className="pt-3 border-t border-indigo-100 dark:border-indigo-900/40">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">
-                          Advice
+              {/* ── TOTAL VIEW ── */}
+              {plannerView === 'total' && (
+                <div className="space-y-4">
+                  {/* Official row */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">Official</span>
+                      {dates[0] && (
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500">
+                          · till {fmtDate(dates[0])} · {stats.present}/{stats.total} sessions
                         </span>
-                        <span className="text-[10px] text-indigo-400 dark:text-indigo-500">· Projected</span>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      {[{ label: '75%', data: b75 }, { label: '85%', data: b85 }].map(({ label, data }) => (
+                        <div key={label} className="rounded-lg p-3" style={inner}>
+                          <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">{label} Threshold</div>
+                          {data.canBunk > 0 ? (
+                            <>
+                              <div className="text-2xl font-bold text-green-600 dark:text-green-400">{data.canBunk}</div>
+                              <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">sessions flexible</div>
+                              <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                                ≈ {Math.floor(data.canBunk / 8)}d {data.canBunk % 8 > 0 ? `+ ${data.canBunk % 8}s` : ''}
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div className="text-2xl font-bold text-red-600 dark:text-red-400">{data.needAttend}</div>
+                              <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">sessions to recover</div>
+                              <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                                ≈ {Math.ceil(data.needAttend / 8)} week{data.needAttend > 8 ? 's' : ''}
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Projected row */}
+                  {liveHasData && (() => {
+                    const pb75 = calcBunk(liveProjPresent, liveProjTotal, 75);
+                    const pb85 = calcBunk(liveProjPresent, liveProjTotal, 85);
+                    return (
+                      <div className="pt-3" style={{ borderTop: divider }}>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-[10px] font-semibold uppercase tracking-widest text-indigo-500 dark:text-indigo-400">Projected</span>
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500">
+                            · with self-tracked · {liveProjPresent}/{liveProjTotal} sessions
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          {[{ label: '75%', data: pb75 }, { label: '85%', data: pb85 }].map(({ label, data }) => (
+                            <div key={label}
+                                 className="border border-indigo-200 dark:border-indigo-800
+                                            bg-indigo-50/50 dark:bg-indigo-900/20 rounded-lg p-3">
+                              <div className="text-[10px] font-semibold text-indigo-400 uppercase tracking-wider mb-1.5">{label} Threshold</div>
+                              {data.canBunk > 0 ? (
+                                <>
+                                  <div className="text-2xl font-bold text-green-600 dark:text-green-400">{data.canBunk}</div>
+                                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">sessions flexible</div>
+                                  <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                                    ≈ {Math.floor(data.canBunk / 8)}d {data.canBunk % 8 > 0 ? `+ ${data.canBunk % 8}s` : ''}
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <div className="text-2xl font-bold text-red-600 dark:text-red-400">{data.needAttend}</div>
+                                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">sessions to recover</div>
+                                  <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                                    ≈ {Math.ceil(data.needAttend / 8)} week{data.needAttend > 8 ? 's' : ''}
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                      <div className="space-y-2">
-                        {projAdvice.map((line, i) => (
-                          <div key={i} className="flex items-start gap-2.5 text-sm">
-                            <span className={`w-2 h-2 rounded-full mt-1 shrink-0 ${ADVICE_DOT[line.type]}`} />
-                            <span className={ADVICE_STYLE[line.type]}>{line.text}</span>
+                    );
+                  })()}
+
+                  {/* Advice */}
+                  {advice.length > 0 && (
+                    <div className="pt-3 space-y-4" style={{ borderTop: divider }}>
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Advice</span>
+                          {liveHasData && <span className="text-[10px] text-slate-400 dark:text-slate-500">· Official</span>}
+                        </div>
+                        <div className="space-y-2">
+                          {advice.map((line, i) => (
+                            <div key={i} className="flex items-start gap-2.5 text-sm">
+                              <span className={`w-2 h-2 rounded-full mt-1 shrink-0 ${ADVICE_DOT[line.type]}`} />
+                              <span className={ADVICE_STYLE[line.type]}>{line.text}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      {liveHasData && (() => {
+                        const projAdvice = generateAdvice(liveProjPresent, liveProjTotal, liveProjPct);
+                        return (
+                          <div className="pt-3 border-t border-indigo-100 dark:border-indigo-900/40">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-xs font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">Advice</span>
+                              <span className="text-[10px] text-indigo-400 dark:text-indigo-500">· Projected</span>
+                            </div>
+                            <div className="space-y-2">
+                              {projAdvice.map((line, i) => (
+                                <div key={i} className="flex items-start gap-2.5 text-sm">
+                                  <span className={`w-2 h-2 rounded-full mt-1 shrink-0 ${ADVICE_DOT[line.type]}`} />
+                                  <span className={ADVICE_STYLE[line.type]}>{line.text}</span>
+                                </div>
+                              ))}
+                            </div>
                           </div>
-                        ))}
+                        );
+                      })()}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ── WEEKLY VIEW ── */}
+              {plannerView === 'weekly' && (
+                <div>
+                  {(!stats.weeks || stats.weeks.length === 0) ? (
+                    <p className="text-sm text-center py-6"
+                       style={{ color: isDark ? 'rgba(255,255,255,0.3)' : '#94a3b8' }}>
+                      No weekly data yet.
+                    </p>
+                  ) : (
+                    <div className="space-y-1">
+                      {/* Column headers */}
+                      <div className="grid items-center gap-2 pb-2 mb-1 text-[10px] font-semibold uppercase tracking-wider"
+                           style={{ gridTemplateColumns: '4rem 1fr 2.5rem 3.5rem 2.5rem', color: isDark ? 'rgba(255,255,255,0.3)' : '#94a3b8', borderBottom: divider }}>
+                        <span>Week</span>
+                        <span>Progress</span>
+                        <span className="text-right">%</span>
+                        <span className="text-right">Sessions</span>
+                        <span className="text-center">Status</span>
+                      </div>
+                      {[...stats.weeks].sort((a, b) => b.year - a.year || b.week - a.week).map(w => (
+                        <div key={`${w.year}-${w.week}`}
+                             className="grid items-center gap-2 py-2 rounded-lg px-1"
+                             style={{ gridTemplateColumns: '4rem 1fr 2.5rem 3.5rem 2.5rem' }}>
+                          <span className="text-xs font-medium"
+                                style={{ color: isDark ? 'rgba(255,255,255,0.55)' : '#475569' }}>
+                            Wk {w.week}
+                          </span>
+                          <div className="h-2 rounded-full overflow-hidden"
+                               style={{ background: isDark ? 'rgba(255,255,255,0.07)' : '#f1f5f9' }}>
+                            <div className="h-full rounded-full transition-all"
+                                 style={{ width: `${w.pct}%`, background: pctColor(w.pct) }} />
+                          </div>
+                          <span className="text-xs font-bold text-right"
+                                style={{ color: pctColor(w.pct) }}>
+                            {w.pct}%
+                          </span>
+                          <span className="text-[11px] text-right"
+                                style={{ color: isDark ? 'rgba(255,255,255,0.35)' : '#94a3b8' }}>
+                            {w.present}/{w.total}
+                          </span>
+                          <div className="flex justify-center">
+                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                              w.pct >= 75
+                                ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400'
+                                : 'bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400'
+                            }`}>
+                              {w.pct >= 75 ? 'Safe' : 'Low'}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                      {/* Weekly summary */}
+                      <div className="mt-3 pt-3 grid grid-cols-3 gap-3" style={{ borderTop: divider }}>
+                        {(() => {
+                          const ws = stats.weeks;
+                          const safeCount = ws.filter(w => w.pct >= 75).length;
+                          const lowCount  = ws.length - safeCount;
+                          const avgPct    = ws.length > 0 ? Math.round(ws.reduce((s, w) => s + w.pct, 0) / ws.length) : 0;
+                          return [
+                            { label: 'Avg / Week', value: avgPct + '%', color: pctColor(avgPct) },
+                            { label: 'Safe Weeks', value: safeCount,    color: '#16a34a' },
+                            { label: 'Low Weeks',  value: lowCount,     color: lowCount > 0 ? '#dc2626' : '#16a34a' },
+                          ].map(({ label, value, color }) => (
+                            <div key={label} className="rounded-lg p-3 text-center" style={inner}>
+                              <div className="text-xl font-bold" style={{ color }}>{value}</div>
+                              <div className="text-[10px] uppercase tracking-wider mt-1"
+                                   style={{ color: isDark ? 'rgba(255,255,255,0.3)' : '#94a3b8' }}>
+                                {label}
+                              </div>
+                            </div>
+                          ));
+                        })()}
                       </div>
                     </div>
-                  );
-                })()}
-              </div>
-            )}
+                  )}
+                </div>
+              )}
+
+            </div>
           </div>
         )}
 
