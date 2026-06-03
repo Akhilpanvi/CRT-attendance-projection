@@ -936,38 +936,23 @@ export default function StudentPage() {
                         })()}
                       </div>
 
-                      {/* Current week advice */}
-                      {(() => {
-                        const cur = [...stats.weeks].sort((a, b) => b.year - a.year || b.week - a.week)[0];
-                        if (!cur) return null;
-                        const seq   = weekSeq[`${cur.year}-${cur.week}`];
-                        const range = isoWeekDateRange(cur.year, cur.week);
-                        let type, text;
-                        if (cur.pct === 100)      { type = 'ok';   text = `Week ${seq}: Perfect — ${cur.present}/${cur.total} sessions (100%).`; }
-                        else if (cur.pct >= 85)   { type = 'ok';   text = `Week ${seq}: Well above threshold — ${cur.present}/${cur.total} (${cur.pct}%). Great work.`; }
-                        else if (cur.pct >= 75)   { type = 'warn'; text = `Week ${seq}: Safe but close to threshold — ${cur.present}/${cur.total} (${cur.pct}%). Keep it up.`; }
-                        else if (cur.pct >= 60)   { type = 'bad';  text = `Week ${seq}: Below 75% — ${cur.present}/${cur.total} (${cur.pct}%). Prioritise attendance.`; }
-                        else                      { type = 'bad';  text = `Week ${seq}: Very low — ${cur.present}/${cur.total} (${cur.pct}%). This is pulling your overall down.`; }
-                        return (
-                          <div className="mt-3 pt-3" style={{ borderTop: divider }}>
-                            <div className="text-[10px] font-semibold uppercase tracking-wider mb-2"
-                                 style={{ color: isDark ? 'rgba(255,255,255,0.35)' : '#94a3b8' }}>
-                              Current Week · {range}
-                            </div>
-                            <div className="flex items-start gap-2.5 text-sm">
-                              <span className={`w-2 h-2 rounded-full mt-1 shrink-0 ${ADVICE_DOT[type]}`} />
-                              <span className={ADVICE_STYLE[type]}>{text}</span>
-                            </div>
-                            {/* Overall advice line */}
-                            {advice[0] && (
-                              <div className="flex items-start gap-2.5 text-sm mt-2">
-                                <span className={`w-2 h-2 rounded-full mt-1 shrink-0 ${ADVICE_DOT[advice[0].type]}`} />
-                                <span className={ADVICE_STYLE[advice[0].type]}>{advice[0].text}</span>
+                      {/* Advice — same as Total tab */}
+                      {advice.length > 0 && (
+                        <div className="mt-3 pt-3 space-y-2" style={{ borderTop: divider }}>
+                          <span className="text-[10px] font-semibold uppercase tracking-wider"
+                                style={{ color: isDark ? 'rgba(255,255,255,0.35)' : '#94a3b8' }}>
+                            Advice
+                          </span>
+                          <div className="space-y-2 mt-1">
+                            {advice.map((line, i) => (
+                              <div key={i} className="flex items-start gap-2.5 text-sm">
+                                <span className={`w-2 h-2 rounded-full mt-1 shrink-0 ${ADVICE_DOT[line.type]}`} />
+                                <span className={ADVICE_STYLE[line.type]}>{line.text}</span>
                               </div>
-                            )}
+                            ))}
                           </div>
-                        );
-                      })()}
+                        </div>
+                      )}
                     </div>
                     );
                   })()}
