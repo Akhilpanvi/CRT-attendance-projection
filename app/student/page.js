@@ -244,7 +244,7 @@ export default function StudentPage() {
     </div>
   );
   const Bar = ({ pct: p, track = false }) => (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-3 flex-1 min-w-0">
       <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
         <div className="h-full rounded-full transition-all" style={{ width: `${p}%`, background: track ? '#6366f1' : pctColor(p) }} />
       </div>
@@ -317,9 +317,10 @@ export default function StudentPage() {
     <div className="space-y-3">
 
       {/* Identity + attendance summary */}
-      <Card noPad>
+      <div className="rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden relative"
+           style={{ background: `linear-gradient(135deg, ${statusColor}0d 0%, transparent 55%)` }}>
         {/* Profile row */}
-        <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
+        <div className="px-4 py-3 border-b border-slate-200/60 dark:border-slate-800 flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold text-slate-600 dark:text-slate-300 shrink-0">
             {s.name.split(' ').map(w => w[0]).join('').slice(0, 2)}
           </div>
@@ -377,7 +378,7 @@ export default function StudentPage() {
             ))}
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Threshold planner */}
       {stats.total > 0 && (
