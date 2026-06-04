@@ -267,13 +267,13 @@ export default function StudentPage() {
 
       {/* User footer */}
       <div className="px-3 py-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
-        <div className="flex items-center gap-2 px-2 py-1.5">
-          <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-600 dark:text-slate-300 shrink-0">
+        <div className="flex items-start gap-2 px-2 py-1.5">
+          <div className="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-600 dark:text-slate-300 shrink-0 mt-0.5">
             {s.name.split(' ').map(w => w[0]).join('').slice(0, 2)}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate leading-tight">{s.name.split(' ')[0]}</p>
-            <p className="text-[9px] text-slate-400 dark:text-slate-500 truncate">{s.rollNumber}</p>
+            <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 leading-snug break-words">{s.name}</p>
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{s.rollNumber}</p>
           </div>
         </div>
         <div className="flex items-center gap-1">
@@ -288,7 +288,7 @@ export default function StudentPage() {
   );
 
   const divider = 'border-t border-slate-100 dark:border-slate-800';
-  const card = 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg';
+  const card = 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg transition-shadow duration-200 hover:shadow-sm';
 
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -326,7 +326,7 @@ export default function StudentPage() {
         </header>
 
         {/* Scrollable content */}
-        <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-6 space-y-8 pb-16">
+        <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-6 space-y-8 pb-16 animate-in">
 
           {/* ── OVERVIEW ──────────────────────────────────────────────── */}
           <section id="overview" ref={sectionRefs.overview}>
@@ -387,45 +387,19 @@ export default function StudentPage() {
             </div>
 
             {/* Threshold summary */}
-            {stats.total > 0 && (
-              <div className={`${card} mt-3`}>
-                <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800">
-                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Threshold Summary</p>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Sessions required to meet or maintain each target</p>
-                </div>
-                <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {[{ label: '75% Minimum', data: b75 }, { label: '85% Target', data: b85 }].map(({ label, data }) => (
-                    <div key={label} className="px-5 py-3 flex items-center justify-between gap-4">
-                      <div>
-                        <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{label}</p>
-                        <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
-                          {data.canBunk > 0
-                            ? `${data.canBunk} sessions flexible · ≈ ${Math.floor(data.canBunk / 8)} days`
-                            : `Need ${data.needAttend} sessions · ≈ ${Math.ceil(data.needAttend / 48)} week${data.needAttend > 48 ? 's' : ''}`}
-                        </p>
-                      </div>
-                      <span className={`text-sm font-bold tabular-nums shrink-0 ${data.canBunk > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
-                        {data.canBunk > 0 ? `+${data.canBunk}` : `−${data.needAttend}`}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Notices */}
+            {/* Notices — top of overview */}
             {updates.length > 0 && (
-              <div className={`${card} mt-3`}>
+              <div className={`${card} mt-3 transition-shadow duration-200 hover:shadow-sm`}>
                 <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
                     <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Notices</p>
                   </div>
                   <span className="text-xs text-slate-400">{updates.length} item{updates.length !== 1 ? 's' : ''}</span>
                 </div>
-                <div className="divide-y divide-slate-100 dark:divide-slate-800 max-h-72 overflow-y-auto">
+                <div className="divide-y divide-slate-100 dark:divide-slate-800 max-h-64 overflow-y-auto">
                   {updates.map(u => (
-                    <div key={u._id} className="px-5 py-3">
+                    <div key={u._id} className="px-5 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors duration-150">
                       <div className="flex items-center gap-2 mb-1">
                         <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
                           u.category === 'important' ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
@@ -439,6 +413,33 @@ export default function StudentPage() {
                       </div>
                       {u.title && <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 mb-0.5">{u.title}</p>}
                       <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed whitespace-pre-wrap">{u.content}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Threshold summary */}
+            {stats.total > 0 && (
+              <div className={`${card} mt-3 transition-shadow duration-200 hover:shadow-sm`}>
+                <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800">
+                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Threshold Summary</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Sessions required to meet or maintain each target</p>
+                </div>
+                <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {[{ label: '75% Minimum', data: b75 }, { label: '85% Target', data: b85 }].map(({ label, data }) => (
+                    <div key={label} className="px-5 py-3 flex items-center justify-between gap-4 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors duration-150">
+                      <div>
+                        <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{label}</p>
+                        <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
+                          {data.canBunk > 0
+                            ? `${data.canBunk} sessions flexible · ≈ ${Math.floor(data.canBunk / 8)} days`
+                            : `Need ${data.needAttend} sessions · ≈ ${Math.ceil(data.needAttend / 48)} week${data.needAttend > 48 ? 's' : ''}`}
+                        </p>
+                      </div>
+                      <span className={`text-sm font-bold tabular-nums shrink-0 ${data.canBunk > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                        {data.canBunk > 0 ? `+${data.canBunk}` : `−${data.needAttend}`}
+                      </span>
                     </div>
                   ))}
                 </div>
