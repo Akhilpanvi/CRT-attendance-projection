@@ -335,8 +335,8 @@ export default function StudentPage() {
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-600 mb-3">Overview</p>
 
             {/* Profile + attendance card */}
-            <div className="rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden"
-                 style={{ background: `linear-gradient(135deg, ${statusColor}0d 0%, transparent 55%)` }}>
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden"
+                 style={{ background: `linear-gradient(135deg, ${statusColor}18 0%, ${statusColor}06 40%, transparent 65%)` }}>
               {/* Profile row */}
               <div className="px-5 py-4 flex items-center gap-3 border-b border-slate-200/60 dark:border-slate-800">
                 <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold text-slate-600 dark:text-slate-300 shrink-0">
@@ -353,7 +353,7 @@ export default function StudentPage() {
               <div className="px-5 py-5">
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">Attendance</p>
                 <div className="flex items-end gap-5">
-                  <p className="text-5xl font-black tabular-nums leading-none" style={{ color: statusColor }}>{pct}%</p>
+                  <p className="text-3xl font-bold tabular-nums leading-none" style={{ color: statusColor }}>{pct}%</p>
                   <div className="flex-1 pb-1 min-w-0">
                     <div className="relative h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-1">
                       <div className="h-full rounded-full transition-all duration-700 ease-out"
