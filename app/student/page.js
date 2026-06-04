@@ -226,6 +226,7 @@ export default function StudentPage() {
   const allDates        = [...dates, ...selfOnlyDates].sort().reverse();
   const allSlots        = stats.slots.length > 0 ? stats.slots : TIME_SLOTS;
 
+  const statusColor = pctColor(pct);
   const statusLabel = pct >= 85 ? 'Satisfactory' : pct >= 75 ? 'Meets Requirement' : 'Below Threshold';
   const statusCls   = pct >= 85 ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800'
                     : pct >= 75 ? 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'
