@@ -95,6 +95,9 @@ export default function StudentPage() {
     log:      useRef(null),
   };
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setMounted(true), 80); return () => clearTimeout(t); }, []);
+
   const [selfByDate,     setSelfByDate]     = useState({});
   const [trackerEntries, setTrackerEntries] = useState([
     { id: 1, date: today, slots: {}, saving: false, saved: false, expanded: true },
@@ -235,31 +238,30 @@ export default function StudentPage() {
 
   // ── Sidebar ────────────────────────────────────────────────────────────────
   const Sidebar = ({ mobile = false }) => (
-    <aside className={`${mobile ? 'flex' : 'hidden lg:flex'} flex-col h-full bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800`}>
+    <aside className={`${mobile ? 'flex' : 'hidden lg:flex'} flex-col h-full border-r border-slate-200 dark:border-slate-800/80 bg-white dark:bg-slate-900`}>
       {/* Brand */}
       <div className="flex items-center gap-2.5 px-4 py-4 border-b border-slate-100 dark:border-slate-800">
-        <div className="w-7 h-7 rounded bg-slate-900 dark:bg-slate-100 flex items-center justify-center text-[10px] font-black text-white dark:text-slate-900 shrink-0">KL</div>
+        <div className="w-7 h-7 rounded-md bg-slate-900 dark:bg-white flex items-center justify-center text-[10px] font-black text-white dark:text-slate-900 shrink-0 shadow-sm">KL</div>
         <div className="min-w-0">
-          <p className="text-xs font-bold text-slate-900 dark:text-slate-100 leading-tight">CRT Tracker</p>
+          <p className="text-xs font-bold text-slate-900 dark:text-slate-100 leading-tight tracking-tight">CRT Tracker</p>
           <p className="text-[10px] text-slate-400 dark:text-slate-500">Y-23 · KL University</p>
         </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 py-3 px-2 space-y-0.5">
-        <p className="px-2 pb-2 text-[9px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-600">Navigation</p>
+      <nav className="flex-1 py-4 px-2 space-y-0.5">
+        <p className="px-3 pb-2 text-[9px] font-semibold uppercase tracking-widest text-slate-300 dark:text-slate-700">Navigation</p>
         {NAV.map(item => {
           const active = activeSection === item.id;
           return (
             <button key={item.id} onClick={() => scrollTo(item.id)}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-medium transition-colors text-left ${
+              className={`slide-nav w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-medium transition-all duration-150 text-left group ${
                 active
-                  ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100'
-                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-slate-800 dark:hover:text-slate-200'
+                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm'
+                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'
               }`}>
-              {item.icon}
+              <span className={`transition-transform duration-150 ${active ? '' : 'group-hover:scale-110'}`}>{item.icon}</span>
               {item.label}
-              {active && <span className="ml-auto w-1 h-1 rounded-full bg-blue-500 shrink-0" />}
             </button>
           );
         })}
@@ -288,10 +290,10 @@ export default function StudentPage() {
   );
 
   const divider = 'border-t border-slate-100 dark:border-slate-800';
-  const card = 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg transition-shadow duration-200 hover:shadow-sm';
+  const card = 'bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl transition-all duration-200 hover:shadow-md dark:hover:border-slate-700';
 
   return (
-    <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950">
+    <div className="flex min-h-screen bg-slate-50 dark:bg-[#0a0f1e]">
 
       {/* Desktop sidebar */}
       <div className="hidden lg:block w-52 shrink-0 fixed left-0 top-0 bottom-0 z-20">
@@ -353,10 +355,11 @@ export default function StudentPage() {
                 <div className="flex items-end gap-5">
                   <p className="text-5xl font-black tabular-nums leading-none" style={{ color: statusColor }}>{pct}%</p>
                   <div className="flex-1 pb-1 min-w-0">
-                    <div className="relative h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden mb-1">
-                      <div className="h-full rounded-full" style={{ width: `${pct}%`, background: statusColor }} />
+                    <div className="relative h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-1">
+                      <div className="h-full rounded-full transition-all duration-700 ease-out"
+                           style={{ width: mounted ? `${pct}%` : '0%', background: statusColor }} />
                       {[75, 85].map(t => (
-                        <div key={t} className="absolute top-0 bottom-0 w-px bg-white/50 dark:bg-slate-600/80" style={{ left: `${t}%` }} />
+                        <div key={t} className="absolute top-0 bottom-0 w-px bg-white/60 dark:bg-slate-600" style={{ left: `${t}%` }} />
                       ))}
                     </div>
                     <div className="relative h-3.5">
@@ -506,7 +509,7 @@ export default function StudentPage() {
                             <div className="flex items-center gap-3">
                               <span className="text-[10px] text-slate-400 dark:text-slate-500 w-16 shrink-0">Official</span>
                               <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                <div className="h-full rounded-full" style={{ width: `${w.pct}%`, background: pctColor(w.pct) }} />
+                                <div className="h-full rounded-full" style={{ width: mounted ? `${w.pct}%` : '0%', background: pctColor(w.pct), transition: 'width 0.6s ease-out' }} />
                               </div>
                               <span className="text-xs font-semibold tabular-nums w-8 text-right shrink-0" style={{ color: pctColor(w.pct) }}>{w.pct}%</span>
                               <span className="text-[10px] tabular-nums w-10 text-right shrink-0 text-slate-400">{w.present}/{w.total}</span>
@@ -517,7 +520,7 @@ export default function StudentPage() {
                               {hasSD ? (
                                 <>
                                   <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(99,102,241,0.15)' }}>
-                                    <div className="h-full rounded-full" style={{ width: `${pPct}%`, background: '#6366f1' }} />
+                                    <div className="h-full rounded-full" style={{ width: mounted ? `${pPct}%` : '0%', background: '#6366f1', transition: 'width 0.6s ease-out 0.15s' }} />
                                   </div>
                                   <span className="text-xs font-semibold tabular-nums w-8 text-right shrink-0 text-indigo-500 dark:text-indigo-400">{pPct}%</span>
                                   <span className="text-[10px] tabular-nums w-10 text-right shrink-0 text-indigo-400">{pP}/{pT}</span>
@@ -655,7 +658,7 @@ export default function StudentPage() {
                             <div className="flex items-center gap-3">
                               <span className="text-[10px] text-slate-400 w-16 shrink-0">Official</span>
                               <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                <div className="h-full rounded-full" style={{ width: `${w.pct}%`, background: pctColor(w.pct) }} />
+                                <div className="h-full rounded-full" style={{ width: mounted ? `${w.pct}%` : '0%', background: pctColor(w.pct), transition: 'width 0.6s ease-out' }} />
                               </div>
                               <span className="text-xs font-semibold tabular-nums w-8 text-right" style={{ color: pctColor(w.pct) }}>{w.pct}%</span>
                               <span className="text-[10px] text-slate-400 tabular-nums w-9 text-right">{w.present}/{w.total}</span>
@@ -665,7 +668,7 @@ export default function StudentPage() {
                               {hasSD ? (
                                 <>
                                   <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(99,102,241,0.15)' }}>
-                                    <div className="h-full rounded-full" style={{ width: `${pPct}%`, background: '#6366f1' }} />
+                                    <div className="h-full rounded-full" style={{ width: mounted ? `${pPct}%` : '0%', background: '#6366f1', transition: 'width 0.6s ease-out 0.15s' }} />
                                   </div>
                                   <span className="text-xs font-semibold tabular-nums w-8 text-right text-indigo-500 dark:text-indigo-400">{pPct}%</span>
                                   <span className="text-[10px] text-indigo-400 tabular-nums w-9 text-right">{pP}/{pT}</span>
