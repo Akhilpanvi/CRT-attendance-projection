@@ -397,6 +397,14 @@ export default function StudentPage() {
         </Card>
       )}
 
+      {/* Weekly attendance (compact, homepage) */}
+      {stats.weeks && stats.weeks.length > 0 && (
+        <Card noPad>
+          <SectionHead title="Weekly Attendance" sub="Official attendance and projected per week" />
+          <WeekRows />
+        </Card>
+      )}
+
       {/* Advice */}
       {advice.length > 0 && (
         <Card noPad>
