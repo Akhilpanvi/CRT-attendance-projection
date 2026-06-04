@@ -272,7 +272,7 @@ export default function LoginPage() {
                     </label>
                     <input
                       className="w-full px-4 py-3 rounded-xl text-sm font-medium outline-none transition-all duration-200"
-                      placeholder="e.g. 2300033181"
+                      placeholder="Registration number"
                       value={username}
                       onChange={e => setUsername(e.target.value)}
                       autoFocus
