@@ -238,7 +238,7 @@ export default function StudentPage() {
 
   // ── Sidebar ────────────────────────────────────────────────────────────────
   const Sidebar = ({ mobile = false }) => (
-    <aside className={`${mobile ? 'flex' : 'hidden lg:flex'} flex-col h-full border-r border-slate-200 dark:border-slate-800/80 bg-white dark:bg-slate-900`}>
+    <aside className={`${mobile ? 'flex' : 'hidden lg:flex'} flex-col h-full border-r border-[#ede9e3] dark:border-slate-800/80 bg-white dark:bg-slate-900`}>
       {/* Brand */}
       <div className="flex items-center gap-2.5 px-4 py-4 border-b border-slate-100 dark:border-slate-800">
         <div className="w-7 h-7 rounded-md bg-slate-900 dark:bg-white flex items-center justify-center text-[10px] font-black text-white dark:text-slate-900 shrink-0 shadow-sm">KL</div>
@@ -290,10 +290,10 @@ export default function StudentPage() {
   );
 
   const divider = 'border-t border-slate-100 dark:border-slate-800';
-  const card = 'bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl transition-all duration-200 hover:shadow-md dark:hover:border-slate-700';
+  const card = 'bg-white dark:bg-slate-900/80 border border-[#ede9e3] dark:border-slate-800 rounded-xl transition-all duration-200 hover:shadow-md dark:hover:border-slate-700';
 
   return (
-    <div className="flex min-h-screen bg-slate-50 dark:bg-[#0a0f1e]">
+    <div className="flex min-h-screen dark:bg-[#0a0f1e]" style={{ background: 'var(--cream, #faf8f5)' }}>
 
       {/* Desktop sidebar */}
       <div className="hidden lg:block w-52 shrink-0 fixed left-0 top-0 bottom-0 z-20">
