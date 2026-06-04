@@ -340,12 +340,25 @@ export default function StudentPage() {
             <div className="flex-1 pb-1">
               <div className="relative h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-1">
                 <div className="h-full rounded-full" style={{ width: `${pct}%`, background: pctColor(pct) }} />
+                {/* threshold tick lines */}
+                {[75, 85].map(t => (
+                  <div key={t} className="absolute top-0 bottom-0 w-px bg-slate-300 dark:bg-slate-600 opacity-60"
+                       style={{ left: `${t}%` }} />
+                ))}
               </div>
-              <div className="flex justify-between text-[9px] text-slate-300 dark:text-slate-700">
-                <span>0%</span>
-                <span className="text-slate-400 dark:text-slate-500">75%</span>
-                <span className="text-slate-400 dark:text-slate-500">85%</span>
-                <span>100%</span>
+              {/* labels at correct positions */}
+              <div className="relative h-4">
+                {[{ v: 0, anchor: 'left' }, { v: 75, anchor: 'center' }, { v: 85, anchor: 'center' }, { v: 100, anchor: 'right' }].map(({ v, anchor }) => (
+                  <span key={v}
+                    className="absolute text-[9px] text-slate-400 dark:text-slate-500 top-0"
+                    style={{
+                      left:      anchor === 'right'  ? undefined  : `${v}%`,
+                      right:     anchor === 'right'  ? '0%'       : undefined,
+                      transform: anchor === 'center' ? 'translateX(-50%)' : undefined,
+                    }}>
+                    {v}%
+                  </span>
+                ))}
               </div>
             </div>
           </div>
