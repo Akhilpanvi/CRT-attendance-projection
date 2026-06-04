@@ -430,19 +430,28 @@ export default function StudentPage() {
                   <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Sessions required to meet or maintain each target</p>
                 </div>
                 <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {[{ label: '75% Minimum', data: b75 }, { label: '85% Target', data: b85 }].map(({ label, data }) => (
-                    <div key={label} className="px-5 py-3 flex items-center justify-between gap-4 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors duration-150">
-                      <div>
-                        <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{label}</p>
-                        <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
-                          {data.canBunk > 0
-                            ? `${data.canBunk} sessions flexible · ≈ ${Math.floor(data.canBunk / 8)} days`
-                            : `Need ${data.needAttend} sessions · ≈ ${Math.ceil(data.needAttend / 48)} week${data.needAttend > 48 ? 's' : ''}`}
+                  {[{ label: '75% Minimum', target: 75, data: b75 }, { label: '85% Target', target: 85, data: b85 }].map(({ label, target, data }) => (
+                    <div key={label} className="px-5 py-4 flex items-center justify-between gap-4 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors duration-150">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">{label}</p>
+                        {data.canBunk > 0 ? (
+                          <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
+                            You can skip <span className="font-semibold text-emerald-600 dark:text-emerald-400">{data.canBunk} sessions</span> (≈ {Math.floor(data.canBunk / 8)} days) before dropping below {target}%
+                          </p>
+                        ) : (
+                          <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
+                            Attend <span className="font-semibold text-red-600 dark:text-red-400">{data.needAttend} consecutive sessions</span> to reach {target}% · ≈ {Math.ceil(data.needAttend / 48)} week{data.needAttend > 48 ? 's' : ''}
+                          </p>
+                        )}
+                      </div>
+                      <div className={`shrink-0 text-right ${data.canBunk > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                        <p className="text-lg font-bold tabular-nums leading-none">
+                          {data.canBunk > 0 ? `+${data.canBunk}` : `${data.needAttend}`}
+                        </p>
+                        <p className="text-[10px] font-medium mt-0.5">
+                          {data.canBunk > 0 ? 'can skip' : 'to attend'}
                         </p>
                       </div>
-                      <span className={`text-sm font-bold tabular-nums shrink-0 ${data.canBunk > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
-                        {data.canBunk > 0 ? `+${data.canBunk}` : `−${data.needAttend}`}
-                      </span>
                     </div>
                   ))}
                 </div>
