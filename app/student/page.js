@@ -251,11 +251,11 @@ export default function StudentPage() {
     <aside className={`${mobile ? 'flex' : 'hidden lg:flex'} flex-col h-full border-r border-[#ede9e3] dark:border-white/[0.06] bg-white dark:bg-[#0d1424]`}>
       {/* Brand */}
       <div className="px-4 py-4 border-b border-slate-100/80 dark:border-white/[0.05]">
-        <div className="bg-white rounded-lg px-2 py-1 inline-flex items-center shadow-sm border border-slate-100 dark:border-white/10 mb-2.5">
-          <img src="/logos/KL_Red-White_Original.png" alt="KL University" className="h-6 w-auto block" />
+        <div className="bg-white rounded-lg px-2 py-1.5 inline-flex items-center shadow-sm border border-slate-100 dark:border-white/10 mb-2.5">
+          <img src="/logos/KL_Red_Original.png" alt="KL University" className="h-7 w-auto block" />
         </div>
-        <p className="text-xs font-bold text-slate-900 dark:text-slate-100 leading-tight tracking-tight">CRT Tracker</p>
-        <p className="text-[10px] text-slate-400 dark:text-slate-500">Y-23 · KL University</p>
+        <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight tracking-tight">CRT Tracker</p>
+        <p className="text-[10px] text-slate-500 dark:text-slate-400">Y-23 · KL University</p>
       </div>
 
       {/* Nav */}
