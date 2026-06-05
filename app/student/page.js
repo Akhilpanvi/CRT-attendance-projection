@@ -187,12 +187,12 @@ export default function StudentPage() {
   async function logout() { await fetch('/api/auth/logout', { method: 'POST' }); router.push('/login'); }
 
   if (loading) return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 flex items-center justify-center">
-      <p className="text-sm text-slate-400">Loading…</p>
+    <div className="min-h-[100dvh] flex items-center justify-center" style={{ background: 'var(--cream)' }}>
+      <p className="text-sm text-slate-500 dark:text-slate-400">Loading…</p>
     </div>
   );
   if (error) return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 flex items-center justify-center p-4">
+    <div className="min-h-[100dvh] flex items-center justify-center p-4" style={{ background: 'var(--cream)' }}>
       <div className="alert-danger max-w-sm">{error}</div>
     </div>
   );
@@ -250,7 +250,7 @@ export default function StudentPage() {
 
       {/* Nav */}
       <nav className="flex-1 py-4 px-2 space-y-0.5">
-        <p className="px-3 pb-2 text-[9px] font-semibold uppercase tracking-widest text-slate-300 dark:text-slate-700">Navigation</p>
+        <p className="px-3 pb-2 text-[9px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-600">Navigation</p>
         {NAV.map(item => {
           const active = activeSection === item.id;
           return (
@@ -293,7 +293,7 @@ export default function StudentPage() {
   const card = 'bg-white dark:bg-slate-900/80 border border-[#ede9e3] dark:border-slate-800 rounded-xl transition-all duration-200 hover:shadow-md dark:hover:border-slate-700';
 
   return (
-    <div className="flex min-h-screen dark:bg-[#0a0f1e]" style={{ background: 'var(--cream, #faf8f5)' }}>
+    <div className="flex min-h-[100dvh] overflow-x-hidden" style={{ background: 'var(--cream)' }}>
 
       {/* Desktop sidebar */}
       <div className="hidden lg:block w-52 shrink-0 fixed left-0 top-0 bottom-0 z-20">
@@ -311,7 +311,7 @@ export default function StudentPage() {
       )}
 
       {/* Main */}
-      <div className="flex-1 lg:ml-52 flex flex-col min-h-screen">
+      <div className="flex-1 lg:ml-52 flex flex-col min-h-[100dvh] overflow-x-hidden">
 
         {/* Mobile top bar */}
         <header className="lg:hidden sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center px-4 gap-3" style={{ height: 48 }}>
@@ -332,11 +332,11 @@ export default function StudentPage() {
 
           {/* ── OVERVIEW ──────────────────────────────────────────────── */}
           <section id="overview" ref={sectionRefs.overview}>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-600 mb-3">Overview</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-500 mb-3">Overview</p>
 
             {/* Profile + attendance card */}
-            <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden"
-                 style={{ background: `linear-gradient(135deg, ${statusColor}18 0%, ${statusColor}06 40%, transparent 65%)` }}>
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden"
+                 style={{ backgroundImage: `linear-gradient(135deg, ${statusColor}18 0%, ${statusColor}06 40%, transparent 65%)` }}>
               {/* Profile row */}
               <div className="px-5 py-4 flex items-center gap-3 border-b border-slate-200/60 dark:border-slate-800">
                 <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold text-slate-600 dark:text-slate-300 shrink-0">
@@ -351,7 +351,7 @@ export default function StudentPage() {
 
               {/* Attendance metric */}
               <div className="px-5 py-5">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">Attendance</p>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-500 mb-3">Attendance</p>
                 <div className="flex items-end gap-5">
                   <p className="text-3xl font-bold tabular-nums leading-none" style={{ color: statusColor }}>{pct}%</p>
                   <div className="flex-1 pb-1 min-w-0">
@@ -382,7 +382,7 @@ export default function StudentPage() {
                   ].map(({ label, value, color }) => (
                     <div key={label} className="text-center">
                       <p className={`text-2xl font-bold tabular-nums ${color}`}>{value}</p>
-                      <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{label}</p>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-500 mt-0.5">{label}</p>
                     </div>
                   ))}
                 </div>
@@ -461,7 +461,7 @@ export default function StudentPage() {
 
           {/* ── WEEKLY ────────────────────────────────────────────────── */}
           <section id="weekly" ref={sectionRefs.weekly}>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-600 mb-3">Weekly Attendance</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-500 mb-3">Weekly Attendance</p>
 
             {stats.weeks && stats.weeks.length > 0 ? (
               <>
@@ -479,7 +479,7 @@ export default function StudentPage() {
                       ].map(({ label, value, color }) => (
                         <div key={label} className={`${card} p-3 text-center`}>
                           <p className="text-xl font-bold tabular-nums" style={{ color }}>{value}</p>
-                          <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{label}</p>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-500 mt-0.5">{label}</p>
                         </div>
                       ))}
                     </div>
@@ -569,7 +569,7 @@ export default function StudentPage() {
 
           {/* ── SESSION PLANNER ───────────────────────────────────────── */}
           <section id="planner" ref={sectionRefs.planner}>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-600 mb-3">Session Planner</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-500 mb-3">Session Planner</p>
             {stats.total > 0 && (
               <div className={card}>
                 <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-2">
@@ -708,7 +708,7 @@ export default function StudentPage() {
 
           {/* ── ATTENDANCE PROGRESSION ────────────────────────────────── */}
           <section id="tracker" ref={sectionRefs.tracker}>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-600 mb-3">Attendance Progression</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-500 mb-3">Attendance Progression</p>
             <div className={card}>
               <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800">
                 <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Self-Tracking</p>
@@ -800,7 +800,7 @@ export default function StudentPage() {
 
           {/* ── ATTENDANCE LOG ────────────────────────────────────────── */}
           <section id="log" ref={sectionRefs.log}>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-600 mb-3">Attendance Log</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-500 mb-3">Attendance Log</p>
             <div className={card}>
               <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-2">
                 <div>

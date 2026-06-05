@@ -5,10 +5,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --cream:      #faf8f5;
-  --cream-card: #ffffff;
+  --cream:        #faf8f5;
+  --cream-card:   #ffffff;
   --cream-border: #ede9e3;
-  --cream-muted: #f5f1eb;
+  --cream-muted:  #f5f1eb;
+}
+.dark {
+  --cream:        #0a0f1e;
+  --cream-card:   #0f172a;
+  --cream-border: #1e293b;
+  --cream-muted:  #0d1424;
 }
 
 * { box-sizing: border-box; }
@@ -191,4 +197,8 @@ thead th { position: sticky; top: 0; z-index: 1; }
 @keyframes countUp {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-in, .animate-in > *, .slide-nav { animation: none !important; opacity: 1 !important; transform: none !important; }
 }

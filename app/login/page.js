@@ -157,7 +157,7 @@ export default function LoginPage() {
     <>
       {showSplash && <Splash onDone={() => { setShowSplash(false); setTimeout(() => setReady(true), 60); }} />}
 
-      <div className={`min-h-screen flex transition-opacity duration-600 ${ready ? 'opacity-100' : 'opacity-0'}`}
+      <div className={`min-h-[100dvh] flex transition-opacity duration-500 ${ready ? 'opacity-100' : 'opacity-0'}`}
            style={{ background: isDark ? 'linear-gradient(135deg,#070c18 0%,#0d1425 55%,#060a14 100%)' : `linear-gradient(135deg,${LBG} 0%,#f0ebe3 50%,${LBG} 100%)` }}>
 
         {/* Animated orbs */}
@@ -288,12 +288,12 @@ export default function LoginPage() {
                   ].map(({ label, type, ph, val, set, delay }) => (
                     <div key={label} className="space-y-1.5" style={{ animation: ready ? `fadeUp 0.5s ease ${delay} both` : 'none' }}>
                       <div className="flex items-center justify-between">
-                        <label className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: isDark ? 'rgba(255,255,255,0.38)' : '#94a3b8' }}>{label}</label>
+                        <label className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: isDark ? 'rgba(255,255,255,0.38)' : '#64748b' }}>{label}</label>
                         {type === 'password' && (
                           <button type="button" onClick={() => { setFpOpen(o => !o); setFpMsg(''); setFpRoll(''); }}
-                            className="text-[11px] transition-colors duration-150" style={{ color: isDark ? 'rgba(255,255,255,0.32)' : '#94a3b8' }}
-                            onMouseEnter={e => e.target.style.color = isDark ? 'rgba(255,255,255,0.7)' : '#475569'}
-                            onMouseLeave={e => e.target.style.color = isDark ? 'rgba(255,255,255,0.32)' : '#94a3b8'}>
+                            className="text-[11px] transition-colors duration-150" style={{ color: isDark ? 'rgba(255,255,255,0.32)' : '#64748b' }}
+                            onMouseEnter={e => e.target.style.color = isDark ? 'rgba(255,255,255,0.7)' : '#334155'}
+                            onMouseLeave={e => e.target.style.color = isDark ? 'rgba(255,255,255,0.32)' : '#64748b'}>
                             Forgot password?
                           </button>
                         )}
