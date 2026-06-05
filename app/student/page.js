@@ -248,9 +248,9 @@ export default function StudentPage() {
 
   // ── Sidebar ────────────────────────────────────────────────────────────────
   const Sidebar = ({ mobile = false }) => (
-    <aside className={`${mobile ? 'flex' : 'hidden lg:flex'} flex-col h-full border-r border-[#ede9e3] dark:border-slate-800/80 bg-white dark:bg-slate-900`}>
+    <aside className={`${mobile ? 'flex' : 'hidden lg:flex'} flex-col h-full border-r border-[#ede9e3] dark:border-white/[0.06] bg-white dark:bg-[#0d1424]`}>
       {/* Brand */}
-      <div className="px-4 py-4 border-b border-slate-100 dark:border-slate-800">
+      <div className="px-4 py-4 border-b border-slate-100/80 dark:border-white/[0.05]">
         <div className="bg-white rounded-lg px-2 py-1 inline-flex items-center shadow-sm border border-slate-100 dark:border-white/10 mb-2.5">
           <img src="/logos/KL_Red-White_Original.png" alt="KL University" className="h-6 w-auto block" />
         </div>
@@ -278,7 +278,7 @@ export default function StudentPage() {
       </nav>
 
       {/* User footer */}
-      <div className="px-3 py-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+      <div className="px-3 py-3 border-t border-slate-100/80 dark:border-white/[0.05] space-y-2">
         <div className="flex items-start gap-2 px-2 py-1.5">
           <div className="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-600 dark:text-slate-300 shrink-0 mt-0.5">
             {s.name.split(' ').map(w => w[0]).join('').slice(0, 2)}
@@ -299,8 +299,8 @@ export default function StudentPage() {
     </aside>
   );
 
-  const divider = 'border-t border-slate-100 dark:border-slate-800';
-  const card = 'bg-white dark:bg-slate-900/80 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.07),0_8px_24px_rgba(0,0,0,0.05)] dark:shadow-none dark:border dark:border-slate-800 transition-all duration-200';
+  const divider = 'border-t border-slate-100/80 dark:border-white/[0.05]';
+  const card = 'bg-white dark:bg-white/[0.04] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_20px_rgba(0,0,0,0.04)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.06)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.07),0_8px_24px_rgba(0,0,0,0.05)] transition-all duration-200';
 
   return (
     <div className="flex min-h-[100dvh] overflow-x-hidden" style={{ background: 'var(--cream)' }}>
@@ -360,10 +360,10 @@ export default function StudentPage() {
 
           {/* ── OVERVIEW ──────────────────────────────────────────────── */}
           <section id="overview" ref={sectionRefs.overview}>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-500 mb-3">Overview</p>
+            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Overview</p>
 
             {/* Profile + attendance card */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_20px_rgba(0,0,0,0.04)] dark:shadow-none dark:border dark:border-slate-800"
+            <div className="bg-white dark:bg-white/[0.04] rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_20px_rgba(0,0,0,0.04)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_4px_20px_rgba(0,0,0,0.3)]"
                  style={{ backgroundImage: `linear-gradient(135deg, ${statusColor}16 0%, ${statusColor}05 50%, transparent 72%)` }}>
               {/* Profile row */}
               <div className="px-6 py-5 flex items-center gap-3.5">
@@ -403,7 +403,7 @@ export default function StudentPage() {
                 </div>
 
                 {/* Stats row */}
-                <div className="grid grid-cols-3 gap-3 mt-5 pt-4 border-t border-slate-100 dark:border-slate-800/60">
+                <div className="grid grid-cols-3 gap-3 mt-5 pt-4 border-t border-slate-100/80 dark:border-white/[0.05]/60">
                   {[
                     { label: 'Total Sessions', value: stats.total,   color: 'text-slate-800 dark:text-slate-200' },
                     { label: 'Present',        value: stats.present, color: 'text-emerald-700 dark:text-emerald-400' },
@@ -422,14 +422,14 @@ export default function StudentPage() {
             {/* Notices — top of overview */}
             {updates.length > 0 && (
               <div className={`${card} mt-3 transition-shadow duration-200 hover:shadow-sm`}>
-                <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <div className="px-5 py-3 border-b border-slate-100/80 dark:border-white/[0.05] flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
                     <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Notices</p>
                   </div>
                   <span className="text-xs text-slate-400">{updates.length} item{updates.length !== 1 ? 's' : ''}</span>
                 </div>
-                <div className="divide-y divide-slate-100 dark:divide-slate-800 max-h-64 overflow-y-auto">
+                <div className="divide-y divide-slate-100/80 dark:divide-white/[0.05] max-h-64 overflow-y-auto">
                   {updates.map(u => (
                     <div key={u._id} className="px-5 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors duration-150">
                       <div className="flex items-center gap-2 mb-1">
@@ -454,11 +454,11 @@ export default function StudentPage() {
             {/* Threshold summary */}
             {stats.total > 0 && (
               <div className={`${card} mt-3 transition-shadow duration-200 hover:shadow-sm`}>
-                <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800">
+                <div className="px-5 py-3 border-b border-slate-100/80 dark:border-white/[0.05]">
                   <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Threshold Summary</p>
                   <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Sessions required to meet or maintain each target</p>
                 </div>
-                <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                <div className="divide-y divide-slate-100/80 dark:divide-white/[0.05]">
                   {[{ label: '75% Minimum', target: 75, data: b75 }, { label: '85% Target', target: 85, data: b85 }].map(({ label, target, data }) => (
                     <div key={label} className="px-5 py-4 flex items-center justify-between gap-4 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors duration-150">
                       <div className="flex-1 min-w-0">
@@ -490,7 +490,7 @@ export default function StudentPage() {
 
           {/* ── WEEKLY ────────────────────────────────────────────────── */}
           <section id="weekly" ref={sectionRefs.weekly}>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-500 mb-3">Weekly Attendance</p>
+            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Weekly Attendance</p>
 
             {stats.weeks && stats.weeks.length > 0 ? (
               <>
@@ -518,11 +518,11 @@ export default function StudentPage() {
                 })()}
 
                 <div className={card}>
-                  <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800">
+                  <div className="px-5 py-3 border-b border-slate-100/80 dark:border-white/[0.05]">
                     <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Week-by-Week Breakdown</p>
                     <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Official attendance · Projected with your self-tracked sessions</p>
                   </div>
-                  <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                  <div className="divide-y divide-slate-100/80 dark:divide-white/[0.05]">
                     {[...stats.weeks].sort((a, b) => b.year - a.year || b.week - a.week).map(w => {
                       const seq   = weekSeq[`${w.year}-${w.week}`];
                       const range = isoWeekDateRange(w.year, w.week);
@@ -600,10 +600,10 @@ export default function StudentPage() {
 
           {/* ── SESSION PLANNER ───────────────────────────────────────── */}
           <section id="planner" ref={sectionRefs.planner}>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-500 mb-3">Session Planner</p>
+            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Session Planner</p>
             {stats.total > 0 && (
               <div className={card}>
-                <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-2">
+                <div className="px-5 py-3 border-b border-slate-100/80 dark:border-white/[0.05] flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Bunk Calculator</p>
                     <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{plannerView === 'total' ? '75% / 85% threshold analysis' : 'Week-by-week view'}</p>
@@ -622,7 +622,7 @@ export default function StudentPage() {
                   <div className="p-5 space-y-4">
                     <div className="grid grid-cols-2 gap-3">
                       {[{ label: '75% Minimum', data: b75 }, { label: '85% Target', data: b85 }].map(({ label, data }) => (
-                        <div key={label} className="border border-slate-100 dark:border-slate-800 rounded-lg p-4">
+                        <div key={label} className="border border-slate-100/80 dark:border-white/[0.05] rounded-lg p-4">
                           <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-2">{label}</p>
                           {data.canBunk > 0 ? (
                             <><p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">{data.canBunk}</p>
@@ -640,7 +640,7 @@ export default function StudentPage() {
                       const pb75 = calcBunk(liveProjPresent, liveProjTotal, 75);
                       const pb85 = calcBunk(liveProjPresent, liveProjTotal, 85);
                       return (
-                        <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
+                        <div className="pt-4 border-t border-slate-100/80 dark:border-white/[0.05]">
                           <p className="text-[10px] font-semibold uppercase tracking-wider text-indigo-500 dark:text-indigo-400 mb-3">
                             Projected · {liveProjPresent}/{liveProjTotal} sessions · {liveProjPct}%
                           </p>
@@ -661,7 +661,7 @@ export default function StudentPage() {
                         </div>
                       );
                     })()}
-                    <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <div className="pt-4 border-t border-slate-100/80 dark:border-white/[0.05]">
                       <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Recommendations</p>
                       <div className="space-y-2">
                         {advice.map((line, i) => (
@@ -674,7 +674,7 @@ export default function StudentPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                  <div className="divide-y divide-slate-100/80 dark:divide-white/[0.05]">
                     {[...stats.weeks].sort((a, b) => b.year - a.year || b.week - a.week).map(w => {
                       const seq   = weekSeq[`${w.year}-${w.week}`];
                       const range = isoWeekDateRange(w.year, w.week);
@@ -739,9 +739,9 @@ export default function StudentPage() {
 
           {/* ── ATTENDANCE PROGRESSION ────────────────────────────────── */}
           <section id="tracker" ref={sectionRefs.tracker}>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-500 mb-3">Attendance Progression</p>
+            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Attendance Progression</p>
             <div className={card}>
-              <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="px-5 py-3 border-b border-slate-100/80 dark:border-white/[0.05]">
                 <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Self-Tracking</p>
                 <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Mark your sessions to calculate projected percentage in the Weekly section.</p>
               </div>
@@ -751,9 +751,9 @@ export default function StudentPage() {
                   const ea = Object.values(entry.slots).filter(v => v === 'absent').length;
                   if (entry.saved && !entry.expanded) {
                     return (
-                      <div key={entry.id} className={idx > 0 ? 'pt-4 border-t border-slate-100 dark:border-slate-800' : ''}>
+                      <div key={entry.id} className={idx > 0 ? 'pt-4 border-t border-slate-100/80 dark:border-white/[0.05]' : ''}>
                         <button onClick={() => toggleExpanded(entry.id)}
-                          className="w-full flex items-center gap-3 text-left px-3 py-2.5 rounded-lg border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                          className="w-full flex items-center gap-3 text-left px-3 py-2.5 rounded-lg border border-slate-100/80 dark:border-white/[0.06] hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-colors">
                           <div className="flex-1">
                             <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{fmtDate(entry.date)}</p>
                             <p className="text-xs text-slate-400 mt-0.5">{ep} present · {ea} absent</p>
@@ -765,7 +765,7 @@ export default function StudentPage() {
                     );
                   }
                   return (
-                    <div key={entry.id} className={`space-y-3 ${idx > 0 ? 'pt-4 border-t border-slate-100 dark:border-slate-800' : ''}`}>
+                    <div key={entry.id} className={`space-y-3 ${idx > 0 ? 'pt-4 border-t border-slate-100/80 dark:border-white/[0.05]' : ''}`}>
                       <div className="flex items-center gap-3">
                         {entry.saved ? (
                           <>
@@ -810,14 +810,14 @@ export default function StudentPage() {
                     </div>
                   );
                 })}
-                <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                <div className="pt-2 border-t border-slate-100/80 dark:border-white/[0.05]">
                   <button onClick={addEntry} className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors">
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
                     Add another date
                   </button>
                 </div>
                 {liveHasData && (
-                  <div className="flex items-center justify-between px-4 py-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                  <div className="flex items-center justify-between px-4 py-3 rounded-lg bg-slate-50 dark:bg-white/[0.04] border border-slate-100/80 dark:border-white/[0.05]">
                     <div>
                       <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">Projected Attendance</p>
                       <p className="text-[11px] text-slate-400 mt-0.5">{liveProjPresent}/{liveProjTotal} sessions</p>
@@ -831,9 +831,9 @@ export default function StudentPage() {
 
           {/* ── ATTENDANCE LOG ────────────────────────────────────────── */}
           <section id="log" ref={sectionRefs.log}>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-500 mb-3">Attendance Log</p>
+            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Attendance Log</p>
             <div className={card}>
-              <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-2">
+              <div className="px-5 py-3 border-b border-slate-100/80 dark:border-white/[0.05] flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Session Records</p>
                   <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{dates.length} official · {selfOnlyDates.length} self-tracked</p>
@@ -848,7 +848,7 @@ export default function StudentPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="border-b border-slate-100 dark:border-slate-800">
+                      <tr className="border-b border-slate-100/80 dark:border-white/[0.05]">
                         <th className="tbl-header">Date</th>
                         {allSlots.map(sl => <th key={sl} className="tbl-header">{sl}</th>)}
                         <th className="tbl-header text-center">P / T</th>
