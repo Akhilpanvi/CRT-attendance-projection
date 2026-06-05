@@ -98,6 +98,16 @@ export default function StudentPage() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { const t = setTimeout(() => setMounted(true), 80); return () => clearTimeout(t); }, []);
 
+  const [isDark, setIsDark] = useState(false);
+  useEffect(() => {
+    const root = document.documentElement;
+    const sync = () => setIsDark(root.classList.contains('dark'));
+    sync();
+    const obs = new MutationObserver(sync);
+    obs.observe(root, { attributes: true, attributeFilter: ['class'] });
+    return () => obs.disconnect();
+  }, []);
+
   const [selfByDate,     setSelfByDate]     = useState({});
   const [trackerEntries, setTrackerEntries] = useState([
     { id: 1, date: today, slots: {}, saving: false, saved: false, expanded: true },
@@ -241,7 +251,10 @@ export default function StudentPage() {
     <aside className={`${mobile ? 'flex' : 'hidden lg:flex'} flex-col h-full border-r border-[#ede9e3] dark:border-slate-800/80 bg-white dark:bg-slate-900`}>
       {/* Brand */}
       <div className="flex items-center gap-2.5 px-4 py-4 border-b border-slate-100 dark:border-slate-800">
-        <div className="w-7 h-7 rounded-md bg-slate-900 dark:bg-white flex items-center justify-center text-[10px] font-black text-white dark:text-slate-900 shrink-0 shadow-sm">KL</div>
+        <div className="w-7 h-7 rounded-md bg-white shrink-0 shadow-sm overflow-hidden border border-slate-100 dark:border-slate-700">
+          <img src="/logos/KL_White.png" alt="KL" className="w-full h-full object-cover object-left"
+               style={{ mixBlendMode: isDark ? 'normal' : 'multiply' }} />
+        </div>
         <div className="min-w-0">
           <p className="text-xs font-bold text-slate-900 dark:text-slate-100 leading-tight tracking-tight">CRT Tracker</p>
           <p className="text-[10px] text-slate-400 dark:text-slate-500">Y-23 · KL University</p>
@@ -290,13 +303,31 @@ export default function StudentPage() {
   );
 
   const divider = 'border-t border-slate-100 dark:border-slate-800';
-  const card = 'bg-white dark:bg-slate-900/80 border border-[#ede9e3] dark:border-slate-800 rounded-xl transition-all duration-200 hover:shadow-md dark:hover:border-slate-700';
+  const card = 'bg-white dark:bg-slate-900/80 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.07),0_8px_24px_rgba(0,0,0,0.05)] dark:shadow-none dark:border dark:border-slate-800 transition-all duration-200';
 
   return (
     <div className="flex min-h-[100dvh] overflow-x-hidden" style={{ background: 'var(--cream)' }}>
 
+      {/* Ambient background decoration */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
+        <div className="absolute rounded-full" style={{
+          width: 700, height: 700,
+          background: isDark
+            ? 'radial-gradient(circle, rgba(59,130,246,0.07) 0%, transparent 70%)'
+            : 'radial-gradient(circle, rgba(200,160,80,0.07) 0%, transparent 70%)',
+          top: '-15%', right: '-5%', filter: 'blur(80px)',
+        }} />
+        <div className="absolute rounded-full" style={{
+          width: 500, height: 500,
+          background: isDark
+            ? 'radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 70%)'
+            : 'radial-gradient(circle, rgba(180,130,60,0.05) 0%, transparent 70%)',
+          bottom: '15%', left: '-8%', filter: 'blur(80px)',
+        }} />
+      </div>
+
       {/* Desktop sidebar */}
-      <div className="hidden lg:block w-52 shrink-0 fixed left-0 top-0 bottom-0 z-20">
+      <div className="hidden lg:block w-52 shrink-0 fixed left-0 top-0 bottom-0 z-20 relative">
         <Sidebar />
       </div>
 
@@ -311,7 +342,7 @@ export default function StudentPage() {
       )}
 
       {/* Main */}
-      <div className="flex-1 lg:ml-52 flex flex-col min-h-[100dvh] overflow-x-hidden">
+      <div className="flex-1 lg:ml-52 flex flex-col min-h-[100dvh] overflow-x-hidden relative z-[1]">
 
         {/* Mobile top bar */}
         <header className="lg:hidden sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center px-4 gap-3" style={{ height: 48 }}>
@@ -328,18 +359,19 @@ export default function StudentPage() {
         </header>
 
         {/* Scrollable content */}
-        <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-6 space-y-8 pb-16 animate-in">
+        <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-6 space-y-8 pb-16 animate-in">
 
           {/* ── OVERVIEW ──────────────────────────────────────────────── */}
           <section id="overview" ref={sectionRefs.overview}>
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-500 mb-3">Overview</p>
 
             {/* Profile + attendance card */}
-            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden"
-                 style={{ backgroundImage: `linear-gradient(135deg, ${statusColor}18 0%, ${statusColor}06 40%, transparent 65%)` }}>
+            <div className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_20px_rgba(0,0,0,0.04)] dark:shadow-none dark:border dark:border-slate-800"
+                 style={{ backgroundImage: `linear-gradient(135deg, ${statusColor}16 0%, ${statusColor}05 50%, transparent 72%)` }}>
               {/* Profile row */}
-              <div className="px-5 py-4 flex items-center gap-3 border-b border-slate-200/60 dark:border-slate-800">
-                <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold text-slate-600 dark:text-slate-300 shrink-0">
+              <div className="px-6 py-5 flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center text-sm font-bold shrink-0"
+                     style={{ background: statusColor + '22', color: statusColor }}>
                   {s.name.split(' ').map(w => w[0]).join('').slice(0, 2)}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -350,7 +382,7 @@ export default function StudentPage() {
               </div>
 
               {/* Attendance metric */}
-              <div className="px-5 py-5">
+              <div className="px-6 pb-6 pt-0">
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-500 mb-3">Attendance</p>
                 <div className="flex items-end gap-5">
                   <p className="text-3xl font-bold tabular-nums leading-none" style={{ color: statusColor }}>{pct}%</p>
@@ -374,7 +406,7 @@ export default function StudentPage() {
                 </div>
 
                 {/* Stats row */}
-                <div className="grid grid-cols-3 gap-3 mt-5 pt-4 border-t border-slate-200/60 dark:border-slate-800">
+                <div className="grid grid-cols-3 gap-3 mt-5 pt-4 border-t border-slate-100 dark:border-slate-800/60">
                   {[
                     { label: 'Total Sessions', value: stats.total,   color: 'text-slate-800 dark:text-slate-200' },
                     { label: 'Present',        value: stats.present, color: 'text-emerald-700 dark:text-emerald-400' },
@@ -471,17 +503,19 @@ export default function StudentPage() {
                   const safe = ws.filter(w => w.pct >= 75).length;
                   const avg  = ws.length ? Math.round(ws.reduce((s, w) => s + w.pct, 0) / ws.length) : 0;
                   return (
-                    <div className="grid grid-cols-3 gap-3 mb-3">
-                      {[
-                        { label: 'Avg / Week', value: avg + '%', color: pctColor(avg) },
-                        { label: 'Safe Weeks', value: safe,      color: '#059669'     },
-                        { label: 'Low Weeks',  value: ws.length - safe, color: ws.length - safe > 0 ? '#dc2626' : '#059669' },
-                      ].map(({ label, value, color }) => (
-                        <div key={label} className={`${card} p-3 text-center`}>
-                          <p className="text-xl font-bold tabular-nums" style={{ color }}>{value}</p>
-                          <p className="text-[10px] text-slate-500 dark:text-slate-500 mt-0.5">{label}</p>
-                        </div>
-                      ))}
+                    <div className={`${card} mb-3 overflow-hidden`}>
+                      <div className="grid grid-cols-3 divide-x divide-slate-100 dark:divide-slate-800">
+                        {[
+                          { label: 'Avg / Week', value: avg + '%', color: pctColor(avg) },
+                          { label: 'Safe Weeks', value: safe,      color: '#059669'     },
+                          { label: 'Low Weeks',  value: ws.length - safe, color: ws.length - safe > 0 ? '#dc2626' : '#059669' },
+                        ].map(({ label, value, color }) => (
+                          <div key={label} className="py-4 text-center">
+                            <p className="text-xl font-bold tabular-nums" style={{ color }}>{value}</p>
+                            <p className="text-[10px] text-slate-500 dark:text-slate-500 mt-0.5">{label}</p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   );
                 })()}
