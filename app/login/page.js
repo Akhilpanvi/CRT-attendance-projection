@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import ThemeToggle from '@/components/ThemeToggle';
 
 function fmtDate(d) {
@@ -48,9 +49,10 @@ function Splash({ onDone }) {
 
       {/* KL logo */}
       <div className="relative mb-6 inline-block">
-        <img src={dark ? '/logos/KL_White.png' : '/logos/KL_Red_Original.png'} alt="KL University"
-             className="h-20 w-auto block relative z-10"
-             style={{ animation: 'splashPop 0.7s cubic-bezier(0.16,1,0.3,1) both', ...(dark ? {} : { mixBlendMode: 'multiply' }) }} />
+        <Image src={dark ? '/logos/KL_White.png' : '/logos/KL_Red_Original.png'} alt="KL University"
+               width={600} height={246} priority
+               className="h-20 w-auto block relative z-10"
+               style={{ animation: 'splashPop 0.7s cubic-bezier(0.16,1,0.3,1) both', ...(dark ? {} : { mixBlendMode: 'multiply' }) }} />
         <div className="absolute inset-0" style={{ border: `2px solid ${dark ? 'rgba(255,255,255,0.3)' : 'rgba(30,41,59,0.2)'}`, animation: 'ringPulse 1.5s ease-out 0.5s infinite' }} />
         <div className="absolute inset-0" style={{ border: `1px solid ${dark ? 'rgba(255,255,255,0.15)' : 'rgba(30,41,59,0.1)'}`, animation: 'ringPulse2 2s ease-out 0.8s infinite' }} />
       </div>
@@ -186,9 +188,10 @@ export default function LoginPage() {
           <div style={{ animation: ready ? 'fadeUp 0.65s cubic-bezier(0.16,1,0.3,1) 80ms both' : 'none' }}>
             <div className="inline-flex items-center mb-10"
                  style={{ animation: ready ? 'scaleIn 0.6s cubic-bezier(0.16,1,0.3,1) both' : 'none' }}>
-              <img src={isDark ? '/logos/KL_White.png' : '/logos/KL_Red_Original.png'} alt="KL University"
-                   className="h-14 w-auto block"
-                   style={isDark ? {} : { mixBlendMode: 'multiply' }} />
+              <Image src={isDark ? '/logos/KL_White.png' : '/logos/KL_Red_Original.png'} alt="KL University"
+                     width={600} height={246} priority
+                     className="h-14 w-auto block"
+                     style={isDark ? {} : { mixBlendMode: 'multiply' }} />
             </div>
             <h1 className="text-[2.1rem] font-extrabold leading-tight tracking-tight mb-3">
               <span style={{ color: isDark ? '#ffffff' : '#0f172a' }}>CRT Attendance</span><br />
@@ -244,9 +247,10 @@ export default function LoginPage() {
 
               {/* Mobile logo */}
               <div className="flex items-center gap-2.5 mb-8 lg:hidden">
-                <img src={isDark ? '/logos/KL_White.png' : '/logos/KL_Red_Original.png'} alt="KL"
-                     className="h-9 w-auto block"
-                     style={isDark ? {} : { mixBlendMode: 'multiply' }} />
+                <Image src={isDark ? '/logos/KL_White.png' : '/logos/KL_Red_Original.png'} alt="KL"
+                       width={600} height={246} priority
+                       className="h-9 w-auto block"
+                       style={isDark ? {} : { mixBlendMode: 'multiply' }} />
                 <span className="text-sm font-bold" style={{ color: isDark ? '#ffffff' : '#0f172a' }}>CRT Attendance Tracker</span>
               </div>
 

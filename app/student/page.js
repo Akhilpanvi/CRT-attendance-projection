@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { fmtDate, pctColor, TIME_SLOTS } from '@/lib/helpers';
 import ThemeToggle from '@/components/ThemeToggle';
 
@@ -203,8 +204,9 @@ export default function StudentPage() {
         <div className="absolute rounded-full" style={{ width: 500, height: 500, background: isDark ? 'radial-gradient(circle,rgba(99,102,241,0.05) 0%,transparent 70%)' : 'radial-gradient(circle,rgba(180,130,60,0.05) 0%,transparent 70%)', bottom: '15%', left: '-8%', filter: 'blur(80px)' }} />
       </div>
       <div className="flex flex-col items-center gap-5 relative z-10" style={{ animation: 'fadeUp 0.5s ease both' }}>
-        <img src={isDark ? '/logos/KL_White.png' : '/logos/KL_Red_Original.png'} alt="KL University"
-             className="h-16 w-auto block" style={isDark ? {} : { mixBlendMode: 'multiply' }} />
+        <Image src={isDark ? '/logos/KL_White.png' : '/logos/KL_Red_Original.png'} alt="KL University"
+               width={600} height={246} priority
+               className="h-16 w-auto block" style={isDark ? {} : { mixBlendMode: 'multiply' }} />
         <div className="w-8 h-8 rounded-full animate-spin"
              style={{ border: `2px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}`, borderTopColor: isDark ? 'rgba(255,255,255,0.55)' : '#dc2626' }} />
         <p className="text-xs font-medium tracking-wide" style={{ color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(15,23,42,0.4)' }}>
@@ -263,9 +265,10 @@ export default function StudentPage() {
     <aside className={`${mobile ? 'flex' : 'hidden lg:flex'} flex-col h-full border-r border-[#ede9e3] dark:border-white/[0.06] bg-white dark:bg-[#0d1424]`}>
       {/* Brand */}
       <div className="px-4 py-4 border-b border-slate-100/80 dark:border-white/[0.05]">
-        <img src={isDark ? '/logos/KL_White.png' : '/logos/KL_Red_Original.png'} alt="KL University"
-             className="h-10 w-auto block mb-2.5"
-             style={isDark ? {} : { mixBlendMode: 'multiply' }} />
+        <Image src={isDark ? '/logos/KL_White.png' : '/logos/KL_Red_Original.png'} alt="KL University"
+               width={600} height={246} priority
+               className="h-10 w-auto block mb-2.5"
+               style={isDark ? {} : { mixBlendMode: 'multiply' }} />
         <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight tracking-tight">CRT Tracker</p>
         <p className="text-[10px] text-slate-500 dark:text-slate-400">Y-23 · KL University</p>
       </div>
