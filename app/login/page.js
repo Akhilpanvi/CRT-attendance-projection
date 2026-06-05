@@ -48,10 +48,9 @@ function Splash({ onDone }) {
 
       {/* KL logo */}
       <div className="relative mb-6">
-        <div className="w-20 h-20 rounded-2xl bg-white overflow-hidden shadow-2xl"
-             style={{ animation: 'splashPop 0.7s cubic-bezier(0.16,1,0.3,1) both' }}>
-          <img src="/logos/KL_White.png" alt="KL University" className="w-full h-full object-cover object-left"
-               style={{ mixBlendMode: dark ? 'normal' : 'multiply' }} />
+        <div className="bg-white rounded-2xl px-4 py-3 shadow-2xl flex items-center justify-center"
+             style={{ animation: 'splashPop 0.7s cubic-bezier(0.16,1,0.3,1) both', minWidth: 120 }}>
+          <img src="/logos/KL_Red-White_Original.png" alt="KL University" className="h-14 w-auto block" />
         </div>
         {/* Double ring pulse */}
         <div className="absolute inset-0 rounded-2xl" style={{ border: `2px solid ${dark ? 'rgba(255,255,255,0.3)' : 'rgba(30,41,59,0.2)'}`, animation: 'ringPulse 1.5s ease-out 0.5s infinite' }} />
@@ -187,10 +186,9 @@ export default function LoginPage() {
              style={isDark ? { borderRight: '1px solid rgba(255,255,255,0.06)' } : { borderRight: `1px solid ${LBorder}` }}>
 
           <div style={{ animation: ready ? 'fadeUp 0.65s cubic-bezier(0.16,1,0.3,1) 80ms both' : 'none' }}>
-            <div className="w-11 h-11 rounded-xl bg-white overflow-hidden mb-10"
+            <div className="bg-white rounded-xl px-3 py-2 inline-flex items-center mb-10"
                  style={{ boxShadow: isDark ? '0 4px 24px rgba(255,255,255,0.12)' : '0 4px 20px rgba(15,23,42,0.2)', animation: ready ? 'scaleIn 0.6s cubic-bezier(0.16,1,0.3,1) both' : 'none' }}>
-              <img src="/logos/KL_White.png" alt="KL University" className="w-full h-full object-cover object-left"
-                   style={{ mixBlendMode: isDark ? 'normal' : 'multiply' }} />
+              <img src="/logos/KL_Red-White_Original.png" alt="KL University" className="h-9 w-auto block" />
             </div>
             <h1 className="text-[2.1rem] font-extrabold leading-tight tracking-tight mb-3">
               <span style={{ color: isDark ? '#ffffff' : '#0f172a' }}>CRT Attendance</span><br />
@@ -246,9 +244,8 @@ export default function LoginPage() {
 
               {/* Mobile logo */}
               <div className="flex items-center gap-2.5 mb-8 lg:hidden">
-                <div className="w-8 h-8 rounded-xl bg-white overflow-hidden shadow-sm">
-                  <img src="/logos/KL_White.png" alt="KL" className="w-full h-full object-cover object-left"
-                       style={{ mixBlendMode: isDark ? 'normal' : 'multiply' }} />
+                <div className="bg-white rounded-lg px-1.5 py-1 inline-flex items-center shadow-sm">
+                  <img src="/logos/KL_Red-White_Original.png" alt="KL" className="h-6 w-auto block" />
                 </div>
                 <span className="text-sm font-bold" style={{ color: isDark ? '#ffffff' : '#0f172a' }}>CRT Attendance Tracker</span>
               </div>

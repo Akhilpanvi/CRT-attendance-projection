@@ -250,15 +250,12 @@ export default function StudentPage() {
   const Sidebar = ({ mobile = false }) => (
     <aside className={`${mobile ? 'flex' : 'hidden lg:flex'} flex-col h-full border-r border-[#ede9e3] dark:border-slate-800/80 bg-white dark:bg-slate-900`}>
       {/* Brand */}
-      <div className="flex items-center gap-2.5 px-4 py-4 border-b border-slate-100 dark:border-slate-800">
-        <div className="w-7 h-7 rounded-md bg-white shrink-0 shadow-sm overflow-hidden border border-slate-100 dark:border-slate-700">
-          <img src="/logos/KL_White.png" alt="KL" className="w-full h-full object-cover object-left"
-               style={{ mixBlendMode: isDark ? 'normal' : 'multiply' }} />
+      <div className="px-4 py-4 border-b border-slate-100 dark:border-slate-800">
+        <div className="bg-white rounded-lg px-2 py-1 inline-flex items-center shadow-sm border border-slate-100 dark:border-white/10 mb-2.5">
+          <img src="/logos/KL_Red-White_Original.png" alt="KL University" className="h-6 w-auto block" />
         </div>
-        <div className="min-w-0">
-          <p className="text-xs font-bold text-slate-900 dark:text-slate-100 leading-tight tracking-tight">CRT Tracker</p>
-          <p className="text-[10px] text-slate-400 dark:text-slate-500">Y-23 · KL University</p>
-        </div>
+        <p className="text-xs font-bold text-slate-900 dark:text-slate-100 leading-tight tracking-tight">CRT Tracker</p>
+        <p className="text-[10px] text-slate-400 dark:text-slate-500">Y-23 · KL University</p>
       </div>
 
       {/* Nav */}
@@ -327,7 +324,7 @@ export default function StudentPage() {
       </div>
 
       {/* Desktop sidebar */}
-      <div className="hidden lg:block w-52 shrink-0 fixed left-0 top-0 bottom-0 z-20 relative">
+      <div className="hidden lg:block w-52 shrink-0 fixed left-0 top-0 bottom-0 z-20">
         <Sidebar />
       </div>
 
