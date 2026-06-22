@@ -34,7 +34,7 @@ function Splash({ onDone }) {
 
   return (
     <div className={`fixed inset-0 z-50 flex flex-col items-center justify-center transition-all duration-500 ${out ? 'opacity-0 scale-105 pointer-events-none' : 'opacity-100 scale-100'}`}
-         style={{ background: dark ? 'linear-gradient(135deg,#070c18 0%,#0d1425 60%,#060a15 100%)' : 'linear-gradient(135deg,#faf8f5 0%,#f0ebe3 60%,#faf8f5 100%)' }}>
+         style={{ background: dark ? '#000000' : 'linear-gradient(135deg,#faf8f5 0%,#f0ebe3 60%,#faf8f5 100%)' }}>
 
       {/* Orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -158,7 +158,7 @@ export default function LoginPage() {
       {showSplash && <Splash onDone={() => { setShowSplash(false); setTimeout(() => setReady(true), 60); }} />}
 
       <div className={`min-h-[100dvh] flex transition-opacity duration-500 ${ready ? 'opacity-100' : 'opacity-0'}`}
-           style={{ background: isDark ? 'linear-gradient(135deg,#070c18 0%,#0d1425 55%,#060a14 100%)' : `linear-gradient(135deg,${LBG} 0%,#f0ebe3 50%,${LBG} 100%)` }}>
+           style={{ background: isDark ? '#000000' : `linear-gradient(135deg,${LBG} 0%,#f0ebe3 50%,${LBG} 100%)` }}>
 
         {/* Animated orbs */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden">
