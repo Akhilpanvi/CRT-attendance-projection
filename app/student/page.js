@@ -262,7 +262,7 @@ export default function StudentPage() {
 
   // ── Sidebar ────────────────────────────────────────────────────────────────
   const Sidebar = ({ mobile = false }) => (
-    <aside className={`${mobile ? 'flex' : 'hidden lg:flex'} flex-col h-full border-r border-[#ede9e3] dark:border-white/[0.06] bg-white dark:bg-[#0d1424]`}>
+    <aside className={`${mobile ? 'flex' : 'hidden lg:flex'} flex-col h-full border-r border-[#ede9e3] dark:border-white/[0.06] bg-white dark:bg-black`}>
       {/* Brand */}
       <div className="px-4 py-4 border-b border-slate-100/80 dark:border-white/[0.05]">
         <img src={isDark ? LOGO_WHITE : LOGO_RED} alt="KL University"
@@ -356,7 +356,7 @@ export default function StudentPage() {
       <div className="flex-1 lg:ml-52 flex flex-col min-h-[100dvh] overflow-x-hidden relative z-[1]">
 
         {/* Mobile top bar */}
-        <header className="lg:hidden sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center px-4 gap-3" style={{ height: 48 }}>
+        <header className="lg:hidden sticky top-0 z-20 bg-white dark:bg-black border-b border-slate-200 dark:border-white/[0.08] flex items-center px-4 gap-3" style={{ height: 48 }}>
           <button onClick={() => setSidebarOpen(true)}
             className="p-1.5 rounded text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

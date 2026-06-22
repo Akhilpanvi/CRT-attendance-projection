@@ -71,21 +71,21 @@
 
 .dark {
   /* Legacy */
-  --cream:        #0a0f1e;
-  --cream-card:   #0f172a;
-  --cream-border: #1e293b;
-  --cream-muted:  #0d1424;
+  --cream:        #000000;
+  --cream-card:   #0b0b0b;
+  --cream-border: #1a1a1a;
+  --cream-muted:  #050505;
 
-  /* Surfaces */
-  --bg:            #07090f;
-  --bg-elevated:   #0c1018;
-  --surface:       #0e1320;
-  --surface-2:     #121829;
-  --surface-hover: #161d30;
+  /* Surfaces — true pitch black (OLED), neutral greys for elevation */
+  --bg:            #000000;
+  --bg-elevated:   #0a0a0a;
+  --surface:       #0c0c0c;
+  --surface-2:     #131313;
+  --surface-hover: #1a1a1a;
 
   /* Lines */
-  --border:        rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.14);
+  --border:        rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.16);
 
   /* Text */
   --fg:            #f3f5f9;

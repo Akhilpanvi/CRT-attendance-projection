@@ -19,7 +19,7 @@ export default function RootLayout({ children }) {
           } catch(e) {}
         ` }} />
       </head>
-      <body className="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+      <body className="bg-bg text-fg">
         {children}
         <SpeedInsights />
       </body>
