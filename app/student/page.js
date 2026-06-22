@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { LOGO_RED, LOGO_WHITE } from '@/lib/logos';
 import { fmtDate, pctColor, TIME_SLOTS } from '@/lib/helpers';
 import ThemeToggle from '@/components/ThemeToggle';
+import { FadeIn, Stagger, Item, ProgressRing, StatCard, AnimatedNumber } from '@/components/ui';
 
 function calcBunk(present, total, threshold = 75) {
   if (!total) return { canBunk: 0, needAttend: 0 };
@@ -375,9 +376,9 @@ export default function StudentPage() {
           <section id="overview" ref={sectionRefs.overview}>
             <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Overview</p>
 
-            {/* Profile + attendance card */}
-            <div className="bg-white dark:bg-white/[0.04] rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_20px_rgba(0,0,0,0.04)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_4px_20px_rgba(0,0,0,0.3)]"
-                 style={{ backgroundImage: `linear-gradient(135deg, ${statusColor}16 0%, ${statusColor}05 50%, transparent 72%)` }}>
+            {/* Profile + attendance hero card */}
+            <FadeIn className="rounded-2xl overflow-hidden bg-surface border border-line shadow-token-md"
+                 style={{ backgroundImage: `linear-gradient(135deg, ${statusColor}14 0%, ${statusColor}04 46%, transparent 70%)` }}>
               {/* Profile row */}
               <div className="px-6 py-5 flex items-center gap-3.5">
                 <div className="w-11 h-11 rounded-xl flex items-center justify-center text-sm font-bold shrink-0"
@@ -391,45 +392,41 @@ export default function StudentPage() {
                 <span className={`text-[10px] font-semibold px-2.5 py-1 rounded border shrink-0 ${statusCls}`}>{statusLabel}</span>
               </div>
 
-              {/* Attendance metric */}
+              {/* Attendance metric — ring + stats */}
               <div className="px-6 pb-6 pt-0">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-500 mb-3">Attendance</p>
-                <div className="flex items-end gap-5">
-                  <p className="text-3xl font-bold tabular-nums leading-none" style={{ color: statusColor }}>{pct}%</p>
-                  <div className="flex-1 pb-1 min-w-0">
-                    <div className="relative h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-1">
-                      <div className="h-full rounded-full transition-all duration-700 ease-out"
+                <div className="flex flex-col sm:flex-row items-center gap-6">
+                  {/* Animated ring */}
+                  <div className="shrink-0">
+                    <ProgressRing value={pct} color={statusColor} size={156} stroke={12} label="attendance" />
+                  </div>
+
+                  {/* Right column: progress bar + stats */}
+                  <div className="flex-1 w-full min-w-0">
+                    <div className="relative h-2.5 bg-bg-elevated rounded-full overflow-hidden mb-1">
+                      <div className="h-full rounded-full transition-all duration-[900ms] ease-out"
                            style={{ width: mounted ? `${pct}%` : '0%', background: statusColor }} />
                       {[75, 85].map(t => (
-                        <div key={t} className="absolute top-0 bottom-0 w-px bg-white/60 dark:bg-slate-600" style={{ left: `${t}%` }} />
+                        <div key={t} className="absolute top-0 bottom-0 w-px bg-white/60 dark:bg-white/20" style={{ left: `${t}%` }} />
                       ))}
                     </div>
-                    <div className="relative h-3.5">
+                    <div className="relative h-3.5 mb-4">
                       {[{ v: 0, a: 'left' }, { v: 75, a: 'center' }, { v: 85, a: 'center' }, { v: 100, a: 'right' }].map(({ v, a }) => (
-                        <span key={v} className="absolute text-[9px] text-slate-400 dark:text-slate-600"
+                        <span key={v} className="absolute text-[9px] text-fg-faint"
                           style={{ left: a === 'right' ? undefined : `${v}%`, right: a === 'right' ? '0%' : undefined, transform: a === 'center' ? 'translateX(-50%)' : undefined }}>
                           {v}%
                         </span>
                       ))}
                     </div>
+
+                    <Stagger className="grid grid-cols-3 gap-2.5" delay={0.2}>
+                      <StatCard label="Total" value={stats.total} accent="var(--fg)" />
+                      <StatCard label="Present" value={stats.present} accent="var(--success)" />
+                      <StatCard label="Absent" value={stats.absent} accent="var(--danger)" />
+                    </Stagger>
                   </div>
                 </div>
-
-                {/* Stats row */}
-                <div className="grid grid-cols-3 gap-3 mt-5 pt-4 border-t border-slate-100/80 dark:border-white/[0.05]/60">
-                  {[
-                    { label: 'Total Sessions', value: stats.total,   color: 'text-slate-800 dark:text-slate-200' },
-                    { label: 'Present',        value: stats.present, color: 'text-emerald-700 dark:text-emerald-400' },
-                    { label: 'Absent',         value: stats.absent,  color: 'text-red-600 dark:text-red-400' },
-                  ].map(({ label, value, color }) => (
-                    <div key={label} className="text-center">
-                      <p className={`text-2xl font-bold tabular-nums ${color}`}>{value}</p>
-                      <p className="text-[10px] text-slate-500 dark:text-slate-500 mt-0.5">{label}</p>
-                    </div>
-                  ))}
-                </div>
               </div>
-            </div>
+            </FadeIn>
 
             {/* Threshold summary */}
             {/* Notices — top of overview */}
