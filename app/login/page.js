@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { LOGO_RED, LOGO_WHITE } from '@/lib/logos';
 import ThemeToggle from '@/components/ThemeToggle';
+import { motion } from 'framer-motion';
 
 function fmtDate(d) {
   return new Date(d).toLocaleString('en-IN', {
@@ -33,7 +34,7 @@ function Splash({ onDone }) {
 
   return (
     <div className={`fixed inset-0 z-50 flex flex-col items-center justify-center transition-all duration-500 ${out ? 'opacity-0 scale-105 pointer-events-none' : 'opacity-100 scale-100'}`}
-         style={{ background: dark ? 'linear-gradient(135deg,#070c18 0%,#0d1425 60%,#060a15 100%)' : 'linear-gradient(135deg,#faf8f5 0%,#f0ebe3 60%,#faf8f5 100%)' }}>
+         style={{ background: dark ? '#000000' : 'linear-gradient(135deg,#faf8f5 0%,#f0ebe3 60%,#faf8f5 100%)' }}>
 
       {/* Orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -157,7 +158,7 @@ export default function LoginPage() {
       {showSplash && <Splash onDone={() => { setShowSplash(false); setTimeout(() => setReady(true), 60); }} />}
 
       <div className={`min-h-[100dvh] flex transition-opacity duration-500 ${ready ? 'opacity-100' : 'opacity-0'}`}
-           style={{ background: isDark ? 'linear-gradient(135deg,#070c18 0%,#0d1425 55%,#060a14 100%)' : `linear-gradient(135deg,${LBG} 0%,#f0ebe3 50%,${LBG} 100%)` }}>
+           style={{ background: isDark ? '#000000' : `linear-gradient(135deg,${LBG} 0%,#f0ebe3 50%,${LBG} 100%)` }}>
 
         {/* Animated orbs */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden">
@@ -203,21 +204,22 @@ export default function LoginPage() {
           {/* Feature cards */}
           <div className="space-y-2.5 flex-1 flex flex-col justify-center my-8">
             {features.map((f, i) => (
-              <div key={f.title} className="rounded-xl px-4 py-3.5 flex items-start gap-3 group transition-all duration-200"
+              <motion.div key={f.title} className="rounded-xl px-4 py-3.5 flex items-start gap-3 group"
                    style={{
                      background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.6)',
                      border: isDark ? '1px solid rgba(255,255,255,0.07)' : `1px solid ${LBorder}`,
                      backdropFilter: 'blur(8px)',
-                     animation: ready ? `fadeUp 0.55s cubic-bezier(0.16,1,0.3,1) ${200 + i * 110}ms both` : 'none',
                    }}
-                   onMouseEnter={e => { e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.9)'; e.currentTarget.style.transform = 'translateX(4px)'; }}
-                   onMouseLeave={e => { e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.6)'; e.currentTarget.style.transform = 'translateX(0)'; }}>
+                   initial={ready ? { opacity: 0, y: 14 } : false}
+                   animate={ready ? { opacity: 1, y: 0 } : false}
+                   transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1], delay: 0.2 + i * 0.11 }}
+                   whileHover={{ x: 4, backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.92)' }}>
                 <span className="text-xl shrink-0 mt-0.5">{f.icon}</span>
                 <div>
                   <p className="text-sm font-semibold" style={{ color: isDark ? 'rgba(255,255,255,0.9)' : '#1e293b' }}>{f.title}</p>
                   <p className="text-xs mt-0.5 leading-relaxed" style={{ color: isDark ? 'rgba(255,255,255,0.38)' : 'rgba(15,23,42,0.5)' }}>{f.sub}</p>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
 
