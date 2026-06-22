@@ -4,3 +4,5 @@ export { FadeIn, Stagger, Item, Pressable, motion, useReducedMotion } from './mo
 export { default as AnimatedNumber } from './AnimatedNumber';
 export { default as ProgressRing } from './ProgressRing';
 export { default as StatCard } from './StatCard';
+export { default as TrendChart } from './TrendChart';
+export { default as EmptyState } from './EmptyState';

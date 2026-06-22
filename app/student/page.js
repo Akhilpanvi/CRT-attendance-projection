@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { LOGO_RED, LOGO_WHITE } from '@/lib/logos';
 import { fmtDate, pctColor, TIME_SLOTS } from '@/lib/helpers';
 import ThemeToggle from '@/components/ThemeToggle';
-import { FadeIn, Stagger, Item, ProgressRing, StatCard, AnimatedNumber } from '@/components/ui';
+import { FadeIn, Stagger, Item, ProgressRing, StatCard, AnimatedNumber, TrendChart, EmptyState } from '@/components/ui';
 
 function calcBunk(present, total, threshold = 75) {
   if (!total) return { canBunk: 0, needAttend: 0 };
@@ -370,11 +370,14 @@ export default function StudentPage() {
         </header>
 
         {/* Scrollable content */}
-        <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-6 space-y-8 pb-16 animate-in">
+        <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-7 lg:py-9 space-y-10 pb-20 animate-in">
 
           {/* ── OVERVIEW ──────────────────────────────────────────────── */}
           <section id="overview" ref={sectionRefs.overview}>
-            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Overview</p>
+            <div className="mb-5">
+              <h1 className="text-xl lg:text-2xl font-bold tracking-tight text-fg">Overview</h1>
+              <p className="text-sm text-fg-subtle mt-0.5">Your attendance at a glance, {s.name.split(' ')[0]}.</p>
+            </div>
 
             {/* Profile + attendance hero card */}
             <FadeIn className="rounded-2xl overflow-hidden bg-surface border border-line shadow-token-md"
@@ -428,11 +431,12 @@ export default function StudentPage() {
               </div>
             </FadeIn>
 
-            {/* Threshold summary */}
-            {/* Notices — top of overview */}
+            {/* Notices + Threshold — side by side on large screens */}
+            <div className="grid lg:grid-cols-2 gap-4 mt-4 items-start">
+            {/* Notices */}
             {updates.length > 0 && (
-              <div className={`${card} mt-3 transition-shadow duration-200 hover:shadow-sm`}>
-                <div className="px-5 py-3 border-b border-slate-100/80 dark:border-white/[0.05] flex items-center justify-between">
+              <div className={`${card} !mb-0 transition-shadow duration-200 hover:shadow-token-md`}>
+                <div className="px-5 py-3 border-b border-line flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
                     <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Notices</p>
@@ -463,10 +467,10 @@ export default function StudentPage() {
 
             {/* Threshold summary */}
             {stats.total > 0 && (
-              <div className={`${card} mt-3 transition-shadow duration-200 hover:shadow-sm`}>
-                <div className="px-5 py-3 border-b border-slate-100/80 dark:border-white/[0.05]">
-                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Threshold Summary</p>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Sessions required to meet or maintain each target</p>
+              <div className={`${card} !mb-0 transition-shadow duration-200 hover:shadow-token-md`}>
+                <div className="px-5 py-3 border-b border-line">
+                  <p className="text-sm font-semibold text-fg">Threshold Summary</p>
+                  <p className="text-xs text-fg-subtle mt-0.5">Sessions required to meet or maintain each target</p>
                 </div>
                 <div className="divide-y divide-slate-100/80 dark:divide-white/[0.05]">
                   {[{ label: '75% Minimum', target: 75, data: b75 }, { label: '85% Target', target: 85, data: b85 }].map(({ label, target, data }) => (
@@ -496,30 +500,48 @@ export default function StudentPage() {
                 </div>
               </div>
             )}
+            </div>
           </section>
 
           {/* ── WEEKLY ────────────────────────────────────────────────── */}
           <section id="weekly" ref={sectionRefs.weekly}>
-            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Weekly Attendance</p>
+            <div className="mb-5">
+              <h2 className="text-xl lg:text-2xl font-bold tracking-tight text-fg">Attendance Analytics</h2>
+              <p className="text-sm text-fg-subtle mt-0.5">Your weekly trend, broken down session by session.</p>
+            </div>
 
             {stats.weeks && stats.weeks.length > 0 ? (
               <>
-                {/* Summary cards */}
+                {/* Trend chart + summary cards */}
                 {(() => {
                   const ws = stats.weeks;
                   const safe = ws.filter(w => w.pct >= 75).length;
                   const avg  = ws.length ? Math.round(ws.reduce((s, w) => s + w.pct, 0) / ws.length) : 0;
+                  const trend = [...ws]
+                    .sort((a, b) => a.year - b.year || a.week - b.week)
+                    .map(w => ({ label: 'W' + (weekSeq[`${w.year}-${w.week}`] ?? w.week), pct: w.pct }));
                   return (
-                    <div className={`${card} mb-3 overflow-hidden`}>
-                      <div className="grid grid-cols-3 divide-x divide-slate-100 dark:divide-slate-800">
+                    <div className="grid lg:grid-cols-3 gap-4 mb-4 items-stretch">
+                      {/* Trend chart */}
+                      <div className={`${card} !mb-0 lg:col-span-2 flex flex-col`}>
+                        <div className="px-1 pb-3 flex items-center justify-between">
+                          <p className="text-sm font-semibold text-fg">Weekly Trend</p>
+                          <span className="chip">{ws.length} weeks</span>
+                        </div>
+                        <div className="flex-1 min-h-[168px]">
+                          <TrendChart data={trend} threshold={75} color={pctColor(avg)} height={172} />
+                        </div>
+                      </div>
+                      {/* Summary metrics */}
+                      <div className={`${card} !mb-0 grid grid-cols-3 lg:grid-cols-1 lg:divide-y divide-line`}>
                         {[
                           { label: 'Avg / Week', value: avg + '%', color: pctColor(avg) },
-                          { label: 'Safe Weeks', value: safe,      color: '#059669'     },
-                          { label: 'Low Weeks',  value: ws.length - safe, color: ws.length - safe > 0 ? '#dc2626' : '#059669' },
+                          { label: 'Safe Weeks', value: safe,      color: 'var(--success)' },
+                          { label: 'Low Weeks',  value: ws.length - safe, color: ws.length - safe > 0 ? 'var(--danger)' : 'var(--success)' },
                         ].map(({ label, value, color }) => (
-                          <div key={label} className="py-4 text-center">
-                            <p className="text-xl font-bold tabular-nums" style={{ color }}>{value}</p>
-                            <p className="text-[10px] text-slate-500 dark:text-slate-500 mt-0.5">{label}</p>
+                          <div key={label} className="py-3 lg:py-4 text-center lg:text-left lg:px-2 lg:flex lg:items-center lg:justify-between">
+                            <p className="text-[10px] uppercase tracking-wider text-fg-subtle lg:order-1">{label}</p>
+                            <p className="text-2xl font-bold tabular lg:order-2" style={{ color }}>{value}</p>
                           </div>
                         ))}
                       </div>
@@ -602,15 +624,18 @@ export default function StudentPage() {
                 )}
               </>
             ) : (
-              <div className={`${card} px-5 py-10 text-center`}>
-                <p className="text-sm text-slate-400">No weekly data yet.</p>
+              <div className={`${card}`}>
+                <EmptyState
+                  title="No weekly data yet"
+                  description="Once attendance is uploaded for your batch, your week-by-week trend and projections will appear here."
+                />
               </div>
             )}
           </section>
 
           {/* ── SESSION PLANNER ───────────────────────────────────────── */}
           <section id="planner" ref={sectionRefs.planner}>
-            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Session Planner</p>
+            <h2 className="text-xl lg:text-2xl font-bold tracking-tight text-fg mb-5">Session Planner</h2>
             {stats.total > 0 && (
               <div className={card}>
                 <div className="px-5 py-3 border-b border-slate-100/80 dark:border-white/[0.05] flex items-center justify-between flex-wrap gap-2">
@@ -749,7 +774,7 @@ export default function StudentPage() {
 
           {/* ── ATTENDANCE PROGRESSION ────────────────────────────────── */}
           <section id="tracker" ref={sectionRefs.tracker}>
-            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Attendance Progression</p>
+            <h2 className="text-xl lg:text-2xl font-bold tracking-tight text-fg mb-5">Attendance Progression</h2>
             <div className={card}>
               <div className="px-5 py-3 border-b border-slate-100/80 dark:border-white/[0.05]">
                 <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Self-Tracking</p>
@@ -841,7 +866,7 @@ export default function StudentPage() {
 
           {/* ── ATTENDANCE LOG ────────────────────────────────────────── */}
           <section id="log" ref={sectionRefs.log}>
-            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Attendance Log</p>
+            <h2 className="text-xl lg:text-2xl font-bold tracking-tight text-fg mb-5">Attendance Log</h2>
             <div className={card}>
               <div className="px-5 py-3 border-b border-slate-100/80 dark:border-white/[0.05] flex items-center justify-between flex-wrap gap-2">
                 <div>
