@@ -272,14 +272,14 @@ thead th { position: sticky; top: 0; z-index: 1; }
   .slide-nav:nth-child(5) { animation-delay: 240ms; }
   .slide-nav:nth-child(6) { animation-delay: 290ms; }
 
-  /* Gradient text */
+  /* Gradient text — cohesive blue → indigo → violet, vivid on black */
   .text-gradient-blue {
-    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #34d399 100%);
+    background: linear-gradient(120deg, #5b9dff 0%, #8b7cff 50%, #c77dff 100%);
     background-size: 200% 200%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    animation: gradientShift 4s ease infinite;
+    animation: gradientShift 5s ease infinite;
   }
   .text-gradient-brand {
     background: linear-gradient(135deg, var(--brand) 0%, #f97316 100%);

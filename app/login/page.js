@@ -196,7 +196,7 @@ export default function LoginPage() {
               <span style={{ color: isDark ? '#ffffff' : '#0f172a' }}>CRT Attendance</span><br />
               <span className="text-gradient-blue">Tracker</span>
             </h1>
-            <p className="text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(15,23,42,0.5)' }}>
+            <p className="text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.62)' : 'rgba(15,23,42,0.5)' }}>
               Y-23 Summer CRT Training · KL University
             </p>
           </div>
@@ -217,16 +217,16 @@ export default function LoginPage() {
                 <span className="text-xl shrink-0 mt-0.5">{f.icon}</span>
                 <div>
                   <p className="text-sm font-semibold" style={{ color: isDark ? 'rgba(255,255,255,0.9)' : '#1e293b' }}>{f.title}</p>
-                  <p className="text-xs mt-0.5 leading-relaxed" style={{ color: isDark ? 'rgba(255,255,255,0.38)' : 'rgba(15,23,42,0.5)' }}>{f.sub}</p>
+                  <p className="text-xs mt-0.5 leading-relaxed" style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(15,23,42,0.5)' }}>{f.sub}</p>
                 </div>
               </motion.div>
             ))}
           </div>
 
-          <p className="text-[10px] leading-relaxed" style={{ color: isDark ? 'rgba(255,255,255,0.18)' : 'rgba(15,23,42,0.3)', animation: ready ? 'fadeUp 0.5s ease 650ms both' : 'none' }}>
+          <p className="text-[10px] leading-relaxed" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(15,23,42,0.3)', animation: ready ? 'fadeUp 0.5s ease 650ms both' : 'none' }}>
             Made by{' '}
             <a href="https://akhilpanvi.com" target="_blank" rel="noopener noreferrer"
-               style={{ color: isDark ? 'rgba(255,255,255,0.38)' : 'rgba(15,23,42,0.5)', textDecoration: 'underline', textUnderlineOffset: '2px' }}>
+               style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(15,23,42,0.5)', textDecoration: 'underline', textUnderlineOffset: '2px' }}>
               Akhil Panvi
             </a>
             {' '}· Y-23 · KL University
@@ -278,11 +278,11 @@ export default function LoginPage() {
 
                 {/* Top card shimmer line */}
                 <div className="absolute top-0 left-0 right-0 h-px"
-                     style={{ background: isDark ? 'linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent)' : 'linear-gradient(90deg,transparent,rgba(0,0,0,0.05),transparent)' }} />
+                     style={{ background: isDark ? 'linear-gradient(90deg,transparent,rgba(255,255,255,0.46),transparent)' : 'linear-gradient(90deg,transparent,rgba(0,0,0,0.05),transparent)' }} />
 
                 <div className="mb-7">
                   <h2 className="text-xl font-bold" style={{ color: isDark ? '#ffffff' : '#0f172a' }}>Welcome back</h2>
-                  <p className="text-sm mt-1" style={{ color: isDark ? 'rgba(255,255,255,0.42)' : '#64748b' }}>Sign in to view your attendance</p>
+                  <p className="text-sm mt-1" style={{ color: isDark ? 'rgba(255,255,255,0.62)' : '#64748b' }}>Sign in to view your attendance</p>
                 </div>
 
                 <form onSubmit={handleLogin} className="space-y-5">
@@ -292,12 +292,12 @@ export default function LoginPage() {
                   ].map(({ label, type, ph, val, set, delay }) => (
                     <div key={label} className="space-y-1.5" style={{ animation: ready ? `fadeUp 0.5s ease ${delay} both` : 'none' }}>
                       <div className="flex items-center justify-between">
-                        <label className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: isDark ? 'rgba(255,255,255,0.38)' : '#64748b' }}>{label}</label>
+                        <label className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: isDark ? 'rgba(255,255,255,0.6)' : '#64748b' }}>{label}</label>
                         {type === 'password' && (
                           <button type="button" onClick={() => { setFpOpen(o => !o); setFpMsg(''); setFpRoll(''); }}
-                            className="text-[11px] transition-colors duration-150" style={{ color: isDark ? 'rgba(255,255,255,0.32)' : '#64748b' }}
+                            className="text-[11px] transition-colors duration-150" style={{ color: isDark ? 'rgba(255,255,255,0.55)' : '#64748b' }}
                             onMouseEnter={e => e.target.style.color = isDark ? 'rgba(255,255,255,0.7)' : '#334155'}
-                            onMouseLeave={e => e.target.style.color = isDark ? 'rgba(255,255,255,0.32)' : '#64748b'}>
+                            onMouseLeave={e => e.target.style.color = isDark ? 'rgba(255,255,255,0.55)' : '#64748b'}>
                             Forgot password?
                           </button>
                         )}
@@ -335,7 +335,7 @@ export default function LoginPage() {
                     onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = !loading ? (isDark ? '0 4px 20px rgba(255,255,255,0.08)' : '0 4px 20px rgba(15,23,42,0.15)') : 'none'; }}>
                     {/* Shimmer sweep */}
                     {!loading && <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                                       style={{ background: 'linear-gradient(105deg,transparent 35%,rgba(255,255,255,0.2) 50%,transparent 65%)', animation: 'shimmer 1.4s ease infinite' }} />}
+                                       style={{ background: 'linear-gradient(105deg,transparent 35%,rgba(255,255,255,0.46) 50%,transparent 65%)', animation: 'shimmer 1.4s ease infinite' }} />}
                     {loading ? (
                       <span className="flex items-center justify-center gap-2">
                         <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -351,8 +351,8 @@ export default function LoginPage() {
                 {/* Feedback */}
                 <button type="button" onClick={() => { setFbOpen(o => !o); setFbStatus(''); setFbMsg(''); }}
                   className="w-full mt-3 flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs transition-all duration-200"
-                  style={{ border: isDark ? '1px dashed rgba(255,255,255,0.1)' : `1px dashed ${LBorder}`, color: isDark ? 'rgba(255,255,255,0.32)' : '#94a3b8' }}
-                  onMouseEnter={e => { e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.04)' : '#faf8f5'; e.currentTarget.style.borderColor = isDark ? 'rgba(255,255,255,0.2)' : '#c5bdb3'; }}
+                  style={{ border: isDark ? '1px dashed rgba(255,255,255,0.1)' : `1px dashed ${LBorder}`, color: isDark ? 'rgba(255,255,255,0.55)' : '#94a3b8' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.04)' : '#faf8f5'; e.currentTarget.style.borderColor = isDark ? 'rgba(255,255,255,0.46)' : '#c5bdb3'; }}
                   onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = isDark ? 'rgba(255,255,255,0.1)' : LBorder; }}>
                   <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
@@ -412,19 +412,19 @@ export default function LoginPage() {
 
               {/* Footer links */}
               <div className="mt-5 text-center" style={{ animation: ready ? 'fadeUp 0.5s ease 550ms both' : 'none' }}>
-                <p className="text-[10px] mb-2" style={{ color: isDark ? 'rgba(255,255,255,0.22)' : 'rgba(15,23,42,0.35)' }}>
+                <p className="text-[10px] mb-2" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(15,23,42,0.35)' }}>
                   Use your registration number as username · First login prompts a password change
                 </p>
                 <div className="flex items-center justify-center gap-3">
                   {[['Privacy', '/privacy'], ['Terms', '/terms']].map(([l, h]) => (
-                    <a key={l} href={h} className="text-[10px] transition-colors" style={{ color: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(15,23,42,0.3)' }}
+                    <a key={l} href={h} className="text-[10px] transition-colors" style={{ color: isDark ? 'rgba(255,255,255,0.46)' : 'rgba(15,23,42,0.3)' }}
                        onMouseEnter={e => e.target.style.color = isDark ? 'rgba(255,255,255,0.5)' : 'rgba(15,23,42,0.6)'}
-                       onMouseLeave={e => e.target.style.color = isDark ? 'rgba(255,255,255,0.2)' : 'rgba(15,23,42,0.3)'}>{l}</a>
+                       onMouseLeave={e => e.target.style.color = isDark ? 'rgba(255,255,255,0.46)' : 'rgba(15,23,42,0.3)'}>{l}</a>
                   ))}
                   <span style={{ color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(15,23,42,0.2)', fontSize: '10px' }}>·</span>
-                  <a href="https://akhilpanvi.com" target="_blank" rel="noopener noreferrer" className="text-[10px] transition-colors" style={{ color: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(15,23,42,0.3)' }}
+                  <a href="https://akhilpanvi.com" target="_blank" rel="noopener noreferrer" className="text-[10px] transition-colors" style={{ color: isDark ? 'rgba(255,255,255,0.46)' : 'rgba(15,23,42,0.3)' }}
                      onMouseEnter={e => e.target.style.color = isDark ? 'rgba(255,255,255,0.5)' : 'rgba(15,23,42,0.6)'}
-                     onMouseLeave={e => e.target.style.color = isDark ? 'rgba(255,255,255,0.2)' : 'rgba(15,23,42,0.3)'}>Akhil Panvi</a>
+                     onMouseLeave={e => e.target.style.color = isDark ? 'rgba(255,255,255,0.46)' : 'rgba(15,23,42,0.3)'}>Akhil Panvi</a>
                 </div>
               </div>
             </div>
@@ -443,7 +443,7 @@ export default function LoginPage() {
                       <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
                       <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: isDark ? 'rgba(255,255,255,0.55)' : '#475569' }}>Notices</span>
                     </div>
-                    <span className="text-[10px]" style={{ color: isDark ? 'rgba(255,255,255,0.25)' : '#94a3b8' }}>{updates.length} items</span>
+                    <span className="text-[10px]" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : '#94a3b8' }}>{updates.length} items</span>
                   </div>
                   <div style={{ maxHeight: '440px', overflowY: 'auto' }}>
                     {updates.map((u, i) => {
@@ -458,7 +458,7 @@ export default function LoginPage() {
                             <span style={{ fontSize: '9px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em', color: cc, background: `${cc}20`, padding: '2px 7px', borderRadius: '4px' }}>
                               {u.pinned ? '📌 ' : ''}{cl}
                             </span>
-                            <span style={{ color: isDark ? 'rgba(255,255,255,0.22)' : '#94a3b8', fontSize: '10px' }}>{fmtDate(u.createdAt)}</span>
+                            <span style={{ color: isDark ? 'rgba(255,255,255,0.5)' : '#94a3b8', fontSize: '10px' }}>{fmtDate(u.createdAt)}</span>
                           </div>
                           {u.title && <p style={{ fontSize: '12px', fontWeight: '600', color: isDark ? 'rgba(255,255,255,0.88)' : '#0f172a', marginBottom: '4px', lineHeight: '1.4' }}>{u.title}</p>}
                           <p style={{ fontSize: '11px', color: isDark ? 'rgba(255,255,255,0.45)' : '#475569', lineHeight: '1.65', whiteSpace: 'pre-wrap' }}>{u.content}</p>
