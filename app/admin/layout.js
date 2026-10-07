@@ -253,7 +253,7 @@ export default function AdminLayout({ children }) {
           </span>
           <span className="hidden sm:block text-slate-300 dark:text-slate-600 text-xs">·</span>
           <span className="hidden sm:block text-slate-400 dark:text-slate-500 text-xs">
-            2023-27 Batch · Y-23 Summer CRT Training
+            2024-28 Batch · Y-24 CRT Training
           </span>
           <div className="ml-auto">
             <ThemeToggle />

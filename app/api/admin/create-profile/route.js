@@ -3,11 +3,9 @@ import bcrypt from 'bcryptjs';
 import { connectDB } from '@/lib/mongodb';
 import Student from '@/lib/models/Student';
 import User from '@/lib/models/User';
-import Attendance from '@/lib/models/Attendance';
 import { getSession } from '@/lib/auth';
-import { getWeekNumber } from '@/lib/helpers';
 import { logAction } from '@/lib/auditLog';
-import { buildSlotsPerDate } from '@/lib/attendanceCalc';
+import { CLUSTERS, normalizeCluster } from '@/lib/attendanceCalc';
 
 export async function POST(request) {
   try {
@@ -20,6 +18,9 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Name and registration number are required' }, { status: 400 });
 
     const roll = rollNumber.trim().toUpperCase();
+    const studentCluster = normalizeCluster(cluster);
+    if (role !== 'admin' && !studentCluster)
+      return NextResponse.json({ error: `Cluster is required for students (${CLUSTERS.join(' or ')})` }, { status: 400 });
     await connectDB();
 
     // Check existing user
@@ -52,47 +53,14 @@ export async function POST(request) {
       effectiveRole === 'student'
         ? Student.findOneAndUpdate(
             { rollNumber: roll },
-            { rollNumber: roll, name: name.trim().toUpperCase(), branch, dept, cluster, crtSec, crtRoom },
+            { rollNumber: roll, name: name.trim().toUpperCase(), branch, dept, cluster: studentCluster, crtSec, crtRoom },
             { upsert: true, new: true }
           )
         : Promise.resolve(),
     ]);
 
-    // ── Backfill absent records for past training days ────────────────
-    // New students must be absent for every session before they were added.
-    if (effectiveRole === 'student') {
-      try {
-        const rawPairs = await Attendance.aggregate([
-          { $group: { _id: { date: '$date', slot: '$slot' } } },
-          { $project: { _id: 0, date: '$_id.date', slot: '$_id.slot' } },
-        ]);
-        const { slotsPerDate } = buildSlotsPerDate(rawPairs);
-
-        const absentBulk = [];
-        for (const [date, slots] of Object.entries(slotsPerDate)) {
-          const wk = getWeekNumber(date);
-          const yr = new Date(date).getFullYear();
-          for (const slot of slots) {
-            absentBulk.push({
-              updateOne: {
-                filter: { rollNumber: roll, date, slot },
-                update: { $setOnInsert: { rollNumber: roll, date, slot, status: 'absent', week: wk, year: yr, markedAt: new Date() } },
-                upsert: true,
-              },
-            });
-          }
-        }
-        if (absentBulk.length) {
-          const CHUNK = 500;
-          for (let i = 0; i < absentBulk.length; i += CHUNK) {
-            await Attendance.bulkWrite(absentBulk.slice(i, i + CHUNK), { ordered: false });
-          }
-        }
-      } catch (backfillErr) {
-        // Non-fatal — log but don't fail the profile creation
-        console.error('[create-profile] absent backfill failed:', backfillErr.message);
-      }
-    }
+    // No absent backfill needed: sessions of the student's cluster with no
+    // record already count as absent (see lib/attendanceCalc.js).
 
     logAction(
       session.username, 'CREATE_PROFILE', roll,

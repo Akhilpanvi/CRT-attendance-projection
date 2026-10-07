@@ -65,9 +65,9 @@ export default function TermsPage() {
             <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">Legal</p>
             <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-3">Terms of Service</h1>
             <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-slate-500 dark:text-slate-400">
-              <span>Effective: 25 May 2026</span>
+              <span>Effective: 7 Oct 2026</span>
               <span>CRT Attendance Tracker</span>
-              <span>Y-23 Batch · KL University</span>
+              <span>Y-24 Batch · KL University</span>
             </div>
           </div>
 
@@ -87,7 +87,7 @@ export default function TermsPage() {
               <div className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed space-y-3">
                 <p>
                   CRT Attendance Tracker is a web application developed to help students and the training
-                  administration track attendance for the Y-23 Summer CRT Training at KL University.
+                  administration track attendance for the Y-24 CRT Training at KL University.
                 </p>
                 <p>
                   Attendance data is sourced from the <span className="font-medium text-slate-700 dark:text-slate-300">Department of CRT</span>.
@@ -105,7 +105,7 @@ export default function TermsPage() {
                 <p>This platform is intended exclusively for:</p>
                 <ul className="space-y-2">
                   {[
-                    'Y-23 batch students of KL University enrolled in the Summer CRT Training',
+                    'Y-24 batch students of KL University enrolled in the CRT Training',
                     'Authorised admin users with credentials issued by the platform maintainer',
                   ].map((r, i) => (
                     <li key={i} className="flex items-start gap-3">
@@ -238,7 +238,7 @@ export default function TermsPage() {
           <div className="mt-16 pt-8 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="space-y-0.5">
               <p className="text-xs text-slate-400 dark:text-slate-500">
-                A student-built attendance tracking platform for the Y-23 Summer CRT Training at KL University.
+                A student-built attendance tracking platform for the Y-24 CRT Training at KL University.
               </p>
               <p className="text-xs text-slate-400 dark:text-slate-500">
                 Made by{' '}

@@ -1,75 +1,56 @@
 import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import Student from '@/lib/models/Student';
-import Attendance from '@/lib/models/Attendance';
 import { getSession } from '@/lib/auth';
-import { buildSlotsPerDate } from '@/lib/attendanceCalc';
+import { getSessions } from '@/lib/sessions';
+import { attachStats } from '@/lib/batchStats';
 
-export async function GET() {
+export const dynamic = 'force-dynamic';
+
+const FILTER_FIELDS = { name: 'name', branch: 'branch', dept: 'dept', cluster: 'cluster', crtSec: 'crtSec', crtRoom: 'crtRoom', roll: 'rollNumber' };
+const escape = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const contains = v => ({ $regex: escape(v), $options: 'i' });
+
+/**
+ * GET /api/admin/students
+ *   ?page=1&limit=50       server-side pagination (limit ≤ 200)
+ *   ?q=                    search name or reg. no.
+ *   ?name=&branch=&dept=&cluster=&crtSec=&crtRoom=&roll=   column filters
+ *   ?all=1                 every matching student (for the Excel report)
+ * → { rows, total, page, limit, pages }
+ */
+export async function GET(request) {
   try {
     const session = await getSession();
     if (!session || session.role !== 'admin')
       return NextResponse.json({ error: 'Admin only' }, { status: 403 });
 
+    const sp    = new URL(request.url).searchParams;
+    const all   = sp.get('all') === '1';
+    const limit = Math.min(200, Math.max(10, parseInt(sp.get('limit') || '50', 10) || 50));
+    let   page  = Math.max(1, parseInt(sp.get('page') || '1', 10) || 1);
+
+    const filter = {};
+    const q = (sp.get('q') || '').trim();
+    if (q) filter.$or = [{ name: contains(q) }, { rollNumber: contains(q) }];
+    for (const [param, field] of Object.entries(FILTER_FIELDS)) {
+      const v = (sp.get(param) || '').trim();
+      if (v) filter[field] = contains(v);
+    }
+    const filtered = Object.keys(filter).length > 0;
+
     await connectDB();
 
-    // Identify training days: uploaded dates that are working days (≥ training start, not Sunday)
-    const rawPairs = await Attendance.aggregate([
-      { $group: { _id: { date: '$date', slot: '$slot' } } },
-      { $project: { _id: 0, date: '$_id.date', slot: '$_id.slot' } },
-    ]);
-    const { slotsPerDate, totalSlots } = buildSlotsPerDate(rawPairs);
-    const workingDates = Object.keys(slotsPerDate);
+    const [total, sessions] = await Promise.all([Student.countDocuments(filter), getSessions()]);
+    const pages = Math.max(1, Math.ceil(total / limit));
+    if (page > pages) page = pages;
 
-    const [students, presentAgg, spOnlyAgg] = await Promise.all([
-      Student.find().sort({ sno: 1, name: 1 }).lean(),
-      // present+sp count on working dates only (used for SP-adjusted %)
-      workingDates.length
-        ? Attendance.aggregate([
-            { $match: { date: { $in: workingDates }, status: { $in: ['present', 'sp'] } } },
-            { $group: {
-                _id:     '$rollNumber',
-                present: { $sum: 1 },
-                sp:      { $sum: { $cond: [{ $eq: ['$status', 'sp'] }, 1, 0] } },
-            }},
-          ])
-        : Promise.resolve([]),
-      // pure-present count on working dates (for "original %" without SP)
-      workingDates.length
-        ? Attendance.aggregate([
-            { $match: { date: { $in: workingDates }, status: 'present' } },
-            { $group: { _id: '$rollNumber', presentOnly: { $sum: 1 } } },
-          ])
-        : Promise.resolve([]),
-    ]);
+    let query = Student.find(filter, { __v: 0, createdAt: 0 }).sort({ sno: 1, name: 1 });
+    if (!all) query = query.skip((page - 1) * limit).limit(limit);
+    const students = await query.lean();
 
-    const statsMap = {};
-    for (const s of presentAgg) {
-      statsMap[s._id] = { present: s.present, sp: s.sp || 0 };
-    }
-    const origMap = {};
-    for (const s of spOnlyAgg) origMap[s._id] = s.presentOnly;
-
-    return NextResponse.json(students.map(s => {
-      const present    = statsMap[s.rollNumber]?.present    || 0;
-      const sp         = statsMap[s.rollNumber]?.sp         || 0;
-      const origPres   = origMap[s.rollNumber]              || 0;
-      const total      = totalSlots;
-      const overallPct = total > 0 ? Math.round((present / total) * 100) : 0;
-      const origPct    = total > 0 ? Math.round((origPres / total) * 100) : 0;
-      return {
-        ...s,
-        stats: {
-          total,
-          present,
-          absent:     total - present,
-          sp,
-          overallPct,
-          origPresent: origPres,
-          origPct,
-        },
-      };
-    }));
+    const rows = await attachStats(students, sessions, { everyone: all && !filtered });
+    return NextResponse.json({ rows, total, page, limit, pages });
   } catch (e) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }

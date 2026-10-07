@@ -3,7 +3,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata = {
   title: 'CRT Attendance Tracker — KL University',
-  description: 'Y-23 Batch Summer CRT Training. Not an official KL University platform.',
+  description: 'Y-24 Batch CRT Training. Not an official KL University platform.',
 };
 
 export default function RootLayout({ children }) {

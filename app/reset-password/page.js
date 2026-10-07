@@ -51,8 +51,8 @@ function ResetPasswordForm() {
             CRT Attendance<br />Tracker
           </h2>
           <p className="text-white/50 text-sm mt-2">
-            KL University · 2023-27 Batch<br />
-            Y-23 Summer CRT Training
+            KL University · 2024-28 Batch<br />
+            Y-24 CRT Training
           </p>
         </div>
         <p className="text-white/25 text-xs">© {new Date().getFullYear()} KL University</p>

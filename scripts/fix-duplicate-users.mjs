@@ -2,8 +2,13 @@
 // Add --delete flag to actually remove the duplicates after reviewing the dry-run output.
 
 import mongoose from 'mongoose';
+import fs from 'fs';
 
-const MONGO_URI = 'mongodb+srv://admin:REMOVED@cluster0.p0on5pi.mongodb.net/crt_attendance?retryWrites=true&w=majority&appName=Cluster0';
+// Read MONGO_URI from the environment or the project's .env — never hardcode credentials
+const MONGO_URI = process.env.MONGO_URI || (fs.existsSync('.env')
+  ? fs.readFileSync('.env', 'utf8').match(/^MONGO_URI=(.*)$/m)?.[1]?.trim()
+  : undefined);
+if (!MONGO_URI) { console.error('MONGO_URI not set (env or .env)'); process.exit(1); }
 const DRY_RUN  = !process.argv.includes('--delete');
 
 const UserSchema = new mongoose.Schema({

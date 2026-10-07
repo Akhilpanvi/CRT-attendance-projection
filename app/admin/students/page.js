@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { fmtDate, pctColor } from '@/lib/helpers';
 import { useToast, Toast } from '@/components/Toast';
 
@@ -330,38 +330,68 @@ function DetailView({ data, roll, showToast, refetch }) {
 
 export default function StudentsPage() {
   const { toast, show } = useToast();
-  const [all, setAll]       = useState([]);
+  const [data, setData]       = useState({ rows: [], total: 0, pages: 1 });
   const [loading, setLoading] = useState(true);
-  const [q, setQ]           = useState('');
+  const [q, setQ]             = useState('');
   const [filters, setFilters] = useState({});
-  const [modal, setModal]   = useState(null);
-  const [page, setPage]     = useState(1);
+  const [modal, setModal]     = useState(null);
+  const [page, setPage]       = useState(1);
+  const [reloadKey, setReloadKey] = useState(0);
+  const [downloading, setDownloading] = useState(false);
+
+  // Debounce typing so we query once the admin pauses
+  const [query, setQuery] = useState({ q: '', filters: {} });
+  useEffect(() => {
+    const t = setTimeout(() => setQuery({ q, filters }), 300);
+    return () => clearTimeout(t);
+  }, [q, filters]);
+
+  const cache = useRef(new Map());
+  const buildParams = (pg, extra = {}) => {
+    const p = new URLSearchParams({ page: String(pg), limit: String(PAGE_SIZE), ...extra });
+    if (query.q.trim()) p.set('q', query.q.trim());
+    for (const [k, v] of Object.entries(query.filters)) if (v?.trim()) p.set(k, v.trim());
+    return p.toString();
+  };
+  const fetchPage = (pg, signal) => {
+    const key = buildParams(pg);
+    if (cache.current.has(key)) return Promise.resolve(cache.current.get(key));
+    return fetch(`/api/admin/students?${key}`, { signal })
+      .then(r => r.json())
+      .then(d => { if (d.error) throw new Error(d.error); cache.current.set(key, d); return d; });
+  };
 
   useEffect(() => {
-    fetch('/api/admin/students')
-      .then(r => r.json())
-      .then(d => { setAll(Array.isArray(d) ? d : []); setLoading(false); })
-      .catch(e => { show(e.message, 'error'); setLoading(false); });
-  }, []);
+    const ctrl = new AbortController();
+    setLoading(true);
+    fetchPage(page, ctrl.signal)
+      .then(d => {
+        setData(d);
+        setLoading(false);
+        if (d.page !== page) setPage(d.page);
+        // Prefetch the next page so "Next" is instant
+        if (d.page < d.pages) fetchPage(d.page + 1).catch(() => {});
+      })
+      .catch(e => { if (e.name !== 'AbortError') { show(e.message, 'error'); setLoading(false); } });
+    return () => ctrl.abort();
+  }, [page, query, reloadKey]);
 
   const setFilter = (k, v) => { setFilters(f => ({ ...f, [k]: v })); setPage(1); };
+  const refresh   = () => { cache.current.clear(); setReloadKey(k => k + 1); };
 
-  const filtered = useMemo(() => {
-    const ql = q.toLowerCase();
-    return all.filter(s =>
-      (!ql || s.name.toLowerCase().includes(ql) || s.rollNumber.toLowerCase().includes(ql)) &&
-      (!filters.name    || s.name.toLowerCase().includes(filters.name.toLowerCase())) &&
-      (!filters.branch  || (s.branch  || '').toLowerCase().includes(filters.branch.toLowerCase())) &&
-      (!filters.dept    || (s.dept    || '').toLowerCase().includes(filters.dept.toLowerCase())) &&
-      (!filters.cluster || (s.cluster || '').toLowerCase().includes(filters.cluster.toLowerCase())) &&
-      (!filters.crtSec  || (s.crtSec  || '').toLowerCase().includes(filters.crtSec.toLowerCase())) &&
-      (!filters.crtRoom || (s.crtRoom || '').toLowerCase().includes(filters.crtRoom.toLowerCase())) &&
-      (!filters.roll    || s.rollNumber.toLowerCase().includes(filters.roll.toLowerCase()))
-    );
-  }, [all, q, filters]);
+  async function downloadReport() {
+    setDownloading(true);
+    try {
+      const r = await fetch(`/api/admin/students?${buildParams(1, { all: '1' })}`);
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error);
+      await downloadAttendanceReport(d.rows);
+    } catch (e) { show(e.message, 'error'); }
+    finally { setDownloading(false); }
+  }
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const paged      = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const paged      = data.rows;
+  const totalPages = data.pages;
 
   return (
     <div>
@@ -382,16 +412,11 @@ export default function StudentsPage() {
           />
           <button
             className="btn-outline btn-sm"
-            disabled={loading || all.length === 0}
-            onClick={() => downloadAttendanceReport(filtered)}>
-            Download Report
+            disabled={downloading || data.total === 0}
+            onClick={downloadReport}>
+            {downloading ? 'Preparing…' : 'Download Report'}
           </button>
-          <button
-            className="btn-outline btn-sm"
-            onClick={() => {
-              setLoading(true);
-              fetch('/api/admin/students').then(r => r.json()).then(d => { setAll(d); setLoading(false); });
-            }}>
+          <button className="btn-outline btn-sm" onClick={refresh}>
             Refresh
           </button>
         </div>
@@ -400,8 +425,9 @@ export default function StudentsPage() {
       <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
         <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-700
                         text-xs text-slate-400 dark:text-slate-500">
-          Showing {filtered.length} of {all.length} students
+          {data.total.toLocaleString('en-IN')} student{data.total !== 1 ? 's' : ''}
           {totalPages > 1 && ` · Page ${page} of ${totalPages}`}
+          {loading && data.rows.length > 0 && ' · Loading…'}
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -429,8 +455,8 @@ export default function StudentsPage() {
                 <th /><th /><th />
               </tr>
             </thead>
-            <tbody>
-              {loading && (
+            <tbody className={loading && paged.length ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
+              {loading && paged.length === 0 && (
                 <tr><td colSpan={11} className="text-center text-slate-400 py-10 text-sm">Loading students…</td></tr>
               )}
               {!loading && paged.length === 0 && (

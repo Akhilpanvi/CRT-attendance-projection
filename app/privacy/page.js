@@ -65,9 +65,9 @@ export default function PrivacyPage() {
             <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">Legal</p>
             <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-3">Privacy Policy</h1>
             <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-slate-500 dark:text-slate-400">
-              <span>Effective: 25 May 2026</span>
+              <span>Effective: 7 Oct 2026</span>
               <span>CRT Attendance Tracker</span>
-              <span>Y-23 Batch · KL University</span>
+              <span>Y-24 Batch · KL University</span>
             </div>
           </div>
 
@@ -88,8 +88,8 @@ export default function PrivacyPage() {
               <div className="prose-sm space-y-3 text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
                 <p>
                   This Privacy Policy describes how the CRT Attendance Tracker ("the platform", "we")
-                  collects, stores, and protects information belonging to students and staff of the Y-23
-                  Summer CRT Training at KL University.
+                  collects, stores, and protects information belonging to students and staff of the Y-24
+                  CRT Training at KL University.
                 </p>
                 <p>
                   Attendance records displayed on this platform are sourced from the Department of CRT and
@@ -227,7 +227,7 @@ export default function PrivacyPage() {
               <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-4">Data Retention</h2>
               <div className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed space-y-3">
                 <p>
-                  Student and attendance data is retained for the duration of the Y-23 Summer CRT Training programme.
+                  Student and attendance data is retained for the duration of the Y-24 CRT Training programme.
                   Password reset tokens are automatically invalidated within 2 minutes of generation.
                 </p>
                 <p>
@@ -281,7 +281,7 @@ export default function PrivacyPage() {
           <div className="mt-16 pt-8 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="space-y-0.5">
               <p className="text-xs text-slate-400 dark:text-slate-500">
-                A student-built attendance tracking platform for the Y-23 Summer CRT Training at KL University.
+                A student-built attendance tracking platform for the Y-24 CRT Training at KL University.
               </p>
               <p className="text-xs text-slate-400 dark:text-slate-500">
                 Made by{' '}

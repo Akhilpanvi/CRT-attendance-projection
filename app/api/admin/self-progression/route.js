@@ -15,17 +15,22 @@ export async function GET() {
 
     await connectDB();
 
-    const [students, selfRecords, officialStats] = await Promise.all([
-      Student.find().sort({ sno: 1, name: 1 }).lean(),
-      SelfAttendance.find().sort({ date: 1, slot: 1 }).lean(),
-      Attendance.aggregate([
-        { $group: {
-          _id:     '$rollNumber',
-          total:   { $sum: 1 },
-          present: { $sum: { $cond: [{ $in: ['$status', ['present', 'sp']] }, 1, 0] } },
-        }},
-      ]),
-    ]);
+    // Only students who self-tracked are shown — fetch just their data
+    const selfRecords = await SelfAttendance.find().sort({ date: 1, slot: 1 }).lean();
+    const rolls = [...new Set(selfRecords.map(r => r.rollNumber))];
+    const [students, officialStats] = rolls.length
+      ? await Promise.all([
+          Student.find({ rollNumber: { $in: rolls } }).lean(),
+          Attendance.aggregate([
+            { $match: { rollNumber: { $in: rolls } } },
+            { $group: {
+              _id:     '$rollNumber',
+              total:   { $sum: 1 },
+              present: { $sum: { $cond: [{ $in: ['$status', ['present', 'sp']] }, 1, 0] } },
+            }},
+          ]),
+        ])
+      : [[], []];
 
     const officialMap = {};
     for (const s of officialStats) officialMap[s._id] = s;

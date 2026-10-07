@@ -4,6 +4,7 @@ import Student from '@/lib/models/Student';
 import Attendance from '@/lib/models/Attendance';
 import { getSession } from '@/lib/auth';
 import { TIME_SLOTS } from '@/lib/helpers';
+import { normalizeSlot } from '@/lib/attendanceCalc';
 
 const MORNING   = TIME_SLOTS.slice(0, 4);
 const AFTERNOON = TIME_SLOTS.slice(4);
@@ -62,9 +63,20 @@ export async function GET() {
       return NextResponse.json({ error: 'Admin only' }, { status: 403 });
 
     await connectDB();
-    const [students, records] = await Promise.all([
-      Student.find().lean(),
-      Attendance.find().lean(),
+    // Only (student, day) pairs that mix present and absent can be irregular —
+    // let MongoDB filter those instead of loading every record.
+    const [students, mixedDays] = await Promise.all([
+      Student.find({}, { _id: 0, rollNumber: 1, name: 1, branch: 1, dept: 1, crtSec: 1, cluster: 1 }).lean(),
+      Attendance.aggregate([
+        { $match: { status: { $in: ['present', 'absent'] } } },
+        { $group: {
+            _id:   { rollNumber: '$rollNumber', date: '$date' },
+            slots: { $push: { slot: '$slot', status: '$status' } },
+            hasP:  { $max: { $cond: [{ $eq: ['$status', 'present'] }, 1, 0] } },
+            hasA:  { $max: { $cond: [{ $eq: ['$status', 'absent'] }, 1, 0] } },
+        }},
+        { $match: { hasP: 1, hasA: 1 } },
+      ]).allowDiskUse(true),
     ]);
 
     const studentMap = {};
@@ -72,10 +84,10 @@ export async function GET() {
 
     // Group by student → date
     const byStudentDate = {};
-    for (const r of records) {
-      if (!byStudentDate[r.rollNumber]) byStudentDate[r.rollNumber] = {};
-      if (!byStudentDate[r.rollNumber][r.date]) byStudentDate[r.rollNumber][r.date] = {};
-      byStudentDate[r.rollNumber][r.date][r.slot] = r.status;
+    for (const { _id: { rollNumber, date }, slots } of mixedDays) {
+      const slotMap = {};
+      for (const { slot, status } of slots) slotMap[normalizeSlot(slot)] = status;
+      (byStudentDate[rollNumber] ||= {})[date] = slotMap;
     }
 
     const LABELS = {
@@ -102,6 +114,7 @@ export async function GET() {
           branch:     s?.branch  || '',
           dept:       s?.dept    || '',
           crtSec:     s?.crtSec  || '',
+          cluster:    s?.cluster || '',
           irregularDays: irregularDays.sort((a, b) => b.date.localeCompare(a.date)),
           count: irregularDays.length,
         });

@@ -1,12 +1,23 @@
 # CRT Attendance Tracker
 
-A full-stack web application for tracking student attendance during the **Y-23 Summer CRT Training** at KL University (KLEF). Built independently by a Y-23 student for easy, real-time attendance monitoring.
+A full-stack web application for tracking student attendance during the **Y-24 CRT Training** (2024-28 batch) at KL University (KLEF). Built independently by a Y-23 student for easy, real-time attendance monitoring.
 
-> **Disclaimer:** This is not an official KL University platform. It is a student-built tool for voluntary use during the Summer CRT Training programme.
+> **Disclaimer:** This is not an official KL University platform. It is a student-built tool for voluntary use during the CRT Training programme.
 
 ---
 
 ## Overview
+
+### Y-24 clusters
+
+Training started **16 Aug 2026**. The batch is split into two clusters, each with CRT on two fixed weekdays:
+
+| Cluster | Days |
+|---|---|
+| C1 | Monday, Tuesday |
+| C2 | Wednesday, Thursday |
+
+Each upload is tagged with a cluster (auto-suggested from the date's weekday, confirmed by the admin). A student's attendance % only counts the sessions held for their own cluster; students of that cluster missing from a sheet are marked absent. The schedule lives in `CLUSTER_DAYS` / `TRAINING_START` in `lib/attendanceCalc.js`.
 
 The CRT Attendance Tracker provides students with a personalised dashboard to monitor their attendance across all CRT training slots, visualise weekly trends, and plan sessions ahead. The admin panel allows the CRT team to upload attendance CSVs, manage student profiles, and post notices visible to all students on the login page.
 
@@ -40,7 +51,7 @@ The CRT Attendance Tracker provides students with a personalised dashboard to mo
 - Updates/notices banner — shows admin-posted announcements at the top of the dashboard
 
 ### Admin Panel
-- **CSV Upload** — bulk-upload attendance records from CSV files; upload history with edit-date and delete
+- **Attendance Upload** — drop the official Excel report (.xlsx/.xls) or a CSV; header row, slot columns, date and clusters are detected automatically, then confirmed before import; upload history per date & cluster with edit-date and delete
 - **Student Manager** — view all students, search by roll number, edit profiles
 - **Attendance Marking** — manually mark individual student attendance
 - **Irregular Patterns** — flag students with unusual attendance behaviour
@@ -72,7 +83,7 @@ The CRT Attendance Tracker provides students with a personalised dashboard to mo
 | `/change-password` | Authenticated | First-login password change |
 | `/reset-password` | Public | Token-based password reset |
 | `/student` | Student | Attendance dashboard + session planner |
-| `/admin/upload` | Admin | CSV upload + upload history |
+| `/admin/upload` | Admin | Excel / CSV upload + upload history |
 | `/admin/students` | Admin | Student list and search |
 | `/admin/mark` | Admin | Manual attendance marking |
 | `/admin/irregular` | Admin | Irregular pattern detection |
@@ -96,9 +107,9 @@ The CRT Attendance Tracker provides students with a personalised dashboard to mo
 | GET | `/api/student/me` | Fetch authenticated student data |
 | GET | `/api/students/[rollNumber]` | Fetch a specific student's data |
 | POST | `/api/attendance/mark` | Mark attendance for a student |
-| POST | `/api/admin/upload-csv` | Bulk upload attendance from CSV |
+| POST | `/api/admin/upload-csv` | Preview (`mode=preview`) or import an Excel / CSV attendance file |
 | GET/DELETE | `/api/admin/upload-history` | Manage upload history |
-| GET/POST/PUT | `/api/admin/students` | Manage students |
+| GET | `/api/admin/students` | Paginated student list with stats (`page`, `limit`, `q`, column filters, `all=1`) |
 | POST | `/api/admin/create-profile` | Create a new student account |
 | POST | `/api/admin/removal` | Remove a student |
 | GET | `/api/admin/irregular` | Get irregular attendance patterns |
@@ -197,5 +208,5 @@ For questions, bug reports, or data requests:
 
 ## License
 
-This project is not open-source and is intended solely for use within the Y-23 KL University CRT Training programme.
+This project is not open-source and is intended solely for use within the Y-24 KL University CRT Training programme.
 © 2026 CRT Attendance Tracker — Not an official KL University platform.

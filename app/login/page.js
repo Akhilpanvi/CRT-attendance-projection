@@ -60,7 +60,7 @@ function Splash({ onDone }) {
       {/* Text */}
       <div className="text-center space-y-1" style={{ animation: 'fadeUp 0.5s ease 0.35s both' }}>
         <p className="font-bold text-xl tracking-tight" style={{ color: dark ? '#ffffff' : '#0f172a' }}>CRT Attendance Tracker</p>
-        <p className="text-sm" style={{ color: dark ? 'rgba(255,255,255,0.4)' : 'rgba(15,23,42,0.4)' }}>Y-23 · KL University</p>
+        <p className="text-sm" style={{ color: dark ? 'rgba(255,255,255,0.4)' : 'rgba(15,23,42,0.4)' }}>Y-24 · KL University</p>
       </div>
 
       {/* Progress bar */}
@@ -197,7 +197,7 @@ export default function LoginPage() {
               <span className="text-gradient-blue">Tracker</span>
             </h1>
             <p className="text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.62)' : 'rgba(15,23,42,0.5)' }}>
-              Y-23 Summer CRT Training · KL University
+              Y-24 CRT Training · KL University
             </p>
           </div>
 

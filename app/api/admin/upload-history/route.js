@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import Attendance from '@/lib/models/Attendance';
+import Session from '@/lib/models/Session';
 import { getSession } from '@/lib/auth';
 import { getWeekNumber } from '@/lib/helpers';
+import { getSessions } from '@/lib/sessions';
+import { dayName } from '@/lib/attendanceCalc';
+import { logAction } from '@/lib/auditLog';
 
 async function adminOnly() {
   const session = await getSession();
@@ -10,42 +14,44 @@ async function adminOnly() {
   return session;
 }
 
-// GET — list all uploaded dates with record counts
+// Records for one upload: a date, optionally narrowed to one cluster
+const scope = (date, cluster) => (cluster ? { date, cluster } : { date });
+
+// GET — one row per uploaded (date, cluster), from the Session collection
 export async function GET() {
   try {
     if (!await adminOnly()) return NextResponse.json({ error: 'Admin only' }, { status: 403 });
     await connectDB();
+    await getSessions(); // rebuilds the Session collection if it is missing
 
-    const agg = await Attendance.aggregate([
+    const agg = await Session.aggregate([
       { $group: {
-        _id:      '$date',
-        records:  { $sum: 1 },
-        present:  { $sum: { $cond: [{ $eq: ['$status', 'present'] }, 1, 0] } },
-        students: { $addToSet: '$rollNumber' },
-        slots:    { $addToSet: '$slot' },
+        _id:        { date: '$date', cluster: '$cluster' },
+        slots:      { $sum: 1 },
+        students:   { $max: '$students' },
+        present:    { $sum: '$present' },
+        records:    { $sum: '$students' },
+        fileName:   { $last: '$fileName' },
+        uploadedBy: { $last: '$uploadedBy' },
+        uploadedAt: { $max: '$uploadedAt' },
       }},
-      { $project: {
-        date:     '$_id',
-        records:  1,
-        present:  1,
-        students: { $size: '$students' },
-        slots:    { $size: '$slots' },
-        _id: 0,
-      }},
-      { $sort: { date: -1 } },
+      { $sort: { '_id.date': -1, '_id.cluster': 1 } },
     ]);
 
-    return NextResponse.json(agg);
+    return NextResponse.json(agg.map(({ _id, ...r }) => ({
+      date: _id.date, cluster: _id.cluster, day: dayName(_id.date), ...r,
+    })));
   } catch (e) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }
 
-// PATCH — change the date of all records for a given date
+// PATCH — move an upload to another date
 export async function PATCH(request) {
   try {
-    if (!await adminOnly()) return NextResponse.json({ error: 'Admin only' }, { status: 403 });
-    const { fromDate, toDate } = await request.json();
+    const session = await adminOnly();
+    if (!session) return NextResponse.json({ error: 'Admin only' }, { status: 403 });
+    const { fromDate, toDate, cluster = '' } = await request.json();
 
     if (!fromDate || !toDate)
       return NextResponse.json({ error: 'fromDate and toDate required' }, { status: 400 });
@@ -58,30 +64,35 @@ export async function PATCH(request) {
     await connectDB();
 
     // Check toDate doesn't already have records (would cause unique-index conflicts)
-    const existing = await Attendance.countDocuments({ date: toDate });
+    const existing = await Attendance.countDocuments(scope(toDate, cluster));
     if (existing > 0)
-      return NextResponse.json({ error: `${toDate} already has ${existing} records. Delete it first or pick a different date.` }, { status: 409 });
+      return NextResponse.json({ error: `${toDate} already has ${existing} records${cluster ? ` for ${cluster}` : ''}. Delete it first or pick a different date.` }, { status: 409 });
 
-    const result = await Attendance.updateMany(
-      { date: fromDate },
-      { $set: { date: toDate, week, year } }
-    );
+    const result = await Attendance.updateMany(scope(fromDate, cluster), { $set: { date: toDate, week, year } });
+    await Session.updateMany(scope(fromDate, cluster), { $set: { date: toDate } });
 
+    logAction(session.username, 'EDIT_UPLOAD_DATE', fromDate,
+      `Moved ${cluster || 'all'} attendance from ${fromDate} to ${toDate} — ${result.modifiedCount} records`);
     return NextResponse.json({ success: true, updated: result.modifiedCount });
   } catch (e) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }
 
-// DELETE — remove all attendance records for a date
+// DELETE — remove all attendance records for a date (optionally one cluster)
 export async function DELETE(request) {
   try {
-    if (!await adminOnly()) return NextResponse.json({ error: 'Admin only' }, { status: 403 });
-    const { date } = await request.json();
+    const session = await adminOnly();
+    if (!session) return NextResponse.json({ error: 'Admin only' }, { status: 403 });
+    const { date, cluster = '' } = await request.json();
     if (!date) return NextResponse.json({ error: 'date required' }, { status: 400 });
 
     await connectDB();
-    const result = await Attendance.deleteMany({ date });
+    const result = await Attendance.deleteMany(scope(date, cluster));
+    await Session.deleteMany(scope(date, cluster));
+
+    logAction(session.username, 'DELETE_UPLOAD', date,
+      `Deleted ${cluster || 'all'} attendance for ${date} — ${result.deletedCount} records`);
     return NextResponse.json({ success: true, deleted: result.deletedCount });
   } catch (e) {
     return NextResponse.json({ error: e.message }, { status: 500 });

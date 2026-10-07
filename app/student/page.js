@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { LOGO_RED, LOGO_WHITE } from '@/lib/logos';
 import { fmtDate, pctColor, TIME_SLOTS } from '@/lib/helpers';
+import { SESSIONS_PER_WEEK, clusterDaysLabel } from '@/lib/attendanceCalc';
 import ThemeToggle from '@/components/ThemeToggle';
 import { FadeIn, Stagger, Item, ProgressRing, StatCard, AnimatedNumber, TrendChart, EmptyState } from '@/components/ui';
 
@@ -32,10 +33,10 @@ function generateAdvice(present, total, overallPct, weeks = [], weekSeqMap = {})
     else if (w.pct < 75) lines.push({ type: 'warn', text: `${label}: Below threshold — ${w.present}/${w.total} (${w.pct}%). Prioritise attendance.` });
     else                 lines.push({ type: 'info', text: `${label}: ${w.present}/${w.total} (${w.pct}%) — on track.` });
   }
-  if (b75.canBunk >= 16)       lines.push({ type: 'tip', text: `${b75.canBunk} sessions of flexibility (≈${Math.floor(b75.canBunk / 8)} days). No more than 1 day per week.` });
+  if (b75.canBunk >= 16)       lines.push({ type: 'tip', text: `${b75.canBunk} sessions of flexibility (≈${Math.floor(b75.canBunk / 8)} days). No more than 1 day every 2 weeks.` });
   else if (b75.canBunk >= 8)   lines.push({ type: 'tip', text: `${b75.canBunk} sessions of flexibility. Use at most 1 full day, then full attendance for 2 weeks.` });
   else if (b75.canBunk > 0)    lines.push({ type: 'tip', text: `Only ${b75.canBunk} sessions of flexibility — plan carefully, avoid full days.` });
-  else if (b75.needAttend > 0) lines.push({ type: 'tip', text: `Recovery: full attendance for ${Math.ceil(b75.needAttend / 48)} week${b75.needAttend > 48 ? 's' : ''} (${b75.needAttend} sessions) to reach 75%.` });
+  else if (b75.needAttend > 0) lines.push({ type: 'tip', text: `Recovery: full attendance for ${Math.ceil(b75.needAttend / SESSIONS_PER_WEEK)} week${b75.needAttend > SESSIONS_PER_WEEK ? 's' : ''} (${b75.needAttend} sessions) to reach 75%.` });
   return lines;
 }
 
@@ -269,7 +270,7 @@ export default function StudentPage() {
              className="h-10 w-auto block mb-2.5"
              style={isDark ? {} : { mixBlendMode: 'multiply' }} />
         <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight tracking-tight">CRT Tracker</p>
-        <p className="text-[10px] text-slate-500 dark:text-slate-400">Y-23 · KL University</p>
+        <p className="text-[10px] text-slate-500 dark:text-slate-400">Y-24 · KL University</p>
       </div>
 
       {/* Nav */}
@@ -390,7 +391,7 @@ export default function StudentPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">{s.name}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{[s.rollNumber, s.branch, s.crtSec].filter(Boolean).join(' · ')}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{[s.rollNumber, s.branch, s.crtSec, s.cluster && `${s.cluster} (${clusterDaysLabel(s.cluster)})`].filter(Boolean).join(' · ')}</p>
                 </div>
                 <span className={`text-[10px] font-semibold px-2.5 py-1 rounded border shrink-0 ${statusCls}`}>{statusLabel}</span>
               </div>
@@ -483,7 +484,7 @@ export default function StudentPage() {
                           </p>
                         ) : (
                           <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
-                            Attend <span className="font-semibold text-red-600 dark:text-red-400">{data.needAttend} consecutive sessions</span> to reach {target}% · ≈ {Math.ceil(data.needAttend / 48)} week{data.needAttend > 48 ? 's' : ''}
+                            Attend <span className="font-semibold text-red-600 dark:text-red-400">{data.needAttend} consecutive sessions</span> to reach {target}% · ≈ {Math.ceil(data.needAttend / SESSIONS_PER_WEEK)} week{data.needAttend > SESSIONS_PER_WEEK ? 's' : ''}
                           </p>
                         )}
                       </div>
@@ -666,7 +667,7 @@ export default function StudentPage() {
                           ) : (
                             <><p className="text-3xl font-bold text-red-600 dark:text-red-400 tabular-nums">{data.needAttend}</p>
                             <p className="text-xs text-slate-500 mt-0.5">sessions to recover</p>
-                            <p className="text-[11px] text-slate-400 mt-1">≈ {Math.ceil(data.needAttend / 48)} week{data.needAttend > 48 ? 's' : ''}</p></>
+                            <p className="text-[11px] text-slate-400 mt-1">≈ {Math.ceil(data.needAttend / SESSIONS_PER_WEEK)} week{data.needAttend > SESSIONS_PER_WEEK ? 's' : ''}</p></>
                           )}
                         </div>
                       ))}
@@ -933,7 +934,7 @@ export default function StudentPage() {
 
           {/* Footer */}
           <p className="text-center text-[10px] text-slate-300 dark:text-slate-700 pb-4">
-            Y-23 CRT Training · KL University ·{' '}
+            Y-24 CRT Training · KL University ·{' '}
             <a href="https://akhilpanvi.com" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">Akhil Panvi</a>
           </p>
         </main>

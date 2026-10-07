@@ -1,9 +1,10 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useToast, Toast } from '@/components/Toast';
+import { CLUSTERS, clusterDaysLabel } from '@/lib/attendanceCalc';
 
 const ALL_PERMISSIONS = [
-  { key: 'upload',          label: 'Upload CSV',      desc: 'Import daily attendance CSVs' },
+  { key: 'upload',          label: 'Upload',          desc: 'Import daily attendance (Excel / CSV)' },
   { key: 'students',        label: 'All Students',    desc: 'View and edit student attendance' },
   { key: 'mark',            label: 'Mark Attendance', desc: 'Manually mark individual slots' },
   { key: 'removal',         label: 'Removal List',    desc: 'View students at removal risk' },
@@ -103,7 +104,7 @@ export default function CreateProfilePage() {
             </div>
             <div>
               <label className="form-label">Registration No. <span className="text-red-500">*</span></label>
-              <input className="form-input" placeholder="e.g. 2300040011"
+              <input className="form-input" placeholder="e.g. 2400030017"
                      value={form.rollNumber} onChange={e => set('rollNumber', e.target.value)} />
             </div>
             <div>
@@ -128,18 +129,20 @@ export default function CreateProfilePage() {
                          value={form.dept} onChange={e => set('dept', e.target.value)} />
                 </div>
                 <div>
-                  <label className="form-label">Cluster</label>
-                  <input className="form-input" placeholder="e.g. C2"
-                         value={form.cluster} onChange={e => set('cluster', e.target.value)} />
+                  <label className="form-label">Cluster <span className="text-red-500">*</span></label>
+                  <select className="form-input" value={form.cluster} onChange={e => set('cluster', e.target.value)}>
+                    <option value="">Select…</option>
+                    {CLUSTERS.map(c => <option key={c} value={c}>{c} — {clusterDaysLabel(c)}</option>)}
+                  </select>
                 </div>
                 <div>
                   <label className="form-label">CRT Section</label>
-                  <input className="form-input" placeholder="e.g. IS205"
+                  <input className="form-input" placeholder="e.g. RS21"
                          value={form.crtSec} onChange={e => set('crtSec', e.target.value)} />
                 </div>
                 <div>
                   <label className="form-label">CRT Room</label>
-                  <input className="form-input" placeholder="e.g. C008"
+                  <input className="form-input" placeholder="e.g. C121"
                          value={form.crtRoom} onChange={e => set('crtRoom', e.target.value)} />
                 </div>
               </>

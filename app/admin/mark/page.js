@@ -14,9 +14,9 @@ function buildTemplateCSV() {
   const header = ['Roll Number', 'Date', ...TIME_SLOTS].join(',');
   // Sample data matching the image
   const rows = [
-    ['2200030001', '15/05/26', 'SP', '', 'SP', '', '', 'SP', 'SP', ''],
-    ['2200030002', '15/05/26', '',   '', '',   '', '', 'SP', 'SP', ''],
-    ['2200030003', '16/05/26', 'SP', '', '',   '', '', '',   'SP', 'SP'],
+    ['2400030017', '17/08/26', 'SP', '', 'SP', '', '', 'SP', 'SP', ''],
+    ['2400030216', '17/08/26', '',   '', '',   '', '', 'SP', 'SP', ''],
+    ['2400030239', '18/08/26', 'SP', '', '',   '', '', '',   'SP', 'SP'],
   ].map(r => r.join(','));
   return [header, ...rows].join('\n');
 }
