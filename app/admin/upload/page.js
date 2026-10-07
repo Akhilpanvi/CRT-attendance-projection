@@ -170,6 +170,167 @@ function UploadHistory({ refreshKey, onChanged, showToast }) {
   );
 }
 
+// ── Training calendar: uploaded / holiday / not-uploaded days ─────────────────
+const STATUS_STYLE = {
+  uploaded: 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800',
+  holiday:  'text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600',
+  pending:  'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800',
+};
+const STATUS_LABEL = { uploaded: 'Uploaded', holiday: 'Holiday', pending: 'Not uploaded' };
+
+function TrainingCalendar({ refreshKey, onChanged, showToast }) {
+  const [data, setData]       = useState(null);
+  const [view, setView]       = useState('pending');
+  const [busy, setBusy]       = useState(null);           // row key
+  const [marking, setMarking] = useState(null);           // { key, reason }
+  const [form, setForm]       = useState({ date: '', cluster: 'ALL', reason: '' });
+
+  const load = useCallback(() => {
+    fetch('/api/admin/calendar')
+      .then(r => r.json())
+      .then(d => { if (d.error) throw new Error(d.error); setData(d); })
+      .catch(e => showToast(e.message, 'error'));
+  }, []);
+  useEffect(() => { load(); }, [refreshKey]);
+
+  async function send(method, body, key, okMsg) {
+    setBusy(key);
+    try {
+      const r = await fetch('/api/admin/calendar', { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error);
+      showToast(okMsg);
+      setMarking(null);
+      load();
+      onChanged?.();
+      return true;
+    } catch (e) { showToast(e.message, 'error'); return false; }
+    finally { setBusy(null); }
+  }
+
+  async function addHoliday(e) {
+    e.preventDefault();
+    if (!form.date) { showToast('Pick a date', 'error'); return; }
+    const target = form.cluster === 'ALL' ? (clusterForDate(form.date) || 'both clusters') : form.cluster;
+    const ok = await send('POST', form, 'form', `${dayName(form.date)} ${fmtDate(form.date)} marked as holiday (${target})`);
+    if (ok) setForm(f => ({ ...f, date: '', reason: '' }));
+  }
+
+  if (!data) return (
+    <div className="card"><p className="card-title">Training Calendar</p>
+      <p className="text-sm text-slate-400 dark:text-slate-500 py-4 text-center">Loading…</p></div>
+  );
+
+  const rows = data.days.filter(d =>
+    view === 'all' ? true : view === 'holiday' ? d.status === 'holiday' : d.status === 'pending');
+
+  return (
+    <div className="card p-0 overflow-hidden">
+      <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div>
+            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Training Calendar</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+              Every scheduled CRT day since training start. Not-uploaded days and holidays are not counted in anyone’s %.
+            </p>
+          </div>
+          <div className="flex gap-1.5">
+            {[['pending', `Not uploaded · ${data.summary.pending}`], ['holiday', `Holidays · ${data.summary.holiday}`], ['all', 'All days']].map(([k, label]) => (
+              <button key={k} onClick={() => setView(k)}
+                className={`text-xs px-2.5 py-1 rounded border transition-colors
+                  ${view === k
+                    ? 'border-slate-800 dark:border-slate-200 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
+                    : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-slate-400'}`}>
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <form onSubmit={addHoliday} className="mt-3 flex flex-wrap items-end gap-2">
+          <div>
+            <label className="form-label">Add holiday</label>
+            <input type="date" className="form-input text-xs py-1.5 w-36" value={form.date}
+                   onChange={e => setForm(f => ({ ...f, date: e.target.value }))} />
+          </div>
+          <select className="form-input text-xs py-1.5 w-40" value={form.cluster}
+                  onChange={e => setForm(f => ({ ...f, cluster: e.target.value }))}>
+            <option value="ALL">{form.date && clusterForDate(form.date) ? `Auto — ${clusterForDate(form.date)} (${dayName(form.date)})` : 'Both clusters'}</option>
+            {CLUSTERS.map(c => <option key={c} value={c}>{c} ({clusterDaysLabel(c)})</option>)}
+          </select>
+          <input className="form-input text-xs py-1.5 flex-1 min-w-[160px]" placeholder="Reason (optional) — e.g. Dussehra"
+                 value={form.reason} maxLength={120} onChange={e => setForm(f => ({ ...f, reason: e.target.value }))} />
+          <button className="btn-outline btn-sm" disabled={busy === 'form'}>{busy === 'form' ? 'Saving…' : 'Mark holiday'}</button>
+        </form>
+      </div>
+
+      {rows.length === 0 ? (
+        <p className="text-sm text-slate-400 dark:text-slate-500 py-6 text-center">
+          {view === 'pending' ? 'Every scheduled day is uploaded or marked as a holiday. 🎉' : view === 'holiday' ? 'No holidays marked.' : 'No scheduled days yet.'}
+        </p>
+      ) : (
+        <div className="overflow-x-auto max-h-[420px] overflow-y-auto">
+          <table className="w-full text-sm">
+            <thead className="sticky top-0">
+              <tr>{['Date', 'Cluster', 'Status', ''].map(h => <th key={h} className="tbl-header">{h}</th>)}</tr>
+            </thead>
+            <tbody>
+              {rows.map(d => {
+                const key = `${d.date}|${d.cluster}`;
+                const isMarking = marking?.key === key;
+                return (
+                  <tr key={key} className="tbl-row">
+                    <td className="tbl-cell">
+                      <span className="font-medium text-slate-900 dark:text-slate-100">{fmtDate(d.date)}</span>
+                      <span className="text-xs text-slate-400 dark:text-slate-500 ml-1.5">{d.day}</span>
+                      {d.today && <span className="text-[10px] text-slate-400 ml-1.5">today</span>}
+                    </td>
+                    <td className="tbl-cell"><span className="chip">{d.cluster}</span></td>
+                    <td className="tbl-cell">
+                      <span className={`text-[11px] font-medium px-2 py-0.5 rounded border ${STATUS_STYLE[d.status]}`}>
+                        {d.future && d.status === 'holiday' ? 'Upcoming holiday' : STATUS_LABEL[d.status]}
+                      </span>
+                      {d.status === 'uploaded' && <span className="text-xs text-slate-400 ml-2">{d.slots} slots{d.makeup ? ' · make-up' : ''}</span>}
+                      {d.reason && <span className="text-xs text-slate-500 dark:text-slate-400 ml-2">{d.reason}</span>}
+                    </td>
+                    <td className="tbl-cell text-right whitespace-nowrap">
+                      {d.status === 'pending' && (isMarking ? (
+                        <span className="inline-flex items-center gap-1.5">
+                          <input autoFocus className="form-input text-xs py-1 w-40" placeholder="Reason (optional)"
+                                 value={marking.reason} maxLength={120}
+                                 onChange={e => setMarking(m => ({ ...m, reason: e.target.value }))}
+                                 onKeyDown={e => { if (e.key === 'Enter') send('POST', { date: d.date, cluster: d.cluster, reason: marking.reason }, key, `${fmtDate(d.date)} ${d.cluster} marked as holiday`); if (e.key === 'Escape') setMarking(null); }} />
+                          <button className="text-xs font-medium text-green-700 dark:text-green-400" disabled={busy === key}
+                                  onClick={() => send('POST', { date: d.date, cluster: d.cluster, reason: marking.reason }, key, `${fmtDate(d.date)} ${d.cluster} marked as holiday`)}>
+                            {busy === key ? '…' : 'Save'}
+                          </button>
+                          <button className="text-xs text-slate-400" onClick={() => setMarking(null)}>Cancel</button>
+                        </span>
+                      ) : (
+                        <button onClick={() => setMarking({ key, reason: '' })}
+                          className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 border border-slate-200 dark:border-slate-600 rounded px-2 py-0.5 transition-colors">
+                          Mark holiday
+                        </button>
+                      ))}
+                      {d.status === 'holiday' && (
+                        <button disabled={busy === key}
+                          onClick={() => send('DELETE', { date: d.date, cluster: d.cluster }, key, `Holiday removed for ${fmtDate(d.date)} ${d.cluster}`)}
+                          className="text-xs text-red-500 dark:text-red-400 border border-red-200 dark:border-red-800 rounded px-2 py-0.5 transition-colors disabled:opacity-40">
+                          {busy === key ? '…' : 'Undo'}
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Template download (matches the official Y-24 report layout) ─────────────────
 async function downloadTemplate() {
   const XLSX = await import('xlsx');
@@ -267,6 +428,7 @@ export default function UploadPage() {
     : cluster === 'ALL' ? current.total - noClusterRows
     : (counts[cluster] || 0) + noClusterRows;
   const already      = preview?.existing.filter(e => e.date === date && (cluster === 'ALL' || e.cluster === cluster)) || [];
+  const holidayHit   = preview?.holidays?.filter(h => h.date === date && (cluster === 'ALL' || h.cluster === cluster)) || [];
   const canImport    = current && date && cluster && !dateInvalid && importRows > 0 && !importing;
 
   return (
@@ -406,6 +568,10 @@ export default function UploadPage() {
               <div className="alert-warn text-xs"><span className="font-bold shrink-0">!</span>
                 <span>{fmtN(noClusterRows)} row(s) have no cluster and will be skipped in Mixed mode.</span></div>
             )}
+            {holidayHit.length > 0 && (
+              <div className="alert-info text-xs"><span className="font-bold shrink-0">i</span>
+                <span>{fmtDate(date)} is marked as a holiday for {holidayHit.map(h => h.cluster).join(', ')}. Importing will replace the holiday with this attendance.</span></div>
+            )}
             {already.length > 0 && (
               <div className="alert-info text-xs"><span className="font-bold shrink-0">i</span>
                 <span>{fmtDate(date)} already has {already.map(e => `${e.cluster || '—'} (${e.slots} slots)`).join(', ')} uploaded. Matching records will be overwritten.</span></div>
@@ -483,6 +649,8 @@ export default function UploadPage() {
           )}
         </div>
       )}
+
+      <TrainingCalendar refreshKey={historyKey} onChanged={refreshHistory} showToast={show} />
 
       <UploadHistory refreshKey={historyKey} onChanged={refreshHistory} showToast={show} />
     </div>

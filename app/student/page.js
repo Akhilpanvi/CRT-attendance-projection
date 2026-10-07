@@ -252,7 +252,10 @@ export default function StudentPage() {
 
   const officialDateSet = new Set(dates);
   const selfOnlyDates   = Object.keys(selfByDate).filter(d => !officialDateSet.has(d)).sort().reverse();
-  const allDates        = [...dates, ...selfOnlyDates].sort().reverse();
+  const missingMap      = Object.fromEntries((stats.missingDays || []).map(d => [d.date, d]));
+  const pendingCount    = (stats.missingDays || []).filter(d => d.status === 'pending').length;
+  const holidayCount    = (stats.missingDays || []).filter(d => d.status === 'holiday' && !d.future).length;
+  const allDates        = [...new Set([...dates, ...selfOnlyDates, ...Object.keys(missingMap)])].sort().reverse();
   const allSlots        = stats.slots.length > 0 ? stats.slots : TIME_SLOTS;
 
   const statusColor = pctColor(pct);
@@ -872,12 +875,22 @@ export default function StudentPage() {
               <div className="px-5 py-3 border-b border-slate-100/80 dark:border-white/[0.05] flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Session Records</p>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{dates.length} official · {selfOnlyDates.length} self-tracked</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                    {dates.length} official · {selfOnlyDates.length} self-tracked
+                    {pendingCount > 0 && <> · <span className="text-amber-600 dark:text-amber-400">{pendingCount} not uploaded</span></>}
+                    {holidayCount > 0 && <> · {holidayCount} holiday{holidayCount !== 1 ? 's' : ''}</>}
+                  </p>
                 </div>
                 {selfOnlyDates.length > 0 && (
                   <span className="text-[10px] font-medium text-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded px-2 py-0.5">Draft rows shown</span>
                 )}
               </div>
+              {pendingCount > 0 && (
+                <div className="mx-5 mt-3 px-3 py-2 rounded-lg text-[11px] leading-relaxed bg-amber-50 dark:bg-amber-900/15 border border-amber-200/70 dark:border-amber-800/50 text-amber-800 dark:text-amber-300">
+                  {pendingCount} CRT day{pendingCount !== 1 ? 's' : ''} of your cluster {pendingCount !== 1 ? 'have' : 'has'} not been uploaded yet.
+                  {' '}{pendingCount !== 1 ? 'They are' : 'It is'} not counted for or against you until the CRT office uploads the attendance — you can self-track {pendingCount !== 1 ? 'them' : 'it'} in Progression meanwhile.
+                </div>
+              )}
               {allDates.length === 0 ? (
                 <p className="text-sm text-slate-400 text-center py-10">No records yet.</p>
               ) : (
@@ -892,6 +905,29 @@ export default function StudentPage() {
                     </thead>
                     <tbody>
                       {allDates.map(dt => {
+                        const miss = missingMap[dt];
+                        if (miss && !officialDateSet.has(dt) && !selfByDate[dt]) {
+                          const holiday = miss.status === 'holiday';
+                          return (
+                            <tr key={dt} className={holiday ? 'bg-slate-50/70 dark:bg-white/[0.02]' : 'bg-amber-50/40 dark:bg-amber-900/10'}>
+                              <td className="tbl-cell font-medium text-slate-500 dark:text-slate-400">
+                                {fmtDate(dt)} <span className="text-[10px] text-slate-400">{miss.day}</span>
+                              </td>
+                              <td colSpan={allSlots.length} className="tbl-cell text-center">
+                                {holiday ? (
+                                  <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                                    {miss.future ? 'Upcoming holiday' : 'Holiday — no CRT'}{miss.reason ? ` · ${miss.reason}` : ''}
+                                  </span>
+                                ) : (
+                                  <span className="text-[11px] font-medium text-amber-700 dark:text-amber-400">
+                                    {miss.today ? 'Today — attendance not uploaded yet' : 'Attendance not uploaded yet'}
+                                  </span>
+                                )}
+                              </td>
+                              <td className="tbl-cell text-center text-slate-300 dark:text-slate-600">—</td>
+                            </tr>
+                          );
+                        }
                         const isOff   = officialDateSet.has(dt);
                         const rowData = isOff ? (stats.byDate[dt] || {}) : (selfByDate[dt] || {});
                         const p = allSlots.filter(sl => rowData[sl] === 'present' || rowData[sl] === 'sp').length;
@@ -904,6 +940,7 @@ export default function StudentPage() {
                                 {!isOff && (
                                   <>
                                     <span className="text-[9px] font-semibold text-indigo-500 bg-indigo-100 dark:bg-indigo-900/40 px-1 py-0.5 rounded">Draft</span>
+                                    {missingMap[dt]?.status === 'pending' && <span className="text-[9px] font-semibold text-amber-600 bg-amber-100 dark:bg-amber-900/40 px-1 py-0.5 rounded">Not uploaded</span>}
                                     <button onClick={() => handleEditDraft(dt)} className="text-[9px] text-blue-500 hover:underline">Edit</button>
                                     <button onClick={() => handleDeleteDraft(dt)} className="text-[9px] text-red-400 hover:underline">Delete</button>
                                   </>

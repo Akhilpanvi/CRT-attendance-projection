@@ -5,6 +5,7 @@ import Student from '@/lib/models/Student';
 import User from '@/lib/models/User';
 import Attendance from '@/lib/models/Attendance';
 import Session from '@/lib/models/Session';
+import CalendarDay from '@/lib/models/CalendarDay';
 import SelfAttendance from '@/lib/models/SelfAttendance';
 import { getSession } from '@/lib/auth';
 import { getWeekNumber } from '@/lib/helpers';
@@ -65,12 +66,15 @@ export async function POST(request) {
     if (form.get('mode') === 'preview') {
       await connectDB();
       const dates = parsed.sheets.map(s => s.date).filter(Boolean);
-      const existing = dates.length
-        ? await Session.aggregate([
-            { $match: { date: { $in: dates } } },
-            { $group: { _id: { date: '$date', cluster: '$cluster' }, slots: { $sum: 1 } } },
+      const [existing, holidays] = dates.length
+        ? await Promise.all([
+            Session.aggregate([
+              { $match: { date: { $in: dates } } },
+              { $group: { _id: { date: '$date', cluster: '$cluster' }, slots: { $sum: 1 } } },
+            ]),
+            CalendarDay.find({ date: { $in: dates } }, { _id: 0, date: 1, cluster: 1, reason: 1 }).lean(),
           ])
-        : [];
+        : [[], []];
 
       return NextResponse.json({
         fileName,
@@ -91,6 +95,7 @@ export async function POST(request) {
           })),
         })),
         existing: existing.map(e => ({ date: e._id.date, cluster: e._id.cluster, slots: e.slots })),
+        holidays,
       });
     }
 
@@ -216,6 +221,8 @@ export async function POST(request) {
       }});
     }
     if (sessionOps.length) await Session.bulkWrite(sessionOps, { ordered: false });
+    // Real attendance overrides a holiday mark for the same day
+    await CalendarDay.deleteMany({ date, cluster: { $in: Object.keys(held) } });
 
     // Clear self-tracked data for this date — official records now supersede them
     await SelfAttendance.deleteMany({ rollNumber: { $in: rollNumbers }, date });
