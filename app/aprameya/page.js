@@ -152,8 +152,8 @@ function CircleView({ members, stats, fetching, onAdd, onRemove, onSelect, onRef
 
               {/* ── Header row ─────────────────────────────────────── */}
               <div className="flex items-center gap-3 px-3 py-2.5 bg-slate-50 dark:bg-slate-700/40">
-                <div className="w-8 h-8 rounded-full bg-slate-600 dark:bg-slate-500 flex items-center
-                                justify-center text-white text-xs font-bold shrink-0">
+                <div className="sky-btn w-8 h-8 rounded-full flex items-center
+                                justify-center text-xs font-bold shrink-0">
                   {d?.student?.name
                     ? d.student.name.split(' ').map(w => w[0]).join('').slice(0, 2)
                     : '?'}
@@ -329,7 +329,7 @@ function BunkCalc({ members, stats, myRoll }) {
               onClick={() => setMode('circle')}
               className={`px-3 py-1.5 rounded text-sm font-medium border transition-colors
                 ${mode === 'circle'
-                  ? 'bg-slate-800 dark:bg-slate-700 text-white border-slate-800 dark:border-slate-700'
+                  ? 'sky-btn border-transparent'
                   : 'border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'}`}>
               From Circle
             </button>
@@ -338,7 +338,7 @@ function BunkCalc({ members, stats, myRoll }) {
             onClick={() => setMode('manual')}
             className={`px-3 py-1.5 rounded text-sm font-medium border transition-colors
               ${mode === 'manual'
-                ? 'bg-slate-800 dark:bg-slate-700 text-white border-slate-800 dark:border-slate-700'
+                ? 'sky-btn border-transparent'
                 : 'border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'}`}>
             Manual Entry
           </button>
@@ -558,19 +558,17 @@ export default function AprameYaPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <header className="bg-slate-800 dark:bg-slate-950 sticky top-0 z-10">
+    <div className="admin-glass min-h-screen">
+      <header className="sticky top-0 z-10 bg-white/55 dark:bg-slate-950/55 backdrop-blur-xl backdrop-saturate-150 border-b border-white/60 dark:border-white/10">
         <div className="max-w-2xl mx-auto px-4 flex items-center" style={{ height: 52 }}>
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded bg-white/15 border border-white/20 flex items-center
-                            justify-center text-xs font-black text-white">A</div>
-            <span className="font-semibold text-sm text-white">Aprameya's Portal</span>
+            <div className="sky-btn w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black">A</div>
+            <span className="font-semibold text-sm text-slate-900 dark:text-white">Aprameya's Portal</span>
           </div>
           <div className="ml-auto flex items-center gap-2">
-            <ThemeToggle light />
+            <ThemeToggle />
             <button onClick={logout}
-                    className="text-xs text-white/70 hover:text-white border border-white/20
-                               hover:border-white/40 rounded px-3 py-1.5 transition-colors font-medium">
+                    className="sky-soft text-xs rounded-lg px-3 py-1.5 transition-colors font-semibold">
               Sign Out
             </button>
           </div>

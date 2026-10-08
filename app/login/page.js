@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { LOGO_RED, LOGO_WHITE } from '@/lib/logos';
 import ThemeToggle from '@/components/ThemeToggle';
+import { useSky, GREETING, skyAccent, skyUI } from '@/components/SkyBackground';
 import { motion } from 'framer-motion';
 
 function fmtDate(d) {
@@ -14,11 +15,6 @@ function fmtDate(d) {
 const CAT_COLOR = { info: '#3b82f6', warning: '#d97706', important: '#dc2626' };
 const CAT_LABEL = { info: 'Info', warning: 'Warning', important: 'Important' };
 
-// Floating particle dot
-function Particle({ style }) {
-  return <div className="absolute w-1 h-1 rounded-full" style={{ ...style, animation: `particleRise ${3 + Math.random() * 4}s ease-out infinite` }} />;
-}
-
 // Theme-aware splash screen
 function Splash({ onDone }) {
   const dark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
@@ -26,27 +22,15 @@ function Splash({ onDone }) {
   const [out, setOut] = useState(false);
 
   useEffect(() => {
-    const t1 = setTimeout(() => setBar(100), 80);
-    const t2 = setTimeout(() => setOut(true), 1700);
-    const t3 = setTimeout(onDone, 2100);
+    const t1 = setTimeout(() => setBar(100), 40);
+    const t2 = setTimeout(() => setOut(true), 850);
+    const t3 = setTimeout(onDone, 1150);
     return () => [t1, t2, t3].forEach(clearTimeout);
   }, []);
 
   return (
     <div className={`fixed inset-0 z-50 flex flex-col items-center justify-center transition-all duration-500 ${out ? 'opacity-0 scale-105 pointer-events-none' : 'opacity-100 scale-100'}`}
-         style={{ background: dark ? '#000000' : 'linear-gradient(135deg,#faf8f5 0%,#f0ebe3 60%,#faf8f5 100%)' }}>
-
-      {/* Orbs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute w-80 h-80 rounded-full" style={{
-          background: dark ? 'radial-gradient(circle, rgba(59,130,246,0.25) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(180,150,100,0.2) 0%, transparent 70%)',
-          top: '15%', left: '20%', filter: 'blur(40px)', animation: 'orbFloat 8s ease-in-out infinite'
-        }} />
-        <div className="absolute w-64 h-64 rounded-full" style={{
-          background: dark ? 'radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(200,160,80,0.15) 0%, transparent 70%)',
-          bottom: '20%', right: '20%', filter: 'blur(50px)', animation: 'orbFloat2 10s ease-in-out infinite'
-        }} />
-      </div>
+         style={{ background: dark ? 'rgba(4,6,14,0.35)' : 'rgba(255,255,255,0.30)', backdropFilter: 'blur(26px) saturate(150%)', WebkitBackdropFilter: 'blur(26px) saturate(150%)' }}>
 
       {/* KL logo */}
       <div className="relative mb-6 inline-block">
@@ -65,7 +49,7 @@ function Splash({ onDone }) {
 
       {/* Progress bar */}
       <div className="mt-8 w-40 h-0.5 rounded-full overflow-hidden" style={{ background: dark ? 'rgba(255,255,255,0.1)' : 'rgba(15,23,42,0.1)', animation: 'fadeUp 0.4s ease 0.55s both' }}>
-        <div className="h-full rounded-full transition-all duration-[1400ms] ease-out relative overflow-hidden"
+        <div className="h-full rounded-full transition-all duration-[750ms] ease-out relative overflow-hidden"
              style={{ width: `${bar}%`, background: dark ? 'rgba(255,255,255,0.7)' : 'rgba(15,23,42,0.5)' }}>
           <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.5),transparent)', animation: 'shimmer 1.2s ease 0.2s infinite' }} />
         </div>
@@ -93,6 +77,8 @@ export default function LoginPage() {
   const [fbStatus,  setFbStatus]  = useState('');
 
   const [isDark, setIsDark] = useState(true);
+  const sky = useSky();
+  const ui = skyUI(sky, isDark);
   useEffect(() => {
     const root = document.documentElement;
     const sync = () => setIsDark(root.classList.contains('dark'));
@@ -134,18 +120,20 @@ export default function LoginPage() {
     } catch (e) { setError(e.message); } finally { setLoading(false); }
   }
 
-  // Particle positions — stable
-  const particles = useRef([...Array(12)].map((_, i) => ({
-    left: `${8 + (i * 7.5) % 84}%`,
-    top:  `${15 + (i * 11) % 70}%`,
-    animationDelay: `${i * 0.4}s`,
-    background: isDark ? `rgba(${[96,165,250][i%3]},${[130,92,139][i%3]},${[250,246,250][i%3]},0.25)` : `rgba(180,140,80,0.2)`,
-  })));
-
+  const ICON = 'w-[18px] h-[18px]';
   const features = [
-    { icon: '📊', title: 'Live Attendance',   sub: 'Real-time tracking with weekly breakdown and projections' },
-    { icon: '🎯', title: 'Smart Planner',     sub: 'Know exactly how many sessions you can skip or need to attend' },
-    { icon: '📈', title: 'Self Progression',  sub: 'Track your own sessions and see projected percentage instantly' },
+    { title: 'Know where you stand',
+      sub: 'Your official %, and exactly how many sessions you can still miss before 75%.',
+      tint: '#22c55e',
+      icon: <svg className={ICON} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 3v18h18M7 15l4-4 3 3 5-6" /></svg> },
+    { title: 'Made for your cluster',
+      sub: 'C1 (Mon & Tue) and C2 (Wed & Thu) are counted separately. Holidays never count against you.',
+      tint: '#6366f1',
+      icon: <svg className={ICON} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><rect x="3" y="4.5" width="18" height="16.5" rx="2.5" /><path strokeLinecap="round" d="M3 9.5h18M8 2.5v4M16 2.5v4" /></svg> },
+    { title: 'Day not uploaded? Track it',
+      sub: 'Mark missing days yourself and see an estimate — clearly labelled as unofficial.',
+      tint: '#f59e0b',
+      icon: <svg className={ICON} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 11l3 3 8-8M20 12v7a2 2 0 01-2 2H6a2 2 0 01-2-2V5a2 2 0 012-2h9" /></svg> },
   ];
 
   // Light mode colors
@@ -158,43 +146,22 @@ export default function LoginPage() {
       {showSplash && <Splash onDone={() => { setShowSplash(false); setTimeout(() => setReady(true), 60); }} />}
 
       <div className={`min-h-[100dvh] flex transition-opacity duration-500 ${ready ? 'opacity-100' : 'opacity-0'}`}
-           style={{ background: isDark ? '#000000' : `linear-gradient(135deg,${LBG} 0%,#f0ebe3 50%,${LBG} 100%)` }}>
-
-        {/* Animated orbs */}
-        <div className="fixed inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute rounded-full" style={{
-            width: 700, height: 700,
-            background: isDark ? 'radial-gradient(circle,rgba(59,130,246,0.15) 0%,transparent 65%)' : 'radial-gradient(circle,rgba(180,140,80,0.12) 0%,transparent 65%)',
-            top: '-15%', left: '-8%', filter: 'blur(60px)', animation: 'orbFloat 14s ease-in-out infinite'
-          }} />
-          <div className="absolute rounded-full" style={{
-            width: 550, height: 550,
-            background: isDark ? 'radial-gradient(circle,rgba(139,92,246,0.12) 0%,transparent 65%)' : 'radial-gradient(circle,rgba(200,160,90,0.1) 0%,transparent 65%)',
-            bottom: '-10%', right: '5%', filter: 'blur(70px)', animation: 'orbFloat2 18s ease-in-out infinite'
-          }} />
-          <div className="absolute rounded-full" style={{
-            width: 350, height: 350,
-            background: isDark ? 'radial-gradient(circle,rgba(16,185,129,0.1) 0%,transparent 65%)' : 'radial-gradient(circle,rgba(150,190,120,0.08) 0%,transparent 65%)',
-            top: '45%', right: '35%', filter: 'blur(80px)', animation: 'orbFloat3 22s ease-in-out infinite 4s'
-          }} />
-          {/* Particles — dark only */}
-          {isDark && particles.current.map((p, i) => <Particle key={i} style={{ left: p.left, top: p.top, animationDelay: p.animationDelay, background: p.background }} />)}
-        </div>
+           style={{ background: 'transparent' }}>
 
         {/* ── Left panel ── */}
-        <div className="hidden lg:flex flex-col justify-between w-[420px] shrink-0 px-12 py-12 relative overflow-hidden"
+        <div className="hidden lg:flex flex-col justify-between w-[420px] shrink-0 px-12 py-12 relative z-10 overflow-hidden"
              style={isDark ? { borderRight: '1px solid rgba(255,255,255,0.06)' } : { borderRight: `1px solid ${LBorder}` }}>
 
-          <div style={{ animation: ready ? 'fadeUp 0.65s cubic-bezier(0.16,1,0.3,1) 80ms both' : 'none' }}>
+          <div style={{ animation: ready ? 'fadeUp 0.45s cubic-bezier(0.16,1,0.3,1) both' : 'none' }}>
             <div className="inline-flex items-center mb-10"
-                 style={{ animation: ready ? 'scaleIn 0.6s cubic-bezier(0.16,1,0.3,1) both' : 'none' }}>
+                 style={{ animation: 'none' }}>
               <img src={isDark ? LOGO_WHITE : LOGO_RED} alt="KL University"
                    className="h-14 w-auto block"
                    style={isDark ? {} : { mixBlendMode: 'multiply' }} />
             </div>
             <h1 className="text-[2.1rem] font-extrabold leading-tight tracking-tight mb-3">
               <span style={{ color: isDark ? '#ffffff' : '#0f172a' }}>CRT Attendance</span><br />
-              <span className="text-gradient-blue">Tracker</span>
+              <span className="sky-text">Tracker</span>
             </h1>
             <p className="text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.62)' : 'rgba(15,23,42,0.5)' }}>
               Y-24 CRT Training · KL University
@@ -206,24 +173,26 @@ export default function LoginPage() {
             {features.map((f, i) => (
               <motion.div key={f.title} className="rounded-xl px-4 py-3.5 flex items-start gap-3 group"
                    style={{
-                     background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.6)',
-                     border: isDark ? '1px solid rgba(255,255,255,0.07)' : `1px solid ${LBorder}`,
-                     backdropFilter: 'blur(8px)',
+                     background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.45)',
+                     border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(255,255,255,0.9)',
+                     backdropFilter: 'blur(18px) saturate(150%)', WebkitBackdropFilter: 'blur(18px) saturate(150%)',
+                     boxShadow: isDark ? '0 8px 30px rgba(0,0,0,0.35)' : '0 8px 30px rgba(15,23,42,0.06)',
                    }}
                    initial={ready ? { opacity: 0, y: 14 } : false}
                    animate={ready ? { opacity: 1, y: 0 } : false}
-                   transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1], delay: 0.2 + i * 0.11 }}
-                   whileHover={{ x: 4, backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.92)' }}>
-                <span className="text-xl shrink-0 mt-0.5">{f.icon}</span>
+                   transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                   whileHover={{ x: 4, backgroundColor: isDark ? 'rgba(25,30,48,0.7)' : 'rgba(255,255,255,0.92)' }}>
+                <span className="w-9 h-9 rounded-xl shrink-0 flex items-center justify-center"
+                      style={{ background: f.tint + (isDark ? '2e' : '1f'), color: f.tint }}>{f.icon}</span>
                 <div>
-                  <p className="text-sm font-semibold" style={{ color: isDark ? 'rgba(255,255,255,0.9)' : '#1e293b' }}>{f.title}</p>
-                  <p className="text-xs mt-0.5 leading-relaxed" style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(15,23,42,0.5)' }}>{f.sub}</p>
+                  <p className="text-sm font-semibold" style={{ color: isDark ? '#ffffff' : '#0f172a' }}>{f.title}</p>
+                  <p className="text-xs mt-0.5 leading-relaxed" style={{ color: isDark ? 'rgba(255,255,255,0.78)' : '#475569' }}>{f.sub}</p>
                 </div>
               </motion.div>
             ))}
           </div>
 
-          <p className="text-[10px] leading-relaxed" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(15,23,42,0.3)', animation: ready ? 'fadeUp 0.5s ease 650ms both' : 'none' }}>
+          <p className="text-[10px] leading-relaxed" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(15,23,42,0.3)', animation: ready ? 'fadeUp 0.45s cubic-bezier(0.16,1,0.3,1) both' : 'none' }}>
             Made by{' '}
             <a href="https://akhilpanvi.com" target="_blank" rel="noopener noreferrer"
                style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(15,23,42,0.5)', textDecoration: 'underline', textUnderlineOffset: '2px' }}>
@@ -234,8 +203,15 @@ export default function LoginPage() {
         </div>
 
         {/* ── Right ── */}
-        <div className="flex-1 flex flex-col relative">
-          <div className="flex justify-end p-4 relative z-10">
+        <div className="flex-1 flex flex-col relative z-10">
+          <div className="flex justify-end items-center gap-2 p-4 relative z-10">
+            {sky.weather && (
+              <span className="text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-md"
+                    title={`Live weather · sunrise ${sky.weather.sunrise} · sunset ${sky.weather.sunset}`}
+                    style={{ background: isDark ? 'rgba(15,18,30,0.55)' : 'rgba(255,255,255,0.75)', border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(255,255,255,0.9)', color: isDark ? '#f1f5f9' : '#0f172a' }}>
+                {sky.weather.place} · {sky.weather.temp}° · {sky.weather.label}
+              </span>
+            )}
             <ThemeToggle />
           </div>
 
@@ -243,7 +219,7 @@ export default function LoginPage() {
 
             {/* Form */}
             <div className="w-full max-w-sm shrink-0"
-                 style={{ animation: ready ? 'fadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 120ms both' : 'none' }}>
+                 style={{ animation: ready ? 'fadeUp 0.45s cubic-bezier(0.16,1,0.3,1) both' : 'none' }}>
 
               {/* Mobile logo */}
               <div className="flex items-center gap-2.5 mb-8 lg:hidden">
@@ -256,10 +232,10 @@ export default function LoginPage() {
               {/* Mobile notices */}
               {updates.length > 0 && (
                 <div className="lg:hidden mb-6 rounded-xl overflow-hidden"
-                     style={{ background: isDark ? 'rgba(255,255,255,0.04)' : LCard, border: isDark ? '1px solid rgba(255,255,255,0.08)' : `1px solid ${LBorder}` }}>
-                  <div className="px-4 py-2.5 flex items-center gap-2" style={{ borderBottom: isDark ? '1px solid rgba(255,255,255,0.06)' : `1px solid ${LBorder}` }}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : '#475569' }}>Notices</span>
+                     style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.45)', border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.75)'}`, backdropFilter: 'blur(20px) saturate(150%)', WebkitBackdropFilter: 'blur(20px) saturate(150%)' }}>
+                  <div className="px-4 py-2.5 flex items-center gap-2" style={{ background: ui.soft, borderBottom: `1px solid ${ui.edge}` }}>
+                    <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ui.dot }} />
+                    <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: ui.ink }}>Notices</span>
                   </div>
                   {updates.slice(0, 3).map((u, i) => (
                     <div key={u._id} className="px-4 py-2.5" style={{ borderTop: i > 0 ? (isDark ? '1px solid rgba(255,255,255,0.05)' : `1px solid ${LBorder}`) : 'none' }}>
@@ -273,16 +249,22 @@ export default function LoginPage() {
               {/* Form card */}
               <div className="rounded-2xl p-7 relative overflow-hidden"
                    style={isDark
-                     ? { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(24px)', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }
-                     : { background: LCard, border: `1px solid ${LBorder}`, boxShadow: '0 8px 50px rgba(0,0,0,0.07)' }}>
+                     ? { background: 'linear-gradient(160deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03))', border: '1px solid rgba(255,255,255,0.16)', backdropFilter: 'blur(28px) saturate(150%)', WebkitBackdropFilter: 'blur(28px) saturate(150%)', boxShadow: '0 24px 70px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.12)' }
+                     : { background: 'linear-gradient(160deg, rgba(255,255,255,0.62), rgba(255,255,255,0.32))', border: '1px solid rgba(255,255,255,0.75)', backdropFilter: 'blur(28px) saturate(160%)', WebkitBackdropFilter: 'blur(28px) saturate(160%)', boxShadow: '0 20px 60px rgba(15,23,42,0.12), inset 0 1px 0 rgba(255,255,255,0.9)' }}>
 
                 {/* Top card shimmer line */}
                 <div className="absolute top-0 left-0 right-0 h-px"
                      style={{ background: isDark ? 'linear-gradient(90deg,transparent,rgba(255,255,255,0.46),transparent)' : 'linear-gradient(90deg,transparent,rgba(0,0,0,0.05),transparent)' }} />
 
                 <div className="mb-7">
-                  <h2 className="text-xl font-bold" style={{ color: isDark ? '#ffffff' : '#0f172a' }}>Welcome back</h2>
-                  <p className="text-sm mt-1" style={{ color: isDark ? 'rgba(255,255,255,0.62)' : '#64748b' }}>Sign in to view your attendance</p>
+                  <h2 className="text-xl font-bold" style={{ color: isDark ? '#ffffff' : '#0f172a' }}>{sky.phase ? `${GREETING[sky.phase]}!` : 'Welcome back'}</h2>
+                  <p className="text-sm mt-1" style={{ color: isDark ? 'rgba(255,255,255,0.62)' : '#64748b' }}>Sign in to see your CRT attendance</p>
+                </div>
+
+                <div className="mb-5 flex gap-2.5 items-start rounded-xl px-3.5 py-3 text-xs leading-relaxed"
+                     style={{ background: ui.soft, border: `1px solid ${ui.edge}`, color: ui.ink, transition: 'all 1.2s ease' }}>
+                  <svg className="w-4 h-4 shrink-0 mt-px" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><circle cx="12" cy="12" r="9.5" /><path strokeLinecap="round" d="M12 11v6M12 7.5v.01" /></svg>
+                  <span><strong>First time logging in?</strong> Your password is your <strong>Registration No.</strong> (same as your ID). You’ll be asked to set a new password right after.</span>
                 </div>
 
                 <form onSubmit={handleLogin} className="space-y-5">
@@ -290,7 +272,7 @@ export default function LoginPage() {
                     { label: 'Registration No.', type: 'text',     ph: 'Registration number',  val: username, set: setUsername, delay: '200ms' },
                     { label: 'Password',          type: 'password', ph: 'Enter your password',  val: password, set: setPassword, delay: '300ms' },
                   ].map(({ label, type, ph, val, set, delay }) => (
-                    <div key={label} className="space-y-1.5" style={{ animation: ready ? `fadeUp 0.5s ease ${delay} both` : 'none' }}>
+                    <div key={label} className="space-y-1.5" style={{ animation: ready ? `fadeUp 0.45s cubic-bezier(0.16,1,0.3,1) both` : 'none' }}>
                       <div className="flex items-center justify-between">
                         <label className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: isDark ? 'rgba(255,255,255,0.6)' : '#64748b' }}>{label}</label>
                         {type === 'password' && (
@@ -307,9 +289,9 @@ export default function LoginPage() {
                         className="w-full px-4 py-3 rounded-xl text-sm font-medium outline-none transition-all duration-250"
                         style={isDark
                           ? { background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }
-                          : { background: '#faf8f5', border: `1px solid ${LBorder}`, color: '#0f172a' }}
-                        onFocus={e => { e.target.style.borderColor = isDark ? 'rgba(96,165,250,0.7)' : '#93c5fd'; e.target.style.boxShadow = isDark ? '0 0 0 3px rgba(59,130,246,0.12)' : '0 0 0 3px rgba(59,130,246,0.08)'; e.target.style.background = isDark ? 'rgba(255,255,255,0.09)' : '#ffffff'; }}
-                        onBlur={e => { e.target.style.borderColor = isDark ? 'rgba(255,255,255,0.1)' : LBorder; e.target.style.boxShadow = 'none'; e.target.style.background = isDark ? 'rgba(255,255,255,0.07)' : '#faf8f5'; }}
+                          : { background: 'rgba(255,255,255,0.55)', border: '1px solid rgba(15,23,42,0.10)', color: '#0f172a' }}
+                        onFocus={e => { e.target.style.borderColor = ui.dot; e.target.style.boxShadow = `0 0 0 3px ${ui.soft}`; e.target.style.background = isDark ? 'rgba(255,255,255,0.09)' : '#ffffff'; }}
+                        onBlur={e => { e.target.style.borderColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(15,23,42,0.10)'; e.target.style.boxShadow = 'none'; e.target.style.background = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.55)'; }}
                       />
                     </div>
                   ))}
@@ -326,13 +308,14 @@ export default function LoginPage() {
 
                   <button type="submit" disabled={loading}
                     className="w-full py-3.5 rounded-xl text-sm font-bold relative overflow-hidden transition-all duration-200 group"
-                    style={{ animation: ready ? 'fadeUp 0.5s ease 400ms both' : 'none',
-                             background: loading ? (isDark ? 'rgba(255,255,255,0.08)' : '#e9e5df') : (isDark ? '#ffffff' : '#1e293b'),
-                             color: loading ? (isDark ? 'rgba(255,255,255,0.35)' : '#94a3b8') : (isDark ? '#0f172a' : '#ffffff'),
+                    style={{ animation: ready ? 'fadeUp 0.45s cubic-bezier(0.16,1,0.3,1) both' : 'none',
+                             ...(loading
+                               ? { background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.08)', color: isDark ? 'rgba(255,255,255,0.45)' : '#64748b' }
+                               : ui.button),
                              transform: 'translateY(0)',
-                             boxShadow: !loading ? (isDark ? '0 4px 20px rgba(255,255,255,0.08)' : '0 4px 20px rgba(15,23,42,0.15)') : 'none' }}
-                    onMouseEnter={e => { if (!loading) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = isDark ? '0 8px 30px rgba(255,255,255,0.15)' : '0 8px 30px rgba(15,23,42,0.2)'; }}}
-                    onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = !loading ? (isDark ? '0 4px 20px rgba(255,255,255,0.08)' : '0 4px 20px rgba(15,23,42,0.15)') : 'none'; }}>
+                             boxShadow: !loading ? `0 6px 22px ${ui.glow}` : 'none' }}
+                    onMouseEnter={e => { if (!loading) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = `0 10px 30px ${ui.glow}`; }}}
+                    onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = !loading ? `0 6px 22px ${ui.glow}` : 'none'; }}>
                     {/* Shimmer sweep */}
                     {!loading && <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
                                        style={{ background: 'linear-gradient(105deg,transparent 35%,rgba(255,255,255,0.46) 50%,transparent 65%)', animation: 'shimmer 1.4s ease infinite' }} />}
@@ -411,9 +394,9 @@ export default function LoginPage() {
               </div>
 
               {/* Footer links */}
-              <div className="mt-5 text-center" style={{ animation: ready ? 'fadeUp 0.5s ease 550ms both' : 'none' }}>
+              <div className="mt-5 text-center" style={{ animation: ready ? 'fadeUp 0.45s cubic-bezier(0.16,1,0.3,1) both' : 'none' }}>
                 <p className="text-[10px] mb-2" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(15,23,42,0.35)' }}>
-                  Use your registration number as username · First login prompts a password change
+                  Username = Registration No. · First-time password = Registration No.
                 </p>
                 <div className="flex items-center justify-center gap-3">
                   {[['Privacy', '/privacy'], ['Terms', '/terms']].map(([l, h]) => (
@@ -432,18 +415,18 @@ export default function LoginPage() {
             {/* Notices desktop */}
             {updates.length > 0 && (
               <div className="hidden lg:block w-80 shrink-0 self-center"
-                   style={{ animation: ready ? 'fadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 220ms both' : 'none' }}>
+                   style={{ animation: ready ? 'fadeUp 0.45s cubic-bezier(0.16,1,0.3,1) both' : 'none' }}>
                 <div className="rounded-2xl overflow-hidden"
                      style={isDark
-                       ? { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(24px)', boxShadow: '0 20px 60px rgba(0,0,0,0.4)' }
-                       : { background: LCard, border: `1px solid ${LBorder}`, boxShadow: '0 8px 50px rgba(0,0,0,0.06)' }}>
+                       ? { background: 'linear-gradient(160deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03))', border: '1px solid rgba(255,255,255,0.14)', backdropFilter: 'blur(28px) saturate(150%)', WebkitBackdropFilter: 'blur(28px) saturate(150%)', boxShadow: '0 20px 60px rgba(0,0,0,0.4)' }
+                       : { background: 'linear-gradient(160deg, rgba(255,255,255,0.62), rgba(255,255,255,0.32))', border: '1px solid rgba(255,255,255,0.75)', backdropFilter: 'blur(28px) saturate(160%)', WebkitBackdropFilter: 'blur(28px) saturate(160%)', boxShadow: '0 20px 60px rgba(15,23,42,0.10)' }}>
                   <div className="px-5 py-3.5 flex items-center justify-between"
-                       style={{ background: isDark ? 'rgba(255,255,255,0.025)' : '#f8f5f1', borderBottom: isDark ? '1px solid rgba(255,255,255,0.06)' : `1px solid ${LBorder}` }}>
+                       style={{ background: ui.soft, borderBottom: `1px solid ${ui.edge}`, transition: 'all 1.2s ease' }}>
                     <div className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: isDark ? 'rgba(255,255,255,0.55)' : '#475569' }}>Notices</span>
+                      <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ui.dot }} />
+                      <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: ui.ink }}>Notices</span>
                     </div>
-                    <span className="text-[10px]" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : '#94a3b8' }}>{updates.length} items</span>
+                    <span className="text-[10px] font-semibold" style={{ color: ui.ink, opacity: 0.8 }}>{updates.length} items</span>
                   </div>
                   <div style={{ maxHeight: '440px', overflowY: 'auto' }}>
                     {updates.map((u, i) => {
@@ -451,8 +434,8 @@ export default function LoginPage() {
                       const cl = CAT_LABEL[u.category] || 'Info';
                       return (
                         <div key={u._id} className="px-5 py-3.5 transition-colors duration-150 cursor-default"
-                             style={{ borderBottom: isDark ? '1px solid rgba(255,255,255,0.05)' : `1px solid ${LBorder}` }}
-                             onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.03)' : '#faf8f5'}
+                             style={{ borderBottom: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(15,23,42,0.06)' }}
+                             onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.45)'}
                              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                           <div className="flex items-center justify-between mb-1.5">
                             <span style={{ fontSize: '9px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em', color: cc, background: `${cc}20`, padding: '2px 7px', borderRadius: '4px' }}>
@@ -461,7 +444,7 @@ export default function LoginPage() {
                             <span style={{ color: isDark ? 'rgba(255,255,255,0.5)' : '#94a3b8', fontSize: '10px' }}>{fmtDate(u.createdAt)}</span>
                           </div>
                           {u.title && <p style={{ fontSize: '12px', fontWeight: '600', color: isDark ? 'rgba(255,255,255,0.88)' : '#0f172a', marginBottom: '4px', lineHeight: '1.4' }}>{u.title}</p>}
-                          <p style={{ fontSize: '11px', color: isDark ? 'rgba(255,255,255,0.45)' : '#475569', lineHeight: '1.65', whiteSpace: 'pre-wrap' }}>{u.content}</p>
+                          <p style={{ fontSize: '11px', color: isDark ? 'rgba(255,255,255,0.72)' : '#475569', lineHeight: '1.65', whiteSpace: 'pre-wrap' }}>{u.content}</p>
                         </div>
                       );
                     })}

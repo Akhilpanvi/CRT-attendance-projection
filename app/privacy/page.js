@@ -16,7 +16,7 @@ const sections = [
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-900">
+    <div className="min-h-screen">
 
       {/* Header */}
       <header className="border-b border-slate-200 dark:border-slate-800">
@@ -108,7 +108,7 @@ export default function PrivacyPage() {
               </p>
               <div className="overflow-hidden rounded border border-slate-200 dark:border-slate-700">
                 <table className="w-full text-sm">
-                  <thead className="bg-slate-50 dark:bg-slate-800">
+                  <thead className="bg-white/50 dark:bg-white/5">
                     <tr>
                       <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 w-2/5">Data</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Purpose</th>
@@ -122,7 +122,7 @@ export default function PrivacyPage() {
                       ['Attendance records', 'Core purpose of the platform — slots marked Present, Absent, or SP per session; sourced from the Department of CRT'],
                       ['Section and batch', 'Groups students correctly within the attendance system'],
                     ].map(([d, p]) => (
-                      <tr key={d} className="bg-white dark:bg-slate-900">
+                      <tr key={d} className="bg-white/35 dark:bg-white/[0.02]">
                         <td className="px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-200 align-top">{d}</td>
                         <td className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400 align-top">{p}</td>
                       </tr>

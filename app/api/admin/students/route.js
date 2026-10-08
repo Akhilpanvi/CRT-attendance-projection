@@ -45,11 +45,14 @@ export async function GET(request) {
     const pages = Math.max(1, Math.ceil(total / limit));
     if (page > pages) page = pages;
 
-    let query = Student.find(filter, { __v: 0, createdAt: 0 }).sort({ sno: 1, name: 1 });
+    let query = Student.find(filter, { _id: 0, rollNumber: 1, name: 1, branch: 1, dept: 1, cluster: 1, crtSec: 1, crtRoom: 1 })
+      .sort({ sno: 1, name: 1 });
     if (!all) query = query.skip((page - 1) * limit).limit(limit);
     const students = await query.lean();
 
-    const rows = await attachStats(students, sessions, { everyone: all && !filtered });
+    // Send only what the table / Excel report use — keeps each page small
+    const rows = (await attachStats(students, sessions, { everyone: all && !filtered }))
+      .map(({ stats: { total, present, sp, overallPct }, ...s }) => ({ ...s, stats: { total, present, sp, overallPct } }));
     return NextResponse.json({ rows, total, page, limit, pages });
   } catch (e) {
     return NextResponse.json({ error: e.message }, { status: 500 });

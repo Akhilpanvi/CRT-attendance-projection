@@ -16,7 +16,7 @@ const sections = [
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-900">
+    <div className="min-h-screen">
 
       {/* Header */}
       <header className="border-b border-slate-200 dark:border-slate-800">

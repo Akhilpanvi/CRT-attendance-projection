@@ -239,7 +239,7 @@ function TrainingCalendar({ refreshKey, onChanged, showToast }) {
               <button key={k} onClick={() => setView(k)}
                 className={`text-xs px-2.5 py-1 rounded border transition-colors
                   ${view === k
-                    ? 'border-slate-800 dark:border-slate-200 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
+                    ? 'sky-btn border-transparent'
                     : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-slate-400'}`}>
                 {label}
               </button>
@@ -493,7 +493,7 @@ export default function UploadPage() {
                   <button key={s.sheet} onClick={() => selectSheet(s)}
                     className={`text-xs px-3 py-1.5 rounded border transition-colors
                       ${s.sheet === sheet
-                        ? 'border-slate-800 dark:border-slate-200 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
+                        ? 'sky-btn border-transparent'
                         : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-slate-400'}`}>
                     {s.sheet}{s.date ? ` · ${fmtDate(s.date)}` : ''} · {fmtN(s.total)} rows
                   </button>
@@ -519,7 +519,7 @@ export default function UploadPage() {
                   <button key={c} onClick={() => setCluster(c)}
                     className={`flex-1 text-xs px-2 py-2 rounded border transition-colors text-center
                       ${c === cluster
-                        ? 'border-slate-800 dark:border-slate-200 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
+                        ? 'sky-btn border-transparent'
                         : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-slate-400'}`}>
                     <div className="font-semibold">{c === 'ALL' ? 'Mixed' : c}</div>
                     <div className="text-[10px] opacity-70">{c === 'ALL' ? 'per-row cluster' : clusterDaysLabel(c)}</div>
@@ -600,7 +600,7 @@ export default function UploadPage() {
 
           <label className="flex items-center gap-2.5 mt-4 cursor-pointer select-none">
             <input type="checkbox" checked={reupload} onChange={e => setReupload(e.target.checked)}
-              className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500" />
+              className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 accent-[color:var(--sky-dot)]" />
             <span className="text-sm text-slate-600 dark:text-slate-400">Re-upload mode — skip creating new student logins</span>
           </label>
 

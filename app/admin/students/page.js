@@ -28,7 +28,7 @@ async function downloadAttendanceReport(students) {
       'CRT Room':                 s.crtRoom || '',
       'Present (incl. SP)':       present,
       'SP (Special Permission)':  sp,
-      'Absent':                   s.stats?.absent ?? 0,
+      'Absent':                   (s.stats?.total ?? 0) - (s.stats?.present ?? 0),
       'Total':                    total,
       'Original %':               origPct,
       'Attendance % (with SP)':   s.stats?.overallPct ?? 0,

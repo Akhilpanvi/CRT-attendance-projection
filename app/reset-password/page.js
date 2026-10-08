@@ -41,28 +41,25 @@ function ResetPasswordForm() {
   }
 
   return (
-    <div className="min-h-screen flex bg-slate-50 dark:bg-slate-900">
-      <div className="hidden lg:flex flex-col justify-between w-[400px] shrink-0 p-10
-                      bg-slate-800 dark:bg-slate-950">
+    <div className="min-h-screen flex">
+      <div className="glass hidden lg:flex flex-col justify-between w-[400px] shrink-0 p-10 m-4 rounded-3xl">
         <div>
-          <div className="w-9 h-9 rounded bg-white/15 border border-white/20 flex items-center
-                          justify-center text-sm font-black text-white mb-8">KL</div>
-          <h2 className="text-2xl font-bold text-white leading-snug">
-            CRT Attendance<br />Tracker
+          <div className="sky-btn w-9 h-9 rounded-lg flex items-center justify-center text-sm font-black mb-8">KL</div>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white leading-snug">
+            CRT Attendance<br /><span className="sky-text">Tracker</span>
           </h2>
-          <p className="text-white/50 text-sm mt-2">
+          <p className="text-slate-500 dark:text-slate-300 text-sm mt-2">
             KL University · 2024-28 Batch<br />
             Y-24 CRT Training
           </p>
         </div>
-        <p className="text-white/25 text-xs">© {new Date().getFullYear()} KL University</p>
+        <p className="text-slate-400 text-xs">© {new Date().getFullYear()} KL University</p>
       </div>
 
       <div className="flex-1 flex items-center justify-center px-6 pb-12">
         <div className="w-full max-w-sm">
           <div className="flex items-center gap-2 mb-8 lg:hidden">
-            <div className="w-8 h-8 rounded flex items-center justify-center text-xs font-black
-                            text-white bg-slate-800 dark:bg-slate-700">KL</div>
+            <div className="sky-btn w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black">KL</div>
             <span className="text-sm font-bold text-slate-900 dark:text-slate-100">CRT Attendance Tracker</span>
           </div>
 

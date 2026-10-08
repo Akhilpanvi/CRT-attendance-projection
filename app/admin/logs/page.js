@@ -8,6 +8,7 @@ const ACTION_LABELS = {
   EDIT_UPLOAD_DATE:    { label: 'Edit Upload Date',   color: 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' },
   DELETE_UPLOAD:       { label: 'Delete Upload',      color: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' },
   MARK_HOLIDAY:        { label: 'Holiday',            color: 'bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400' },
+  BOT_KNOWLEDGE:       { label: 'Chatbot',            color: 'bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400' },
   MARK_SP:             { label: 'Mark SP',            color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400' },
   CREATE_PROFILE:      { label: 'Create Profile',     color: 'bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400' },
   RESET_PASSWORD:      { label: 'Reset Password',     color: 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' },

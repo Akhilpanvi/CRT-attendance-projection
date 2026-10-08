@@ -1,5 +1,6 @@
 import './globals.css';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import { SkyProvider } from '@/components/SkyBackground';
 
 export const metadata = {
   title: 'CRT Attendance Tracker — KL University',
@@ -20,7 +21,7 @@ export default function RootLayout({ children }) {
         ` }} />
       </head>
       <body className="bg-bg text-fg">
-        {children}
+        <SkyProvider>{children}</SkyProvider>
         <SpeedInsights />
       </body>
     </html>

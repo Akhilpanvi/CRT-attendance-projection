@@ -3,13 +3,17 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
+import { LOGO_RED, LOGO_WHITE } from '@/lib/logos';
+import ChatWidget from '@/components/ChatWidget';
+import useScrolled from '@/components/useScrolled';
 
 // permission key must match the key used in ALL_PERMISSIONS on create-profile page
 const navItems = [
   {
     href: '/admin/upload',
+    group: 'attendance',
     permission: 'upload',
-    label: 'Upload CSV',
+    label: 'Upload',
     icon: (
       <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
@@ -18,6 +22,7 @@ const navItems = [
   },
   {
     href: '/admin/students',
+    group: 'attendance',
     permission: 'students',
     label: 'All Students',
     icon: (
@@ -27,7 +32,30 @@ const navItems = [
     ),
   },
   {
+    href: '/admin/statistics',
+    group: 'attendance',
+    permission: 'statistics',
+    label: 'Statistics',
+    icon: (
+      <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v18h18M7.5 15.75v-3m4.5 3V9m4.5 6.75v-6" />
+      </svg>
+    ),
+  },
+  {
+    href: '/admin/chatbot',
+    group: 'manage',
+    permission: 'chatbot',
+    label: 'Chatbot Knowledge',
+    icon: (
+      <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z" />
+      </svg>
+    ),
+  },
+  {
     href: '/admin/mark',
+    group: 'attendance',
     permission: 'mark',
     label: 'Mark Attendance',
     icon: (
@@ -38,6 +66,7 @@ const navItems = [
   },
   {
     href: '/admin/removal',
+    group: 'attendance',
     permission: 'removal',
     label: 'Removal List',
     icon: (
@@ -48,6 +77,7 @@ const navItems = [
   },
   {
     href: '/admin/irregular',
+    group: 'attendance',
     permission: 'irregular',
     label: 'Irregular',
     icon: (
@@ -58,6 +88,7 @@ const navItems = [
   },
   {
     href: '/admin/progression',
+    group: 'attendance',
     permission: 'progression',
     label: 'Progression',
     icon: (
@@ -68,6 +99,7 @@ const navItems = [
   },
   {
     href: '/admin/create-profile',
+    group: 'manage',
     permission: 'create-profile',
     label: 'Create Profile',
     icon: (
@@ -78,6 +110,7 @@ const navItems = [
   },
   {
     href: '/admin/updates',
+    group: 'manage',
     permission: 'updates',
     label: 'Updates',
     icon: (
@@ -88,6 +121,7 @@ const navItems = [
   },
   {
     href: '/admin/feedback',
+    group: 'manage',
     permission: 'feedback',
     label: 'Feedback',
     icon: (
@@ -98,6 +132,7 @@ const navItems = [
   },
   {
     href: '/admin/logs',
+    group: 'system',
     permission: null,
     superAdminOnly: true,
     label: 'Logs',
@@ -109,6 +144,7 @@ const navItems = [
   },
   {
     href: '/admin/admin-accounts',
+    group: 'system',
     permission: null,
     superAdminOnly: true,
     label: 'Admin Accounts',
@@ -132,6 +168,7 @@ export default function AdminLayout({ children }) {
   const pathname = usePathname();
   const router   = useRouter();
   const [open, setOpen] = useState(false);
+  const scrolled = useScrolled();
   // null = super-admin (full access, no restrictions); 'full' = fallback; array = specific perms; 'loading' = not yet loaded
   const [myPerms,   setMyPerms]   = useState('loading');
   const [myUsername, setMyUsername] = useState('');
@@ -161,61 +198,65 @@ export default function AdminLayout({ children }) {
     router.push('/login');
   }
 
+  const NAV_GROUPS = [['attendance', 'Attendance'], ['manage', 'Manage'], ['system', 'System']];
   const Sidebar = ({ mobile }) => (
-    <aside className={`${mobile ? 'flex' : 'hidden lg:flex'} flex-col h-full bg-slate-800 dark:bg-slate-950`}>
+    <aside className={`${mobile ? 'flex' : 'hidden lg:flex'} flex-col h-full border-r
+                       bg-white/55 dark:bg-slate-950/55 backdrop-blur-2xl backdrop-saturate-150
+                       border-white/70 dark:border-white/10`}>
       {/* Brand */}
-      <div className="flex items-center gap-3 px-4 py-4 border-b border-white/10">
-        <div className="w-8 h-8 rounded bg-white/15 border border-white/20 flex items-center
-                        justify-center text-sm font-black text-white shrink-0">KL</div>
-        <div>
-          <div className="text-sm font-semibold text-white leading-none">CRT Tracker</div>
-          <div className="text-[10px] text-white/50 mt-0.5">KL University</div>
+      <div className="flex items-center gap-2.5 px-4 py-4">
+        <img src={LOGO_RED} alt="KL University" className="h-8 w-auto dark:hidden" style={{ mixBlendMode: 'multiply' }} />
+        <img src={LOGO_WHITE} alt="KL University" className="h-8 w-auto hidden dark:block" />
+        <div className="min-w-0">
+          <div className="text-sm font-bold text-slate-900 dark:text-white leading-none">CRT Tracker</div>
+          <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Admin · Y-24</div>
         </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 py-4">
-        <p className="px-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-white/40">
-          Navigation
-        </p>
-        {visibleNav.map(item => {
-          const active = pathname === item.href;
+      <nav className="flex-1 overflow-y-auto px-2.5 pb-3 space-y-4">
+        {NAV_GROUPS.map(([g, label]) => {
+          const items = visibleNav.filter(i => i.group === g);
+          if (!items.length) return null;
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setOpen(false)}
-              className={`flex items-center gap-3 px-4 py-2.5 text-sm transition-colors border-l-2
-                ${active
-                  ? 'bg-white/10 border-white text-white font-semibold'
-                  : 'border-transparent text-white/65 hover:bg-white/8 hover:text-white'}`}>
-              {item.icon}
-              {item.label}
-            </Link>
+            <div key={g}>
+              <p className="px-2.5 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">{label}</p>
+              <div className="space-y-0.5">
+                {items.map(item => {
+                  const active = pathname === item.href;
+                  return (
+                    <Link key={item.href} href={item.href} onClick={() => setOpen(false)}
+                      aria-current={active ? 'page' : undefined}
+                      className={`flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-[13px] transition-colors
+                        ${active
+                          ? 'sky-soft font-semibold shadow-sm'
+                          : 'text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white'}`}>
+                      {item.icon}
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
           );
         })}
       </nav>
 
       {/* Footer */}
-      <div className="px-3 py-3 border-t border-white/10">
-        <div className="flex items-center gap-2 bg-white/8 rounded px-3 py-2 mb-2">
-          <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center
-                          text-xs font-bold text-white shrink-0">
+      <div className="px-3 py-3 border-t border-slate-900/5 dark:border-white/10">
+        <div className="flex items-center gap-2 px-1.5 mb-2">
+          <div className="sky-btn w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0">
             {myUsername ? myUsername[0].toUpperCase() : 'A'}
           </div>
           <div className="min-w-0">
-            <div className="text-xs font-semibold text-white/80 truncate leading-none">
-              {myUsername || 'Admin'}
-            </div>
-            <div className="text-[9px] text-white/40 mt-0.5">
-              {myPerms === null ? 'Super Admin' : 'Administrator'}
-            </div>
+            <div className="text-xs font-semibold text-slate-800 dark:text-white truncate leading-none">{myUsername || 'Admin'}</div>
+            <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{myPerms === null ? 'Super Admin' : 'Administrator'}</div>
           </div>
         </div>
-        <button
-          onClick={logout}
-          className="w-full text-xs font-medium text-white/75 bg-white/8 hover:bg-white/15
-                     border border-white/15 rounded py-1.5 transition-colors">
+        <button onClick={logout}
+          className="w-full text-xs font-semibold rounded-xl py-2 transition-colors
+                     text-slate-700 dark:text-slate-200 bg-white/70 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10
+                     border border-slate-900/10 dark:border-white/10">
           Sign Out
         </button>
       </div>
@@ -223,7 +264,7 @@ export default function AdminLayout({ children }) {
   );
 
   return (
-    <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="admin-glass flex min-h-screen">
       <div className="hidden lg:block w-56 shrink-0 fixed left-0 top-0 bottom-0 z-20">
         <Sidebar />
       </div>
@@ -238,8 +279,10 @@ export default function AdminLayout({ children }) {
       )}
 
       <div className="flex-1 lg:ml-56 flex flex-col min-h-screen">
-        <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700
-                           flex items-center px-4 gap-3 sticky top-0 z-10"
+        <header className={`transition-all duration-300 border-b ${scrolled
+                             ? 'bg-white/55 dark:bg-slate-950/55 backdrop-blur-xl backdrop-saturate-150 border-white/60 dark:border-white/10 shadow-[0_6px_24px_rgba(15,23,42,0.06)]'
+                             : 'bg-transparent border-transparent'}
+                           flex items-center px-4 gap-3 sticky top-0 z-10`}
                 style={{ height: 52 }}>
           <button
             onClick={() => setOpen(true)}
@@ -276,6 +319,7 @@ export default function AdminLayout({ children }) {
             </div>
           ) : children}
         </main>
+        {!pathname.startsWith('/admin/chatbot') && <ChatWidget role="admin" />}
       </div>
     </div>
   );

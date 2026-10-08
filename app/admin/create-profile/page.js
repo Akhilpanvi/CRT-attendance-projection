@@ -6,6 +6,8 @@ import { CLUSTERS, clusterDaysLabel } from '@/lib/attendanceCalc';
 const ALL_PERMISSIONS = [
   { key: 'upload',          label: 'Upload',          desc: 'Import daily attendance (Excel / CSV)' },
   { key: 'students',        label: 'All Students',    desc: 'View and edit student attendance' },
+  { key: 'statistics',      label: 'Statistics',      desc: 'Section & group attendance analysis' },
+  { key: 'chatbot',         label: 'Chatbot Knowledge', desc: 'Train the CRT Y24 assistant' },
   { key: 'mark',            label: 'Mark Attendance', desc: 'Manually mark individual slots' },
   { key: 'removal',         label: 'Removal List',    desc: 'View students at removal risk' },
   { key: 'irregular',       label: 'Irregular',       desc: 'View irregular attendance report' },
