@@ -124,8 +124,41 @@ function heatStyle(m, t, faded) {
 /** Grid used by both the day rows and the time header so columns line up */
 const halfGrid = n => ({ display: 'grid', gridTemplateColumns: `repeat(${n}, var(--cell))` });
 
-/** A CRT day as heat squares: 4 morning + 4 afternoon with a lunch gap */
-function Segments({ marks, slots, t, faded, animate }) {
+/** Time chip for one session: its start time, coloured by status, struck through if missed */
+function chipStyle(m, t, faded) {
+  const base = { fontSize: 11, fontWeight: 700, lineHeight: 1, padding: '5px 6px', borderRadius: 7, whiteSpace: 'nowrap',
+                 fontVariantNumeric: 'tabular-nums', boxSizing: 'border-box', opacity: faded ? 0.55 : 1 };
+  if (m === 'present') return { ...base, background: t.okSoft, color: t.ok };
+  if (m === 'sp')      return { ...base, background: t.warnSoft, color: t.warn };
+  if (m === 'absent')  return { ...base, background: t.badSoft, color: t.bad, textDecoration: 'line-through' };
+  return { ...base, border: `1.5px dashed ${t.line}`, color: t.muted };
+}
+
+/** A CRT day as time chips (option 8): morning and afternoon groups, wrap on small screens */
+function TimeChips({ marks, slots, t, faded, animate }) {
+  let idx = 0;
+  return (
+    <div className="flex-1 min-w-0 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+      {halves(marks).map((g, gi) => {
+        const base = idx; idx += g.length;
+        return (
+          <div key={gi} className="flex gap-1">
+            {g.map((m, j) => (
+              <span key={j} className={animate ? 'heat-cell' : undefined} title={`${slots[base + j] || ''} · ${STATUS_WORD[m] || 'No record'}`}
+                    style={{ ...chipStyle(m, t, faded), animationDelay: animate ? `${(base + j) * 30}ms` : undefined }}>
+                {(slots[base + j] || '').slice(0, 5)}
+              </span>
+            ))}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/** A CRT day as heat squares (option 3): 4 morning + 4 afternoon with a lunch gap */
+function Segments({ marks, slots, t, faded, animate, view = 'squares' }) {
+  if (view === 'chips') return <TimeChips marks={marks} slots={slots} t={t} faded={faded} animate={animate} />;
   let idx = 0;
   return (
     <div className="heat-row flex-1 min-w-0 flex items-center" style={{ gap: 'var(--lunch)' }}>
@@ -142,6 +175,25 @@ function Segments({ marks, slots, t, faded, animate }) {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+/** Segmented switch between the two attendance views (students only) */
+function ViewSwitch({ view, onChange, t }) {
+  const opts = [
+    ['chips', 'Chips', <svg key="i" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="8" width="8" height="8" rx="2.5" /><rect x="13" y="8" width="8" height="8" rx="2.5" /></svg>],
+    ['squares', 'Squares', <svg key="i" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="9" width="5" height="6" rx="1.5" /><rect x="9.5" y="9" width="5" height="6" rx="1.5" /><rect x="16" y="9" width="5" height="6" rx="1.5" /></svg>],
+  ];
+  return (
+    <div role="radiogroup" aria-label="Attendance view" className="inline-flex p-0.5 rounded-xl" style={{ background: t.well }}>
+      {opts.map(([k, label, icon]) => (
+        <button key={k} role="radio" aria-checked={view === k} onClick={() => onChange(k)}
+                className={`flex items-center gap-1.5 h-8 px-2.5 rounded-[10px] text-xs font-bold transition-all ${view === k ? 'sky-btn' : ''}`}
+                style={view === k ? undefined : { color: t.muted }}>
+          {icon}{label}
+        </button>
+      ))}
     </div>
   );
 }
@@ -185,6 +237,9 @@ export default function StudentPage() {
   const [selfByDate, setSelfByDate] = useState({});
   const [view, setView]         = useState('home');          // 'home' | 'history'
   const [expanded, setExpanded] = useState(null);
+  const [barView, setBarView]   = useState('chips');          // 'chips' (default) | 'squares'
+  useEffect(() => { try { const v = localStorage.getItem('crt-bar-view'); if (v === 'squares' || v === 'chips') setBarView(v); } catch {} }, []);
+  const changeBarView = v => { setBarView(v); try { localStorage.setItem('crt-bar-view', v); } catch {} };
   const [sheet, setSheet]       = useState(null);            // { type: 'info' | 'notices' | 'track', date? }
   const [draft, setDraft]       = useState({});
   const [saving, setSaving]     = useState(false);
@@ -363,7 +418,7 @@ export default function StudentPage() {
               <div className="text-[12px] min-[380px]:text-[13px] font-bold whitespace-nowrap">{dayLabel(d.date)}</div>
               {d.kind === 'self' && <div className="text-[10px] font-bold tracking-wide mt-0.5" style={{ color: t.self }}>SELF-TRACKED</div>}
             </div>
-            <Segments marks={d.marks} slots={model.slots} t={t} faded={d.kind === 'self'} animate={!compact} />
+            <Segments marks={d.marks} slots={model.slots} t={t} faded={d.kind === 'self'} animate={!compact} view={barView} />
             <ScorePill present={d.present} total={model.slots.length} t={t} />
           </button>
           {d.kind === 'self' && (
@@ -398,9 +453,19 @@ export default function StudentPage() {
   const Legend = () => (
     <div className="heat-row flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 text-[11px] font-medium" style={{ color: t.muted, borderTop: `1px solid ${t.line}` }}>
       {[['present', 'Present'], ['absent', 'Missed'], ['sp', 'Permission']].map(([m, l]) => (
-        <span key={m} className="flex items-center gap-1.5"><span style={{ ...heatStyle(m, t), width: 14, height: 14, borderRadius: 4 }} />{l}</span>
+        <span key={m} className="flex items-center gap-1.5">
+          {barView === 'chips'
+            ? <span style={{ ...chipStyle(m, t), padding: '3px 5px', fontSize: 10 }}>09:20</span>
+            : <span style={{ ...heatStyle(m, t), width: 14, height: 14, borderRadius: 4 }} />}
+          {l}
+        </span>
       ))}
-      <span className="flex items-center gap-1.5"><span style={{ ...heatStyle('present', t, true), width: 14, height: 14, borderRadius: 4 }} />Self-tracked (unofficial)</span>
+      <span className="flex items-center gap-1.5">
+        {barView === 'chips'
+          ? <span style={{ ...chipStyle('present', t, true), padding: '3px 5px', fontSize: 10 }}>09:20</span>
+          : <span style={{ ...heatStyle('present', t, true), width: 14, height: 14, borderRadius: 4 }} />}
+        Self-tracked (unofficial)
+      </span>
     </div>
   );
 
@@ -575,11 +640,11 @@ export default function StudentPage() {
 
           {/* Right column */}
           <Glass t={t} className="rounded-[24px] overflow-hidden" aria-label="Recent CRT days">
-            <div className="flex items-baseline justify-between px-4 pt-4 pb-2.5">
+            <div className="flex items-center justify-between gap-3 px-4 pt-4 pb-2.5">
               <h2 className="text-base font-bold">Recent CRT days</h2>
-              <span className="text-[11px]" style={{ color: t.muted }}>Tap a day for details</span>
+              <ViewSwitch view={barView} onChange={changeBarView} t={t} />
             </div>
-            <div className="hidden lg:flex items-center gap-3 px-4 pb-1.5 text-[10.5px] font-mono" style={{ color: t.muted }}>
+            <div className={`${barView === 'squares' ? 'hidden lg:flex' : 'hidden'} items-center gap-3 px-4 pb-1.5 text-[10.5px] font-mono`} style={{ color: t.muted }}>
               <div className="w-[76px] sm:w-[86px] shrink-0" />
               <div className="heat-row flex-1 min-w-0 flex" style={{ gap: 'var(--lunch)' }}>
                 {halves(model.slots).map((g, gi) => (
@@ -603,7 +668,7 @@ export default function StudentPage() {
         </div>
 
         <p className="text-center text-[11px] mt-8" style={{ color: t.muted }}>
-          Y-24 CRT Training · KL University · <a href="https://akhilpanvi.com" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">Akhil Panvi</a>
+          Y-24 CRT Training · KL University · <a href="/about" className="underline underline-offset-2">About</a> · <a href="/privacy" className="underline underline-offset-2">Privacy</a> · <a href="/terms" className="underline underline-offset-2">Terms</a>
         </p>
       </main>
       {renderSheet()}

@@ -166,6 +166,17 @@ function Modal({ roll, name, onClose, showToast }) {
 
 const SP_CLS = 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400';
 
+/** Admin attendance cell: heat square (option 3) — same look students can choose */
+function HeatSquare({ v, label }) {
+  const word = v === 'present' ? 'Present' : v === 'absent' ? 'Missed' : v === 'sp' ? 'Permission (SP)' : 'No record';
+  const cls = v === 'present' ? 'bg-green-600 shadow-[inset_0_-2px_0_rgba(0,0,0,0.12)]'
+    : v === 'sp' ? 'bg-yellow-500 shadow-[inset_0_-2px_0_rgba(0,0,0,0.10)]'
+    : v === 'absent' ? 'bg-red-200 dark:bg-red-500/25 ring-[1.5px] ring-inset ring-red-500 dark:ring-red-400'
+    : 'border-[1.5px] border-dashed border-slate-300 dark:border-slate-600';
+  return <span title={`${label} · ${word}`} aria-label={word} className={`inline-block align-middle ${cls}`}
+               style={{ width: 22, height: 22, borderRadius: 6 }} />;
+}
+
 function SpBadge() {
   return <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold ${SP_CLS}`}>SP</span>;
 }
@@ -307,10 +318,7 @@ function DetailView({ data, roll, showToast, refetch }) {
                             )}
                             <button onClick={() => openEdit(dt, sl)}
                               className="cursor-pointer hover:opacity-70 transition-opacity">
-                              {v === 'present' ? <span className="badge-present">P</span>
-                               : v === 'absent'  ? <span className="badge-absent">A</span>
-                               : v === 'sp'      ? <SpBadge />
-                               : <span className="badge-dash">—</span>}
+                              <HeatSquare v={v} label={sl} />
                             </button>
                           </td>
                         );

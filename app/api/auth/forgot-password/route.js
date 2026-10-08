@@ -77,7 +77,7 @@ function resetEmailTemplate({ name, rollNumber, resetLink, expiresIn }) {
               KL University · CRT Attendance Tracker · Y-24 CRT Training
             </p>
             <p style="margin:0;font-size:10px;color:#cbd5e1;text-align:center;">
-              Not an official KL University platform. Made by a Y23 student with personal interest.
+              Questions? contact@akhilpanvi.com
             </p>
           </td>
         </tr>

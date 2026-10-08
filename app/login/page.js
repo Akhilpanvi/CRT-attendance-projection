@@ -166,6 +166,10 @@ export default function LoginPage() {
             <p className="text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.62)' : 'rgba(15,23,42,0.5)' }}>
               Y-24 CRT Training · KL University
             </p>
+            <a href="/about" className="sky-soft inline-flex items-center gap-1.5 mt-4 px-3.5 py-2 rounded-xl text-sm font-semibold transition-transform hover:-translate-y-0.5">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><circle cx="12" cy="12" r="9.5" /><path strokeLinecap="round" d="M12 11v6M12 7.5v.01" /></svg>
+              About this site
+            </a>
           </div>
 
           {/* Feature cards */}
@@ -193,12 +197,7 @@ export default function LoginPage() {
           </div>
 
           <p className="text-[10px] leading-relaxed" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(15,23,42,0.3)', animation: ready ? 'fadeUp 0.45s cubic-bezier(0.16,1,0.3,1) both' : 'none' }}>
-            Made by{' '}
-            <a href="https://akhilpanvi.com" target="_blank" rel="noopener noreferrer"
-               style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(15,23,42,0.5)', textDecoration: 'underline', textUnderlineOffset: '2px' }}>
-              Akhil Panvi
-            </a>
-            {' '}· Y-23 · KL University
+            Built for Y-24 CRT students · KL University
           </p>
         </div>
 
@@ -227,6 +226,7 @@ export default function LoginPage() {
                      className="h-9 w-auto block"
                      style={isDark ? {} : { mixBlendMode: 'multiply' }} />
                 <span className="text-sm font-bold" style={{ color: isDark ? '#ffffff' : '#0f172a' }}>CRT Attendance Tracker</span>
+                <a href="/about" className="sky-soft ml-auto text-xs font-semibold px-3 py-1.5 rounded-lg">About</a>
               </div>
 
               {/* Mobile notices */}
@@ -399,15 +399,11 @@ export default function LoginPage() {
                   Username = Registration No. · First-time password = Registration No.
                 </p>
                 <div className="flex items-center justify-center gap-3">
-                  {[['Privacy', '/privacy'], ['Terms', '/terms']].map(([l, h]) => (
+                  {[['About', '/about'], ['Privacy', '/privacy'], ['Terms', '/terms']].map(([l, h]) => (
                     <a key={l} href={h} className="text-[10px] transition-colors" style={{ color: isDark ? 'rgba(255,255,255,0.46)' : 'rgba(15,23,42,0.3)' }}
                        onMouseEnter={e => e.target.style.color = isDark ? 'rgba(255,255,255,0.5)' : 'rgba(15,23,42,0.6)'}
                        onMouseLeave={e => e.target.style.color = isDark ? 'rgba(255,255,255,0.46)' : 'rgba(15,23,42,0.3)'}>{l}</a>
                   ))}
-                  <span style={{ color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(15,23,42,0.2)', fontSize: '10px' }}>·</span>
-                  <a href="https://akhilpanvi.com" target="_blank" rel="noopener noreferrer" className="text-[10px] transition-colors" style={{ color: isDark ? 'rgba(255,255,255,0.46)' : 'rgba(15,23,42,0.3)' }}
-                     onMouseEnter={e => e.target.style.color = isDark ? 'rgba(255,255,255,0.5)' : 'rgba(15,23,42,0.6)'}
-                     onMouseLeave={e => e.target.style.color = isDark ? 'rgba(255,255,255,0.46)' : 'rgba(15,23,42,0.3)'}>Akhil Panvi</a>
                 </div>
               </div>
             </div>

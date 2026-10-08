@@ -4,7 +4,7 @@ import { SkyProvider } from '@/components/SkyBackground';
 
 export const metadata = {
   title: 'CRT Attendance Tracker — KL University',
-  description: 'Y-24 Batch CRT Training. Not an official KL University platform.',
+  description: 'Attendance tracker for Y-24 CRT Training students at KL University.',
 };
 
 export default function RootLayout({ children }) {

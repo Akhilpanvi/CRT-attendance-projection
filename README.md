@@ -1,8 +1,7 @@
 # CRT Attendance Tracker
 
-A full-stack web application for tracking student attendance during the **Y-24 CRT Training** (2024-28 batch) at KL University (KLEF). Built independently by a Y-23 student for easy, real-time attendance monitoring.
+A full-stack web application for tracking student attendance during the **Y-24 CRT Training** (2024-28 batch) at KL University (KLEF). Built for easy, real-time attendance monitoring by students.
 
-> **Disclaimer:** This is not an official KL University platform. It is a student-built tool for voluntary use during the CRT Training programme.
 
 ---
 
@@ -202,11 +201,11 @@ Change this immediately after first login.
 ## Contact
 
 For questions, bug reports, or data requests:
-**support@kluniversity.me**
+**contact@akhilpanvi.com**
 
 ---
 
 ## License
 
 This project is not open-source and is intended solely for use within the Y-24 KL University CRT Training programme.
-© 2026 CRT Attendance Tracker — Not an official KL University platform.
+© 2026 CRT Attendance Tracker.

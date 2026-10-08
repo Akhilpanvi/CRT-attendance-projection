@@ -9,7 +9,7 @@ export async function middleware(request) {
 
   if (pathname.startsWith('/api/auth')) return NextResponse.next();
 
-  const publicRoutes = ['/login', '/reset-password', '/api/updates', '/api/feedback', '/api/weather', '/privacy', '/terms'];
+  const publicRoutes = ['/login', '/reset-password', '/api/updates', '/api/feedback', '/api/weather', '/privacy', '/terms', '/about'];
   if (!token) {
     if (publicRoutes.some(r => pathname === r || pathname.startsWith(r))) return NextResponse.next();
     return NextResponse.redirect(new URL('/login', request.url));
