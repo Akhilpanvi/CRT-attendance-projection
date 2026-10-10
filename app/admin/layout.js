@@ -143,6 +143,18 @@ const navItems = [
     ),
   },
   {
+    href: '/admin/database',
+    group: 'system',
+    permission: null,
+    superAdminOnly: true,
+    label: 'Database',
+    icon: (
+      <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
+      </svg>
+    ),
+  },
+  {
     href: '/admin/admin-accounts',
     group: 'system',
     permission: null,
@@ -278,7 +290,7 @@ export default function AdminLayout({ children }) {
         </div>
       )}
 
-      <div className="flex-1 lg:ml-56 flex flex-col min-h-screen">
+      <div className="flex-1 min-w-0 lg:ml-56 flex flex-col min-h-screen">
         <header className={`transition-all duration-300 border-b ${scrolled
                              ? 'bg-white/55 dark:bg-slate-950/55 backdrop-blur-xl backdrop-saturate-150 border-white/60 dark:border-white/10 shadow-[0_6px_24px_rgba(15,23,42,0.06)]'
                              : 'bg-transparent border-transparent'}
@@ -303,7 +315,7 @@ export default function AdminLayout({ children }) {
           </div>
         </header>
 
-        <main className="flex-1 p-4 lg:p-6 bg-slate-50 dark:bg-slate-900">
+        <main className="flex-1 min-w-0 p-4 lg:p-6">
           {myPerms !== 'loading' && !isPageAllowed(pathname, myPerms) ? (
             <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
               <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center

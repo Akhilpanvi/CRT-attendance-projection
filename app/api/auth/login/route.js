@@ -16,12 +16,14 @@ export async function POST(request) {
     if (!user || !(await bcrypt.compare(password, user.passwordHash)))
       return NextResponse.json({ error: 'Invalid username or password' }, { status: 401 });
 
-    // Track last login and log for admin accounts
-    if (user.role === 'admin' || user.role === 'aprameya') {
-      user.lastLoginAt = new Date();
-      await user.save();
+    // Track every sign-in; only staff logins go to the audit log
+    const now = new Date();
+    await User.updateOne(
+      { _id: user._id },
+      { $set: { lastLoginAt: now, lastSeenAt: now }, $inc: { loginCount: 1 } },
+    );
+    if (user.role === 'admin' || user.role === 'aprameya')
       logAction(user.username, 'LOGIN', '', 'Logged in to admin panel');
-    }
 
     const token = await signToken({
       userId:             user._id.toString(),

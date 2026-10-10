@@ -292,6 +292,16 @@ export default function StatisticsPage() {
             <Kpi label="Days held" value={`${data.daysHeld.C1 ?? 0} + ${data.daysHeld.C2 ?? 0}`} sub="C1 + C2 uploaded days" />
           </div>
 
+          {/* Site usage (students signing in to the portal) */}
+          {data.usage && (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <Kpi label="Active today" value={fmtN(data.usage.today)} sub="students, last 24 hours" />
+              <Kpi label="Active this week" value={fmtN(data.usage.week)} sub="students, last 7 days" />
+              <Kpi label="Signed in (tracked)" value={fmtN(data.usage.ever)} sub="since activity tracking began" />
+              <Kpi label="Password changed" value={fmtN(data.usage.pwChanged)} sub="students off the default password" />
+            </div>
+          )}
+
           {/* Distribution */}
           <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4">
             <div className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3">How students are spread</div>

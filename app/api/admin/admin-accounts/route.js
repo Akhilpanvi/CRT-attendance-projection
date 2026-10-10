@@ -20,7 +20,7 @@ export async function GET() {
   await connectDB();
   // Exclude the super-admin's own account — they cannot edit themselves here
   const admins = await User.find({ role: 'admin', username: { $ne: session.username } })
-    .select('username email permissions mustChangePassword createdAt lastLoginAt')
+    .select('username email permissions mustChangePassword createdAt lastLoginAt lastSeenAt loginCount')
     .lean();
 
   return NextResponse.json(admins.map(a => ({
@@ -30,6 +30,8 @@ export async function GET() {
     mustChangePassword: a.mustChangePassword,
     createdAt:          a.createdAt,
     lastLoginAt:        a.lastLoginAt || null,
+    lastSeenAt:         a.lastSeenAt || null,
+    loginCount:         a.loginCount || 0,
     isSelf:             false,
   })));
 }

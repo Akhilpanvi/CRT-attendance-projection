@@ -114,7 +114,7 @@ export default function IrregularPage() {
         {/* Search + Sort row */}
         <div className="flex items-center gap-2 flex-wrap">
           <input
-            className="form-input text-xs w-52"
+            className="form-input text-xs w-full sm:w-52"
             placeholder="Search name or reg. no."
             value={q}
             onChange={e => { setQ(e.target.value); setPage(1); }}
@@ -182,7 +182,7 @@ export default function IrregularPage() {
 
             {/* Row */}
             <button
-              className="w-full flex items-center gap-3 px-4 py-3
+              className="w-full flex flex-wrap sm:flex-nowrap items-center gap-x-3 gap-y-2 px-4 py-3
                          hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors text-left"
               onClick={() => setExpanded(expanded === s.rollNumber ? null : s.rollNumber)}>
 
@@ -193,7 +193,7 @@ export default function IrregularPage() {
               </div>
 
               {/* Name + dept */}
-              <div className="w-56 shrink-0 min-w-0">
+              <div className="flex-1 sm:flex-none sm:w-56 min-w-0">
                 <div className="font-medium text-sm text-slate-900 dark:text-slate-100 truncate">{s.name}</div>
                 <div className="text-xs text-slate-400 truncate">
                   {[s.branch, s.dept, s.crtSec].filter(Boolean).join(' · ')}
@@ -206,7 +206,7 @@ export default function IrregularPage() {
               </div>
 
               {/* Pattern badges */}
-              <div className="flex-1 flex flex-wrap gap-1 min-w-0">
+              <div className="order-last sm:order-none basis-full sm:basis-auto flex-1 flex flex-wrap gap-1 min-w-0 pl-11 sm:pl-0">
                 {[...new Set(s.irregularDays.map(d => d.pattern))].map(p => (
                   <PatternBadge key={p} pattern={p} />
                 ))}

@@ -297,7 +297,9 @@ export default function AdminAccountsPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       <span className="text-[10px] text-slate-400 dark:text-slate-500">
-                        Last login: <span className="text-slate-500 dark:text-slate-400">{fmtDate(admin.lastLoginAt)}</span>
+                        Last active: <span className="text-slate-500 dark:text-slate-400">{fmtDate(admin.lastSeenAt || admin.lastLoginAt)}</span>
+                        {' · '}Last login: <span className="text-slate-500 dark:text-slate-400">{fmtDate(admin.lastLoginAt)}</span>
+                        {admin.loginCount > 0 && <>{' · '}{admin.loginCount} login{admin.loginCount === 1 ? '' : 's'}</>}
                       </span>
                     </div>
                   </div>
