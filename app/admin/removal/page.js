@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState, useRef } from 'react';
 import { useToast, Toast } from '@/components/Toast';
-import { pctColor } from '@/lib/helpers';
+import { pctColor, todayISO } from '@/lib/helpers';
 
 const PRESETS = [75, 80, 85, 90];
 
@@ -363,7 +363,7 @@ function downloadExcel(students, threshold) {
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Removal List');
-    XLSX.writeFile(wb, `removal_list_${threshold}pct_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    XLSX.writeFile(wb, `removal_list_${threshold}pct_${todayISO()}.xlsx`);
   });
 }
 

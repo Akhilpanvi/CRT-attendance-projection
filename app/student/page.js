@@ -711,7 +711,7 @@ export default function StudentPage() {
                 <span className="font-bold uppercase tracking-wide" style={{ color: u.category === 'important' ? t.bad : u.category === 'warning' ? t.warn : t.chipInk }}>
                   {u.pinned ? 'Pinned · ' : ''}{u.category === 'important' ? 'Important' : u.category === 'warning' ? 'Warning' : 'Info'}
                 </span>
-                <span className="ml-auto">{new Date(u.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
+                <span className="ml-auto">{new Date(u.createdAt).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short' })}</span>
               </div>
               {u.title && <p className="text-sm font-bold mt-1">{u.title}</p>}
               <p className="text-[13px] leading-relaxed mt-0.5 whitespace-pre-wrap" style={{ color: t.muted }}>{u.content}</p>

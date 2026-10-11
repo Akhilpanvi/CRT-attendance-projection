@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useToast, Toast } from '@/components/Toast';
-import { fmtDate } from '@/lib/helpers';
+import { fmtDate, todayISO } from '@/lib/helpers';
 
 // Fixed categorical slot per group (color follows the group, never its rank)
 const GROUP_ORDER = ['CGN', 'GK', 'IS', 'RS', 'SI'];
@@ -253,7 +253,7 @@ export default function StatisticsPage() {
       'Avg %': s.avg, 'Median %': s.median, '85%+': s.bands.ge85, '75–85%': s.bands.b75, '60–75%': s.bands.b60,
       'Below 60%': s.bands.lt60, 'Below 75%': s.below75, 'Below 75% (share)': `${pctOf(s.below75, s.counted)}%`,
     })))), 'Sections');
-    XLSX.writeFile(wb, `crt_statistics_${cluster.toLowerCase()}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    XLSX.writeFile(wb, `crt_statistics_${cluster.toLowerCase()}_${todayISO()}.xlsx`);
   }
 
   const o = data?.overall;

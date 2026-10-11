@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { fmtDate, pctColor } from '@/lib/helpers';
+import { fmtDate, pctColor, todayISO } from '@/lib/helpers';
 import { useToast, Toast } from '@/components/Toast';
 
 async function downloadAttendanceReport(students) {
@@ -77,7 +77,7 @@ async function downloadAttendanceReport(students) {
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(progRows), 'Weekly Progression');
   }
 
-  XLSX.writeFile(wb, `attendance_report_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  XLSX.writeFile(wb, `attendance_report_${todayISO()}.xlsx`);
 }
 
 const PAGE_SIZE = 50;

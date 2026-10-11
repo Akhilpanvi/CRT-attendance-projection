@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { useToast, Toast } from '@/components/Toast';
+import { todayISO } from '@/lib/helpers';
 
 const ACTION_LABELS = {
   LOGIN:               { label: 'Login',             color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' },
@@ -21,8 +22,8 @@ const ACTION_LABELS = {
 function fmt(iso) {
   if (!iso) return '—';
   const d = new Date(iso);
-  const date = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-  const time = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+  const date = d.toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', year: 'numeric' });
+  const time = d.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true });
   return `${date}, ${time}`;
 }
 
@@ -119,7 +120,7 @@ export default function LogsPage() {
       }));
 
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Admin Logs');
-      XLSX.writeFile(wb, `admin_logs_${new Date().toISOString().slice(0, 10)}.xlsx`);
+      XLSX.writeFile(wb, `admin_logs_${todayISO()}.xlsx`);
       show('Downloaded');
     } catch (e) { show(e.message, 'error'); }
     finally { setExporting(false); }

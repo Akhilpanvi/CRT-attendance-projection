@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 
 function fmtDate(d) {
-  return new Date(d).toLocaleString('en-IN', {
+  return new Date(d).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata',
     timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short',
     year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true,
   });

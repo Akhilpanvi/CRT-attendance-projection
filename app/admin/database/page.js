@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { useToast, Toast } from '@/components/Toast';
+import { todayISO, fmtDateTimeIST } from '@/lib/helpers';
 
 const STATUS_STYLE = {
   OK:   'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400',
@@ -71,9 +72,9 @@ export default function DatabasePage() {
         report = await r.json();
       }
       const XLSX  = await import('xlsx');
-      const stamp = new Date().toISOString().slice(0, 10);
+      const stamp = todayISO();
       const base  = `db_report_${report.database}_${stamp}`;
-      const info  = [{ Database: report.database, 'Generated at': new Date(report.generatedAt).toLocaleString('en-IN') }];
+      const info  = [{ Database: report.database, 'Generated at (IST)': fmtDateTimeIST(report.generatedAt) }];
 
       if (format === 'csv') {
         const ws = XLSX.utils.json_to_sheet(report[sheet]);
@@ -104,7 +105,7 @@ export default function DatabasePage() {
           <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100">Database</h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
             {data
-              ? <>Database <b className="text-slate-700 dark:text-slate-200">{data.database}</b> · checked {new Date(data.generatedAt).toLocaleString('en-IN')}</>
+              ? <>Database <b className="text-slate-700 dark:text-slate-200">{data.database}</b> · checked {fmtDateTimeIST(data.generatedAt)} IST</>
               : 'Collections, fields and data health'}
           </p>
         </div>

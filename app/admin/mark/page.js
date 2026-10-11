@@ -1,9 +1,9 @@
 'use client';
 import { useState, useRef } from 'react';
 import { useToast, Toast } from '@/components/Toast';
-import { TIME_SLOTS } from '@/lib/helpers';
+import { TIME_SLOTS, todayISO } from '@/lib/helpers';
 
-function today() { return new Date().toISOString().split('T')[0]; }
+const today = todayISO;
 
 /* ─── CSV template (wide / grid format) ───────────────────────────── */
 // Format:  Roll Number | Date | 09:20-10:10 | 10:10-11:00 | … (one col per slot)

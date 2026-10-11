@@ -3,7 +3,7 @@ import { connectDB } from '@/lib/mongodb';
 import Student from '@/lib/models/Student';
 import Attendance from '@/lib/models/Attendance';
 import { getSession } from '@/lib/auth';
-import { getWeekNumber } from '@/lib/helpers';
+import { getWeekNumber, todayISO } from '@/lib/helpers';
 
 export async function POST(request) {
   try {
@@ -20,7 +20,7 @@ export async function POST(request) {
     if (!await Student.findOne({ rollNumber: roll }))
       return NextResponse.json({ error: 'Student not found' }, { status: 404 });
 
-    const attendanceDate = date || new Date().toISOString().split('T')[0];
+    const attendanceDate = date || todayISO();
     const record = await Attendance.findOneAndUpdate(
       { rollNumber: roll, date: attendanceDate, slot },
       { $set: { status, week: getWeekNumber(attendanceDate), year: new Date(attendanceDate).getFullYear(), markedAt: new Date() } },

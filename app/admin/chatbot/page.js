@@ -109,7 +109,7 @@ export default function ChatbotKnowledgePage() {
                             {!r.active && <span className="chip">Off</span>}
                           </div>
                           <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 whitespace-pre-wrap">{r.content}</p>
-                          <p className="text-[10px] text-slate-400 mt-1">by {r.updatedBy || '—'} · {new Date(r.updatedAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</p>
+                          <p className="text-[10px] text-slate-400 mt-1">by {r.updatedBy || '—'} · {new Date(r.updatedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' })}</p>
                         </div>
                         <div className="flex gap-1.5 shrink-0">
                           <button className="btn-outline btn-sm" onClick={() => toggle(r)}>{r.active ? 'Turn off' : 'Turn on'}</button>

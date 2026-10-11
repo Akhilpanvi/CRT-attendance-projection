@@ -7,7 +7,7 @@ import { useSky, GREETING, skyAccent, skyUI } from '@/components/SkyBackground';
 import { motion } from 'framer-motion';
 
 function fmtDate(d) {
-  return new Date(d).toLocaleString('en-IN', {
+  return new Date(d).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata',
     timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short',
     year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true,
   });
