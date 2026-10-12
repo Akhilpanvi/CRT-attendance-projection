@@ -62,7 +62,7 @@ export async function POST(request) {
     // No absent backfill needed: sessions of the student's cluster with no
     // record already count as absent (see lib/attendanceCalc.js).
 
-    logAction(
+    await logAction(
       session.username, 'CREATE_PROFILE', roll,
       `Created ${effectiveRole} account for ${name.trim().toUpperCase()} (${roll})`
     );

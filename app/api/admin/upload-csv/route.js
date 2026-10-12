@@ -229,7 +229,7 @@ export async function POST(request) {
 
     const clusters = Object.keys(held).sort();
     const slotList = [...new Set(Object.values(held).flatMap(s => [...s]))];
-    logAction(
+    await logAction(
       session.username, 'UPLOAD_CSV', date,
       `Uploaded ${fileName}${parsed.sheets.length > 1 ? ` [${sheet.sheet}]` : ''} for ${date} (${clusters.join('+')}) — ${rows.length} students, ${slotList.length} slot(s), ${absentMarked} absent records created${skippedOtherCluster ? `, ${skippedOtherCluster} other-cluster rows skipped` : ''}${reupload ? ' [reupload]' : ''}`
     );

@@ -53,14 +53,14 @@ export async function PATCH(request) {
     user.passwordHash       = await bcrypt.hash(username, 10);
     user.mustChangePassword = true;
     await user.save();
-    logAction(session.username, 'RESET_PASSWORD', username, `Reset password for admin "${username}"`);
+    await logAction(session.username, 'RESET_PASSWORD', username, `Reset password for admin "${username}"`);
     return NextResponse.json({ success: true, message: `Password reset to "${username}"` });
   }
 
   if (action === 'update-email') {
     user.email = email?.trim() || '';
     await user.save();
-    logAction(session.username, 'UPDATE_EMAIL', username, `Updated email for admin "${username}"`);
+    await logAction(session.username, 'UPDATE_EMAIL', username, `Updated email for admin "${username}"`);
     return NextResponse.json({ success: true });
   }
 
@@ -70,7 +70,7 @@ export async function PATCH(request) {
     if (email !== undefined) user.email = email?.trim() || '';
     await user.save();
     const permDesc = user.permissions === null ? 'full access' : `${user.permissions.length} permissions`;
-    logAction(session.username, 'UPDATE_PERMISSIONS', username, `Updated permissions for "${username}" → ${permDesc}`);
+    await logAction(session.username, 'UPDATE_PERMISSIONS', username, `Updated permissions for "${username}" → ${permDesc}`);
     return NextResponse.json({ success: true });
   }
 
@@ -95,6 +95,6 @@ export async function DELETE(request) {
   if (result.deletedCount === 0)
     return NextResponse.json({ error: 'Admin not found' }, { status: 404 });
 
-  logAction(session.username, 'DELETE_ADMIN', username, `Deleted admin account "${username}"`);
+  await logAction(session.username, 'DELETE_ADMIN', username, `Deleted admin account "${username}"`);
   return NextResponse.json({ success: true });
 }

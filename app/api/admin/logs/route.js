@@ -37,8 +37,9 @@ export async function GET(request) {
 
   if (dateFrom || dateTo) {
     filter.createdAt = {};
-    if (dateFrom) filter.createdAt.$gte = new Date(dateFrom);
-    if (dateTo)   filter.createdAt.$lte = new Date(dateTo + 'T23:59:59.999Z');
+    // Dates picked on the page are IST calendar days
+    if (dateFrom) filter.createdAt.$gte = new Date(dateFrom + 'T00:00:00+05:30');
+    if (dateTo)   filter.createdAt.$lte = new Date(dateTo + 'T23:59:59.999+05:30');
   }
 
   const [logs, total] = await Promise.all([

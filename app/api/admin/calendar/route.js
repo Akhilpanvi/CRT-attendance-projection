@@ -62,7 +62,7 @@ export async function POST(request) {
       upsert: true,
     }})));
 
-    logAction(session.username, 'MARK_HOLIDAY', date, `Marked ${date} (${clusters.join('+')}) as holiday${text ? ` — ${text}` : ''}`);
+    await logAction(session.username, 'MARK_HOLIDAY', date, `Marked ${date} (${clusters.join('+')}) as holiday${text ? ` — ${text}` : ''}`);
     return NextResponse.json({ success: true, clusters });
   } catch (e) {
     return NextResponse.json({ error: e.message }, { status: 500 });
@@ -80,7 +80,7 @@ export async function DELETE(request) {
 
     await connectDB();
     const r = await CalendarDay.deleteMany({ date, cluster: { $in: clusters } });
-    logAction(session.username, 'MARK_HOLIDAY', date, `Removed holiday on ${date} (${clusters.join('+')})`);
+    await logAction(session.username, 'MARK_HOLIDAY', date, `Removed holiday on ${date} (${clusters.join('+')})`);
     return NextResponse.json({ success: true, removed: r.deletedCount });
   } catch (e) {
     return NextResponse.json({ error: e.message }, { status: 500 });

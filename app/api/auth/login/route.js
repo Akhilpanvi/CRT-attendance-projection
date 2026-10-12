@@ -13,8 +13,11 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Username and password required' }, { status: 400 });
 
     const user = await User.findOne({ username: username.trim() });
-    if (!user || !(await bcrypt.compare(password, user.passwordHash)))
+    const isStaff = user && (user.role === 'admin' || user.role === 'aprameya');
+    if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+      if (isStaff) await logAction(user.username, 'LOGIN_FAILED', '', 'Wrong password');
       return NextResponse.json({ error: 'Invalid username or password' }, { status: 401 });
+    }
 
     // Track every sign-in; only staff logins go to the audit log
     const now = new Date();
@@ -22,8 +25,8 @@ export async function POST(request) {
       { _id: user._id },
       { $set: { lastLoginAt: now, lastSeenAt: now }, $inc: { loginCount: 1 } },
     );
-    if (user.role === 'admin' || user.role === 'aprameya')
-      logAction(user.username, 'LOGIN', '', 'Logged in to admin panel');
+    if (isStaff)
+      await logAction(user.username, 'LOGIN', '', user.role === 'aprameya' ? 'Logged in to Aprameya view' : 'Logged in to admin panel');
 
     const token = await signToken({
       userId:             user._id.toString(),

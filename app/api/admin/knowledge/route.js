@@ -36,7 +36,7 @@ export async function POST(request) {
   if (!data.title || !data.content) return NextResponse.json({ error: 'Title and answer are required' }, { status: 400 });
   await connectDB();
   const doc = await KnowledgeEntry.create({ ...data, updatedBy: session.username, updatedAt: new Date() });
-  logAction(session.username, 'BOT_KNOWLEDGE', doc.title, `Added chatbot knowledge "${doc.title}"`);
+  await logAction(session.username, 'BOT_KNOWLEDGE', doc.title, `Added chatbot knowledge "${doc.title}"`);
   return NextResponse.json(doc);
 }
 
@@ -48,7 +48,7 @@ export async function PATCH(request) {
   await connectDB();
   const doc = await KnowledgeEntry.findByIdAndUpdate(body.id, { ...clean(body), updatedBy: session.username, updatedAt: new Date() }, { new: true });
   if (!doc) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  logAction(session.username, 'BOT_KNOWLEDGE', doc.title, `Edited chatbot knowledge "${doc.title}"`);
+  await logAction(session.username, 'BOT_KNOWLEDGE', doc.title, `Edited chatbot knowledge "${doc.title}"`);
   return NextResponse.json(doc);
 }
 
@@ -59,6 +59,6 @@ export async function DELETE(request) {
   const { id } = await request.json();
   await connectDB();
   const doc = await KnowledgeEntry.findByIdAndDelete(id);
-  if (doc) logAction(session.username, 'BOT_KNOWLEDGE', doc.title, `Deleted chatbot knowledge "${doc.title}"`);
+  if (doc) await logAction(session.username, 'BOT_KNOWLEDGE', doc.title, `Deleted chatbot knowledge "${doc.title}"`);
   return NextResponse.json({ success: true });
 }

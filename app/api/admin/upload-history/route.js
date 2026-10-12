@@ -71,7 +71,7 @@ export async function PATCH(request) {
     const result = await Attendance.updateMany(scope(fromDate, cluster), { $set: { date: toDate, week, year } });
     await Session.updateMany(scope(fromDate, cluster), { $set: { date: toDate } });
 
-    logAction(session.username, 'EDIT_UPLOAD_DATE', fromDate,
+    await logAction(session.username, 'EDIT_UPLOAD_DATE', fromDate,
       `Moved ${cluster || 'all'} attendance from ${fromDate} to ${toDate} — ${result.modifiedCount} records`);
     return NextResponse.json({ success: true, updated: result.modifiedCount });
   } catch (e) {
@@ -91,7 +91,7 @@ export async function DELETE(request) {
     const result = await Attendance.deleteMany(scope(date, cluster));
     await Session.deleteMany(scope(date, cluster));
 
-    logAction(session.username, 'DELETE_UPLOAD', date,
+    await logAction(session.username, 'DELETE_UPLOAD', date,
       `Deleted ${cluster || 'all'} attendance for ${date} — ${result.deletedCount} records`);
     return NextResponse.json({ success: true, deleted: result.deletedCount });
   } catch (e) {

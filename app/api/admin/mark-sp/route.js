@@ -33,7 +33,7 @@ export async function PATCH(request) {
     // Insert a single clean record with the normalized slot name
     const result = await Attendance.create({ rollNumber: roll, date, slot: normalizedSlot, status, week, year, markedAt: new Date() });
 
-    logAction(
+    await logAction(
       session.username, 'MARK_SP', roll,
       `Marked ${roll} slot "${normalizedSlot}" on ${date} as ${status.toUpperCase()}`
     );

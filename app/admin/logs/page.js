@@ -5,6 +5,8 @@ import { todayISO } from '@/lib/helpers';
 
 const ACTION_LABELS = {
   LOGIN:               { label: 'Login',             color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' },
+  LOGIN_FAILED:        { label: 'Failed Login',       color: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' },
+  LOGOUT:              { label: 'Logout',             color: 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400' },
   UPLOAD_CSV:          { label: 'Upload',             color: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' },
   EDIT_UPLOAD_DATE:    { label: 'Edit Upload Date',   color: 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' },
   DELETE_UPLOAD:       { label: 'Delete Upload',      color: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' },
