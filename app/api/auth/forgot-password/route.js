@@ -4,6 +4,53 @@ import { Resend } from 'resend';
 import { connectDB } from '@/lib/mongodb';
 import Student from '@/lib/models/Student';
 import User from '@/lib/models/User';
+import MailQuota from '@/lib/models/MailQuota';
+import { todayISO } from '@/lib/helpers';
+
+// Free email tier: keep well under the provider's daily cap
+const COOLDOWN_MIN  = 5;    // minutes between emails to one account
+const PER_DAY       = 3;    // emails per account per 24 hours
+const DAILY_CAP     = Number(process.env.RESET_MAIL_DAILY_CAP) || 90;  // site-wide, per IST day
+const LINK_VALID_MIN = 15;
+
+const minsLeft = (from, ms) => Math.max(1, Math.ceil((from.getTime() + ms - Date.now()) / 60000));
+const fmtWait  = m => (m >= 60 ? `${Math.ceil(m / 60)} hour${m >= 120 ? 's' : ''}` : `${m} minute${m === 1 ? '' : 's'}`);
+const tooMany  = msg => NextResponse.json({ error: msg }, { status: 429 });
+
+/**
+ * Atomically reserve one reset email for this account. Returns null when
+ * allowed, otherwise the message explaining how long to wait.
+ */
+async function claimAccountSlot(userId) {
+  const now = new Date(), cool = COOLDOWN_MIN * 60000, day = 24 * 3600000;
+  const claimed = await User.updateOne(
+    {
+      _id: userId,
+      resetSentAt: { $not: { $gt: new Date(now - cool) } },                  // none in cooldown
+      $or: [{ [`resetSentAt.${PER_DAY - 1}`]: { $exists: false } },         // fewer than PER_DAY kept
+            { 'resetSentAt.0': { $lte: new Date(now - day) } }],            // or oldest is >24h old
+    },
+    { $push: { resetSentAt: { $each: [now], $slice: -PER_DAY } } },
+  );
+  if (claimed.modifiedCount) return null;
+
+  const sent = (await User.findById(userId, { resetSentAt: 1 }).lean())?.resetSentAt || [];
+  const last = sent[sent.length - 1];
+  if (last && now - last < cool)
+    return `A reset link was already sent to your email. Check your inbox (and spam), or request again in ${fmtWait(minsLeft(last, cool))}.`;
+  return `Too many reset requests. You can request again in ${fmtWait(minsLeft(sent[0], day))}.`;
+}
+
+/** Reserve one email from today's site-wide quota; false when it is used up */
+async function claimDailyQuota() {
+  try {
+    await MailQuota.updateOne({ _id: todayISO(), count: { $lt: DAILY_CAP } }, { $inc: { count: 1 } }, { upsert: true });
+    return true;
+  } catch (e) {
+    if (e.code === 11000) return false;   // today's doc exists and is at the cap
+    throw e;
+  }
+}
 
 function resetEmailTemplate({ name, rollNumber, resetLink, expiresIn }) {
   return {
@@ -113,12 +160,17 @@ export async function POST(request) {
 
       // For admins without a stored email, silently skip (return success below)
       if (toEmail) {
-        const token  = crypto.randomBytes(32).toString('hex');
-        const expiry = new Date(Date.now() + 2 * 60 * 1000); // 2 minutes
+        const wait = await claimAccountSlot(user._id);
+        if (wait) return tooMany(wait);
+        if (!(await claimDailyQuota())) {
+          await User.updateOne({ _id: user._id }, { $pop: { resetSentAt: 1 } });   // give the slot back
+          return tooMany('Password reset emails are paused for today due to high demand. Please try again tomorrow or contact your CRT admin.');
+        }
 
-        user.resetToken       = token;
-        user.resetTokenExpiry = expiry;
-        await user.save();
+        const token  = crypto.randomBytes(32).toString('hex');
+        const expiry = new Date(Date.now() + LINK_VALID_MIN * 60 * 1000);
+
+        await User.updateOne({ _id: user._id }, { $set: { resetToken: token, resetTokenExpiry: expiry } });
 
         const origin    = request.headers.get('origin') || `https://${request.headers.get('host')}`;
         const resetLink = `${origin}/reset-password?token=${token}`;
@@ -127,7 +179,7 @@ export async function POST(request) {
           name:       toName,
           rollNumber: roll,
           resetLink,
-          expiresIn:  '2 minutes',
+          expiresIn:  `${LINK_VALID_MIN} minutes`,
         });
 
         const resend = new Resend(process.env.RESEND_API_KEY);
@@ -137,7 +189,11 @@ export async function POST(request) {
           subject,
           html,
         });
-        if (result.error) throw new Error(result.error.message);
+        if (result.error) {
+          // Not sent: let them retry right away
+          await User.updateOne({ _id: user._id }, { $pop: { resetSentAt: 1 } });
+          throw new Error(result.error.message);
+        }
       }
     }
 
