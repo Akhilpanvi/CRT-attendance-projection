@@ -68,6 +68,83 @@ function standing(present, total) {
 }
 
 // ── Small pieces ────────────────────────────────────────────────────────────
+const fullDate = d => { const x = utc(d); return `${x.getUTCDate()} ${MON[x.getUTCMonth()]} ${x.getUTCFullYear()}`; };
+
+/** "We count from <start date> — is that right?" with an inline correction form */
+function StartDateCheck({ t, firstDate }) {
+  const [info, setInfo]   = useState(null);     // { startDate, mine }
+  const [mode, setMode]   = useState('ask');    // 'ask' | 'form' | 'done'
+  const [date, setDate]   = useState('');
+  const [note, setNote]   = useState('');
+  const [busy, setBusy]   = useState(false);
+  const [err, setErr]     = useState('');
+
+  useEffect(() => {
+    fetch('/api/student/start-date').then(r => r.json()).then(d => {
+      if (d.error) return;
+      setInfo(d);
+      if (d.mine) { setMode('done'); setDate(d.mine.suggestedDate || ''); setNote(d.mine.note || ''); }
+    }).catch(() => {});
+  }, []);
+  if (!info) return null;
+
+  async function send(correct) {
+    setBusy(true); setErr('');
+    try {
+      const r = await fetch('/api/student/start-date', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ correct, suggestedDate: correct ? '' : date, note: correct ? '' : note }) });
+      const d = await r.json(); if (!r.ok) throw new Error(d.error);
+      setInfo({ ...info, mine: { correct, suggestedDate: correct ? '' : date, note: correct ? '' : note } });
+      setMode('done');
+    } catch (e) { setErr(e.message || 'Could not save. Try again.'); } finally { setBusy(false); }
+  }
+
+  const btn = 'px-3 py-1.5 rounded-lg text-xs font-bold disabled:opacity-50';
+  const input = { background: t.well, border: `1px solid ${t.line}`, color: t.fg };
+  return (
+    <div className="mt-3 px-3.5 py-3 rounded-2xl" style={{ background: t.well }} aria-label="CRT start date">
+      <p className="text-[12.5px] leading-snug" style={{ color: t.muted }}>
+        Attendance is counted from the CRT start date <b style={{ color: t.fg }}>{fullDate(info.startDate)}</b>.
+        {firstDate && <> Your first recorded class: <b style={{ color: t.fg }}>{fullDate(firstDate)}</b>.</>}
+      </p>
+
+      {mode === 'ask' && (
+        <div className="flex items-center gap-2 mt-2 flex-wrap">
+          <span className="text-xs font-semibold mr-auto">Is this start date correct?</span>
+          <button disabled={busy} onClick={() => send(true)} className={btn} style={{ background: t.okSoft, color: t.ok }}>Yes</button>
+          <button disabled={busy} onClick={() => setMode('form')} className={btn} style={{ background: t.badSoft, color: t.bad }}>No, it’s wrong</button>
+        </div>
+      )}
+
+      {mode === 'form' && (
+        <div className="mt-2 space-y-2">
+          <label className="block text-xs font-semibold">
+            When did CRT actually start for you?
+            <input type="date" value={date} onChange={e => setDate(e.target.value)} max={todayIST()}
+                   className="mt-1 w-full px-3 py-2 rounded-lg text-xs outline-none" style={input} />
+          </label>
+          <textarea value={note} onChange={e => setNote(e.target.value)} maxLength={500} rows={2}
+                    placeholder="Anything else? (optional)"
+                    className="w-full px-3 py-2 rounded-lg text-xs outline-none resize-none" style={input} />
+          {err && <p className="text-xs" style={{ color: t.bad }}>{err}</p>}
+          <div className="flex gap-2 justify-end">
+            <button disabled={busy} onClick={() => { setMode(info.mine ? 'done' : 'ask'); setErr(''); }} className={btn} style={{ color: t.muted }}>Cancel</button>
+            <button disabled={busy || (!date && !note.trim())} onClick={() => send(false)} className={`${btn} sky-btn`}>{busy ? 'Sending…' : 'Send feedback'}</button>
+          </div>
+        </div>
+      )}
+
+      {mode === 'done' && info.mine && (
+        <p className="text-xs mt-2" style={{ color: t.muted }}>
+          {info.mine.correct
+            ? <>Thanks — you confirmed this date.</>
+            : <>Thanks — we told the CRT team{info.mine.suggestedDate ? <> it should be <b style={{ color: t.fg }}>{fullDate(info.mine.suggestedDate)}</b></> : ''}.</>}
+          {' '}<button onClick={() => setMode(info.mine.correct ? 'ask' : 'form')} className="font-bold underline underline-offset-2" style={{ color: t.chipInk }}>Change</button>
+        </p>
+      )}
+    </div>
+  );
+}
 const Glass = ({ t, className = '', style, children, as: Tag = 'section', ...rest }) => (
   <Tag className={`glass ${className}`} style={style} {...rest}>{children}</Tag>
 );
@@ -610,6 +687,7 @@ export default function StudentPage() {
                           className="w-11 h-11 -m-2.5 flex items-center justify-center" style={{ color: t.self }}><InfoIcon /></button>
                 </div>
               )}
+              <StartDateCheck t={t} firstDate={Object.keys(stats.byDate || {}).sort()[0]} />
             </Glass>
 
             <div className="grid grid-cols-2 gap-2.5">
