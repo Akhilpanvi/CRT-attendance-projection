@@ -7,6 +7,10 @@ const sections = [
     body: <P>These Terms of Use apply when you use CRT Attendance Tracker (“the Tracker”, “we”, “us”). By signing in, you agree to them. If you don’t agree, please don’t use the Tracker.</P>,
   },
   {
+    id: 'independent', title: 'An independent student project',
+    body: <P>The Tracker is an independent initiative designed and developed by students to help Y-24 CRT trainees follow their attendance. It is not an official website of KL University. For official decisions, always rely on the CRT office and the university’s own records.</P>,
+  },
+  {
     id: 'who', title: 'Who can use the Tracker',
     body: <UL items={[
       'Y-24 (2024–28) students enrolled in CRT Training at KL University.',

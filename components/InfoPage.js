@@ -1,4 +1,5 @@
 'use client';
+import { SITE_NOTICE } from '@/lib/helpers';
 import Link from 'next/link';
 import ThemeToggle from '@/components/ThemeToggle';
 import useScrolled from '@/components/useScrolled';
@@ -82,6 +83,7 @@ export default function InfoPage({ kicker, title, intro, updated, sections }) {
         <Link href="/terms" className="hover:underline">Terms of Use</Link>
         <a href={`mailto:${CONTACT_EMAIL}`} className="hover:underline">{CONTACT_EMAIL}</a>
         <span>Y-24 CRT Training · KL University</span>
+        <span className="basis-full text-center">{SITE_NOTICE}</span>
       </footer>
     </div>
   );

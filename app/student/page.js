@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { LOGO_RED, LOGO_WHITE } from '@/lib/logos';
-import { TIME_SLOTS } from '@/lib/helpers';
+import { TIME_SLOTS, SITE_NOTICE } from '@/lib/helpers';
 import { CLUSTER_DAYS, clusterDaysLabel } from '@/lib/attendanceCalc';
 import ThemeToggle from '@/components/ThemeToggle';
 import ChatWidget from '@/components/ChatWidget';
@@ -746,6 +746,7 @@ export default function StudentPage() {
         </div>
 
         <p className="text-center text-[11px] mt-8" style={{ color: t.muted }}>
+          {SITE_NOTICE}<br />
           Y-24 CRT Training · KL University · <a href="/about" className="underline underline-offset-2">About</a> · <a href="/privacy" className="underline underline-offset-2">Privacy</a> · <a href="/terms" className="underline underline-offset-2">Terms</a>
         </p>
       </main>

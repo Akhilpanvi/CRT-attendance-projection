@@ -1,4 +1,5 @@
 'use client';
+import { SITE_NOTICE } from '@/lib/helpers';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { LOGO_RED, LOGO_WHITE } from '@/lib/logos';
@@ -198,6 +199,7 @@ export default function LoginPage() {
 
           <p className="text-[10px] leading-relaxed" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(15,23,42,0.3)', animation: ready ? 'fadeUp 0.45s cubic-bezier(0.16,1,0.3,1) both' : 'none' }}>
             Built for Y-24 CRT students · KL University
+            <br />{SITE_NOTICE}
           </p>
         </div>
 
