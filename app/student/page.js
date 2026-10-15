@@ -104,7 +104,8 @@ function StartDateCheck({ t, firstDate }) {
   return (
     <div className="mt-3 px-3.5 py-3 rounded-2xl" style={{ background: t.well }} aria-label="CRT start date">
       <p className="text-[12.5px] leading-snug" style={{ color: t.muted }}>
-        Attendance is counted from the CRT start date <b style={{ color: t.fg }}>{fullDate(info.startDate)}</b>.
+        {info.cluster ? <>CRT for Cluster {info.cluster} started on </> : <>CRT started on </>}<b style={{ color: t.fg }}>{DAY[utc(info.startDate).getUTCDay()]} {fullDate(info.startDate)}</b>.
+        {' '}Only sessions uploaded by the CRT office count towards your %.
         {firstDate && <> Your first recorded class: <b style={{ color: t.fg }}>{fullDate(firstDate)}</b>.</>}
       </p>
 

@@ -16,7 +16,7 @@ function StartDateSummary() {
         <div>
           <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">CRT start date check</div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Students are asked if <b>{fmtDay(d.startDate)}</b> is the right start date · {total} answer{total !== 1 ? 's' : ''}
+            Students confirm their cluster’s first CRT day ({d.byCluster.map(c => `${c.cluster}: ${fmtDay(c.startDate)} — ${c.correct} ✓ / ${c.wrong} ✗`).join(' · ')}) · {total} answer{total !== 1 ? 's' : ''}
           </p>
         </div>
         <div className="flex gap-2 text-xs font-semibold">
