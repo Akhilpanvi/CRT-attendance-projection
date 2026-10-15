@@ -16,8 +16,13 @@ function StartDateSummary() {
         <div>
           <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">CRT start date check</div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Students confirm their cluster’s first CRT day ({d.byCluster.map(c => `${c.cluster}: ${fmtDay(c.startDate)} — ${c.correct} ✓ / ${c.wrong} ✗`).join(' · ')}) · {total} answer{total !== 1 ? 's' : ''}
+            {total} answer{total !== 1 ? 's' : ''} from students{d.changed > 0 ? ` · ${d.changed} changed their answer (earlier answers kept)` : ''}
           </p>
+          <div className="mt-2 space-y-0.5 text-xs text-slate-600 dark:text-slate-300">
+            {d.byCluster.map(c => (
+              <div key={c.startDate + c.cluster}>Shown <b>{fmtDay(c.startDate)}</b> · {c.cluster} — <span className="text-green-700 dark:text-green-400">{c.correct} yes</span> / <span className="text-red-600 dark:text-red-400">{c.wrong} no</span></div>
+            ))}
+          </div>
         </div>
         <div className="flex gap-2 text-xs font-semibold">
           <span className="px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">{d.correct} correct</span>
@@ -40,6 +45,7 @@ function StartDateSummary() {
                 <div key={r.rollNumber} className="py-2 text-xs">
                   <div className="text-slate-700 dark:text-slate-200">
                     <b>{r.rollNumber}</b> {r.name && `· ${r.name}`} {r.cluster && `· ${r.cluster}`} {r.crtSec && `· ${r.crtSec}`}
+                    <span className="ml-1 text-slate-400">shown {fmtDay(r.shownDate)}</span>
                     {r.suggestedDate && <span className="ml-1 text-amber-600 dark:text-amber-400">→ {fmtDay(r.suggestedDate)}</span>}
                   </div>
                   {r.note && <p className="text-slate-500 dark:text-slate-400 mt-0.5 whitespace-pre-wrap">{r.note}</p>}

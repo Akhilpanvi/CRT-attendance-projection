@@ -94,7 +94,7 @@ function StartDateCheck({ t, firstDate }) {
       const r = await fetch('/api/student/start-date', { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ correct, suggestedDate: correct ? '' : date, note: correct ? '' : note }) });
       const d = await r.json(); if (!r.ok) throw new Error(d.error);
-      setInfo({ ...info, mine: { correct, suggestedDate: correct ? '' : date, note: correct ? '' : note } });
+      setInfo({ ...info, mine: { startDate: info.startDate, correct, suggestedDate: correct ? '' : date, note: correct ? '' : note } });
       setMode('done');
     } catch (e) { setErr(e.message || 'Could not save. Try again.'); } finally { setBusy(false); }
   }
@@ -137,7 +137,9 @@ function StartDateCheck({ t, firstDate }) {
 
       {mode === 'done' && info.mine && (
         <p className="text-xs mt-2" style={{ color: t.muted }}>
-          {info.mine.correct
+          {info.mine.startDate && info.mine.startDate !== info.startDate
+            ? <>Thanks for your earlier answer about {fullDate(info.mine.startDate)} — we’ve updated the date based on student feedback.</>
+            : info.mine.correct
             ? <>Thanks — you confirmed this date.</>
             : <>Thanks — we told the CRT team{info.mine.suggestedDate ? <> it should be <b style={{ color: t.fg }}>{fullDate(info.mine.suggestedDate)}</b></> : ''}.</>}
           {' '}<button onClick={() => setMode(info.mine.correct ? 'ask' : 'form')} className="font-bold underline underline-offset-2" style={{ color: t.chipInk }}>Change</button>

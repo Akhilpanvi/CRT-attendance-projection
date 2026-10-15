@@ -20,19 +20,19 @@ async function startFor(roll) {
   return { cluster: s?.cluster || '', startDate: clusterStartDate(s?.cluster) || TRAINING_START };
 }
 
-/** GET → { startDate, cluster, mine: { correct, suggestedDate, note } | null } */
+/** GET → { startDate, cluster, mine: { startDate, correct, suggestedDate, note } | null } */
 export async function GET() {
   const roll = await student();
   if (!roll) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   await connectDB();
   const { cluster, startDate } = await startFor(roll);
-  // Answers about an earlier date shown (e.g. 16 Aug) don't count — ask again
-  const mine = await StartDateFeedback.findOne({ rollNumber: roll, startDate },
-    { _id: 0, correct: 1, suggestedDate: 1, note: 1 }).lean();
+  // A student who already answered (even about an earlier date shown) is not asked again
+  const mine = await StartDateFeedback.findOne({ rollNumber: roll },
+    { _id: 0, startDate: 1, correct: 1, suggestedDate: 1, note: 1 }).lean();
   return NextResponse.json({ startDate, cluster, mine });
 }
 
-/** POST { correct, suggestedDate?, note? } — saves or replaces this student's answer */
+/** POST { correct, suggestedDate?, note? } — saves the answer; any previous one moves to history */
 export async function POST(request) {
   const roll = await student();
   if (!roll) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -47,9 +47,12 @@ export async function POST(request) {
 
   await connectDB();
   const { startDate } = await startFor(roll);
+  const prev = await StartDateFeedback.findOne({ rollNumber: roll },
+    { _id: 0, startDate: 1, correct: 1, suggestedDate: 1, note: 1, updatedAt: 1 }).lean();
   await StartDateFeedback.updateOne(
     { rollNumber: roll },
-    { $set: {
+    { ...(prev && { $push: { history: prev } }),
+      $set: {
         startDate, correct,
         suggestedDate: correct ? '' : suggestedDate,
         note: correct ? '' : String(note).trim().slice(0, 500),
