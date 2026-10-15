@@ -1,16 +1,13 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { Resend } from 'resend';
 import { connectDB } from '@/lib/mongodb';
 import Student from '@/lib/models/Student';
 import User from '@/lib/models/User';
-import MailQuota from '@/lib/models/MailQuota';
-import { todayISO } from '@/lib/helpers';
+import { sendMail } from '@/lib/mailer';
 
-// Free email tier: keep well under the provider's daily cap
+// Per-account limits; the site-wide daily caps live in lib/mailer.js
 const COOLDOWN_MIN  = 5;    // minutes between emails to one account
 const PER_DAY       = 3;    // emails per account per 24 hours
-const DAILY_CAP     = Number(process.env.RESET_MAIL_DAILY_CAP) || 90;  // site-wide, per IST day
 const LINK_VALID_MIN = 15;
 
 const minsLeft = (from, ms) => Math.max(1, Math.ceil((from.getTime() + ms - Date.now()) / 60000));
@@ -39,17 +36,6 @@ async function claimAccountSlot(userId) {
   if (last && now - last < cool)
     return `A reset link was already sent to your email. Check your inbox (and spam), or request again in ${fmtWait(minsLeft(last, cool))}.`;
   return `Too many reset requests. You can request again in ${fmtWait(minsLeft(sent[0], day))}.`;
-}
-
-/** Reserve one email from today's site-wide quota; false when it is used up */
-async function claimDailyQuota() {
-  try {
-    await MailQuota.updateOne({ _id: todayISO(), count: { $lt: DAILY_CAP } }, { $inc: { count: 1 } }, { upsert: true });
-    return true;
-  } catch (e) {
-    if (e.code === 11000) return false;   // today's doc exists and is at the cap
-    throw e;
-  }
 }
 
 function resetEmailTemplate({ name, rollNumber, resetLink, expiresIn }) {
@@ -162,10 +148,7 @@ export async function POST(request) {
       if (toEmail) {
         const wait = await claimAccountSlot(user._id);
         if (wait) return tooMany(wait);
-        if (!(await claimDailyQuota())) {
-          await User.updateOne({ _id: user._id }, { $pop: { resetSentAt: 1 } });   // give the slot back
-          return tooMany('Password reset emails are paused for today due to high demand. Please try again tomorrow or contact your CRT admin.');
-        }
+        const giveBack = () => User.updateOne({ _id: user._id }, { $pop: { resetSentAt: 1 } });
 
         const token  = crypto.randomBytes(32).toString('hex');
         const expiry = new Date(Date.now() + LINK_VALID_MIN * 60 * 1000);
@@ -182,17 +165,19 @@ export async function POST(request) {
           expiresIn:  `${LINK_VALID_MIN} minutes`,
         });
 
-        const resend = new Resend(process.env.RESEND_API_KEY);
-        const result = await resend.emails.send({
-          from:    'Change Password <noreply@kluniversity.me>',
-          to:      toEmail,
-          subject,
-          html,
-        });
-        if (result.error) {
-          // Not sent: let them retry right away
-          await User.updateOne({ _id: user._id }, { $pop: { resetSentAt: 1 } });
-          throw new Error(result.error.message);
+        let sent;
+        try {
+          sent = await sendMail({ to: toEmail, subject, html, fromName: 'Change Password' });
+        } catch (e) {
+          await giveBack();   // not sent: let them retry right away
+          throw e;
+        }
+        if (!sent) {
+          await giveBack();
+          await User.updateOne({ _id: user._id }, { $set: { resetToken: null, resetTokenExpiry: null } });
+          return tooMany(isAdmin
+            ? 'Password reset emails are paused for today due to high demand. Please try again tomorrow.'
+            : 'Password reset emails are paused for today due to high demand. Please try again tomorrow, or ask your CRT section coordinator to reset your password from the admin panel.');
         }
       }
     }

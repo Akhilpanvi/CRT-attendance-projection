@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { connectDB } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import { getSession } from '@/lib/auth';
+import { logAction } from '@/lib/auditLog';
 
 export async function POST(request) {
   try {
@@ -21,7 +22,8 @@ export async function POST(request) {
     if (!user) return NextResponse.json({ error: `No account found for ${roll}` }, { status: 404 });
 
     const hash = await bcrypt.hash(roll, 10);
-    await user.updateOne({ passwordHash: hash, mustChangePassword: true });
+    await user.updateOne({ passwordHash: hash, mustChangePassword: true, resetToken: null, resetTokenExpiry: null });
+    await logAction(session.username, 'RESET_PASSWORD', roll, `Reset student ${roll}'s password to their roll number`);
 
     return NextResponse.json({ success: true, rollNumber: roll });
   } catch (e) {
