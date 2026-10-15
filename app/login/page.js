@@ -6,6 +6,7 @@ import { LOGO_RED, LOGO_WHITE } from '@/lib/logos';
 import ThemeToggle from '@/components/ThemeToggle';
 import { useSky, GREETING, skyAccent, skyUI } from '@/components/SkyBackground';
 import { motion } from 'framer-motion';
+import NoticeContent, { noticePreview } from '@/components/NoticeContent';
 
 function fmtDate(d) {
   return new Date(d).toLocaleString('en-IN', {
@@ -76,6 +77,7 @@ export default function LoginPage() {
   const [fbMsg,     setFbMsg]     = useState('');
   const [fbLoading, setFbLoading] = useState(false);
   const [fbStatus,  setFbStatus]  = useState('');
+  const [openNotice, setOpenNotice] = useState(null);   // mobile: notice expanded in place
 
   const [isDark, setIsDark] = useState(true);
   const sky = useSky();
@@ -239,12 +241,33 @@ export default function LoginPage() {
                     <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ui.dot }} />
                     <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: ui.ink }}>Notices</span>
                   </div>
-                  {updates.slice(0, 3).map((u, i) => (
-                    <div key={u._id} className="px-4 py-2.5" style={{ borderTop: i > 0 ? (isDark ? '1px solid rgba(255,255,255,0.05)' : `1px solid ${LBorder}`) : 'none' }}>
-                      {u.title && <p className="text-xs font-semibold mb-0.5" style={{ color: isDark ? 'rgba(255,255,255,0.85)' : '#0f172a' }}>{u.title}</p>}
-                      <p className="text-[11px] leading-relaxed" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : '#64748b' }}>{u.content?.slice(0, 80)}{u.content?.length > 80 ? '…' : ''}</p>
-                    </div>
-                  ))}
+                  {updates.slice(0, 3).map((u, i) => {
+                    const cc = CAT_COLOR[u.category] || CAT_COLOR.info, open = openNotice === u._id;
+                    return (
+                      <button key={u._id} type="button" onClick={() => setOpenNotice(open ? null : u._id)} aria-expanded={open}
+                              className="w-full text-left px-4 py-3 flex gap-3"
+                              style={{ borderTop: i > 0 ? (isDark ? '1px solid rgba(255,255,255,0.06)' : `1px solid ${LBorder}`) : 'none' }}>
+                        <span className="w-[3px] self-stretch rounded-full shrink-0" style={{ background: cc }} />
+                        <span className="flex-1 min-w-0">
+                          <span className="flex items-center gap-2">
+                            <span className="text-[13px] font-semibold flex-1" style={{ color: isDark ? '#ffffff' : '#0f172a' }}>
+                              {u.pinned && <span style={{ color: cc }}><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" style={{ display: 'inline', verticalAlign: '-1px', marginRight: 3 }}><path d="M16 3l5 5-3 1-4 4 1 5-2 2-4-4-5 5-1-1 5-5-4-4 2-2 5 1 4-4z" /></svg></span>}{u.title || CAT_LABEL[u.category] || 'Notice'}
+                            </span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"
+                                 style={{ color: isDark ? 'rgba(255,255,255,0.5)' : '#94a3b8', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}><path d="M6 9l6 6 6-6" /></svg>
+                          </span>
+                          {open ? (
+                            <span className="block mt-2">
+                              <NoticeContent text={u.content} size={12.5} color={isDark ? 'rgba(255,255,255,0.78)' : '#475569'} accent={cc} accentSoft={`${cc}${isDark ? '33' : '1f'}`} />
+                              <span className="block text-[10px] mt-2" style={{ color: isDark ? 'rgba(255,255,255,0.45)' : '#94a3b8' }}>{fmtDate(u.createdAt)}</span>
+                            </span>
+                          ) : (
+                            <span className="block text-[11.5px] leading-relaxed mt-0.5" style={{ color: isDark ? 'rgba(255,255,255,0.55)' : '#64748b' }}>{noticePreview(u.content, 80)}</span>
+                          )}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               )}
 
@@ -424,25 +447,27 @@ export default function LoginPage() {
                       <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ui.dot }} />
                       <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: ui.ink }}>Notices</span>
                     </div>
-                    <span className="text-[10px] font-semibold" style={{ color: ui.ink, opacity: 0.8 }}>{updates.length} items</span>
+                    <span className="text-[10px] font-semibold" style={{ color: ui.ink, opacity: 0.8 }}>{updates.length} {updates.length === 1 ? 'notice' : 'notices'}</span>
                   </div>
                   <div style={{ maxHeight: '440px', overflowY: 'auto' }}>
                     {updates.map((u, i) => {
                       const cc = CAT_COLOR[u.category] || CAT_COLOR.info;
                       const cl = CAT_LABEL[u.category] || 'Info';
                       return (
-                        <div key={u._id} className="px-5 py-3.5 transition-colors duration-150 cursor-default"
-                             style={{ borderBottom: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(15,23,42,0.06)' }}
+                        <div key={u._id} className="px-5 py-4 transition-colors duration-150 cursor-default"
+                             style={{ borderBottom: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(15,23,42,0.06)', boxShadow: `inset 3px 0 0 ${cc}` }}
                              onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.45)'}
                              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                          <div className="flex items-center justify-between mb-1.5">
-                            <span style={{ fontSize: '9px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em', color: cc, background: `${cc}20`, padding: '2px 7px', borderRadius: '4px' }}>
-                              {u.pinned ? '📌 ' : ''}{cl}
-                            </span>
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <span style={{ fontSize: '9px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.07em', color: cc, background: `${cc}${isDark ? '2e' : '1a'}`, padding: '3px 8px', borderRadius: '999px' }}>{cl}</span>
+                            {u.pinned && (
+                              <span style={{ fontSize: '9px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.07em', color: isDark ? 'rgba(255,255,255,0.75)' : '#475569', background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.06)', padding: '3px 8px', borderRadius: '999px', marginRight: 'auto' }}><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" style={{ display: 'inline', verticalAlign: '-1px', marginRight: 3 }}><path d="M16 3l5 5-3 1-4 4 1 5-2 2-4-4-5 5-1-1 5-5-4-4 2-2 5 1 4-4z" /></svg>Pinned</span>
+                            )}
+                            {!u.pinned && <span style={{ marginRight: 'auto' }} />}
                             <span style={{ color: isDark ? 'rgba(255,255,255,0.5)' : '#94a3b8', fontSize: '10px' }}>{fmtDate(u.createdAt)}</span>
                           </div>
-                          {u.title && <p style={{ fontSize: '12px', fontWeight: '600', color: isDark ? 'rgba(255,255,255,0.88)' : '#0f172a', marginBottom: '4px', lineHeight: '1.4' }}>{u.title}</p>}
-                          <p style={{ fontSize: '11px', color: isDark ? 'rgba(255,255,255,0.72)' : '#475569', lineHeight: '1.65', whiteSpace: 'pre-wrap' }}>{u.content}</p>
+                          {u.title && <p style={{ fontSize: '13.5px', fontWeight: '700', color: isDark ? '#ffffff' : '#0f172a', marginBottom: '8px', lineHeight: '1.35', letterSpacing: '-0.01em' }}>{u.title}</p>}
+                          <NoticeContent text={u.content} size={12} color={isDark ? 'rgba(255,255,255,0.75)' : '#475569'} accent={cc} accentSoft={`${cc}${isDark ? '33' : '1f'}`} />
                         </div>
                       );
                     })}

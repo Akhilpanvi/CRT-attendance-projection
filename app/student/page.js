@@ -6,6 +6,7 @@ import { TIME_SLOTS, SITE_NOTICE } from '@/lib/helpers';
 import { CLUSTER_DAYS, clusterDaysLabel } from '@/lib/attendanceCalc';
 import ThemeToggle from '@/components/ThemeToggle';
 import ChatWidget from '@/components/ChatWidget';
+import NoticeContent, { noticePreview } from '@/components/NoticeContent';
 import useScrolled from '@/components/useScrolled';
 import { useSky, GREETING } from '@/components/SkyBackground';
 
@@ -786,7 +787,7 @@ export default function StudentPage() {
                 </div>
                 <div className="text-[11px] font-semibold mt-2.5" style={{ color: t.muted }}>Notice</div>
                 <div className="text-[13px] font-bold mt-0.5 leading-snug line-clamp-2">
-                  {latestNotice ? (latestNotice.title || latestNotice.content) : model.futureHolidays[0] ? `No CRT on ${dayLabel(model.futureHolidays[0].date)}` : 'No new notices'}
+                  {latestNotice ? (latestNotice.title || noticePreview(latestNotice.content, 70)) : model.futureHolidays[0] ? `No CRT on ${dayLabel(model.futureHolidays[0].date)}` : 'No new notices'}
                 </div>
                 {updates.length > 0 && (
                   <button onClick={() => setSheet({ type: 'notices' })} className="text-[11px] font-bold mt-0.5 underline underline-offset-2" style={{ color: t.chipInk }}>
@@ -864,19 +865,21 @@ export default function StudentPage() {
     if (sheet.type === 'notices') return (
       <Sheet t={t} onClose={close} labelledBy="notices-title">
         <h2 id="notices-title" className="text-lg font-extrabold">Notices</h2>
-        <div className="mt-3 space-y-2">
-          {updates.map(u => (
-            <div key={u._id} className="px-3.5 py-3 rounded-2xl" style={{ background: t.well }}>
-              <div className="flex items-center gap-2 text-[11px]" style={{ color: t.muted }}>
-                <span className="font-bold uppercase tracking-wide" style={{ color: u.category === 'important' ? t.bad : u.category === 'warning' ? t.warn : t.chipInk }}>
-                  {u.pinned ? 'Pinned · ' : ''}{u.category === 'important' ? 'Important' : u.category === 'warning' ? 'Warning' : 'Info'}
-                </span>
-                <span className="ml-auto">{new Date(u.createdAt).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short' })}</span>
-              </div>
-              {u.title && <p className="text-sm font-bold mt-1">{u.title}</p>}
-              <p className="text-[13px] leading-relaxed mt-0.5 whitespace-pre-wrap" style={{ color: t.muted }}>{u.content}</p>
-            </div>
-          ))}
+        <div className="mt-3 space-y-2.5">
+          {updates.map(u => {
+            const [ink, soft, label] = u.category === 'important' ? [t.bad, t.badSoft, 'Important'] : u.category === 'warning' ? [t.warn, t.warnSoft, 'Warning'] : [t.chipInk, t.chipSoft, 'Info'];
+            return (
+              <article key={u._id} className="px-4 py-3.5 rounded-2xl" style={{ background: t.well, boxShadow: `inset 3px 0 0 ${ink}` }}>
+                <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider">
+                  <span className="px-2 py-0.5 rounded-full" style={{ background: soft, color: ink }}>{label}</span>
+                  {u.pinned && <span className="px-2 py-0.5 rounded-full" style={{ background: t.line, color: t.muted }}>Pinned</span>}
+                  <span className="ml-auto font-semibold normal-case tracking-normal text-[11px]" style={{ color: t.muted }}>{new Date(u.createdAt).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short' })}</span>
+                </div>
+                {u.title && <h3 className="text-[15px] font-bold mt-2 leading-snug">{u.title}</h3>}
+                <div className="mt-2"><NoticeContent text={u.content} size={13} color={t.muted} accent={ink} accentSoft={soft} /></div>
+              </article>
+            );
+          })}
         </div>
         <button onClick={close} className="sky-btn mt-5 w-full h-[50px] rounded-2xl text-[15px] font-bold">Close</button>
       </Sheet>

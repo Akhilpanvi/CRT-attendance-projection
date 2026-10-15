@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import NoticeContent from '@/components/NoticeContent';
 
 const CAT_STYLES = {
   info:      'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300',
@@ -98,7 +99,7 @@ export default function UpdatesPage() {
           />
           <textarea
             className="form-input min-h-[90px] resize-y"
-            placeholder="Write your update here…"
+            placeholder={"Write your update here…\n\nTip: start lines with 1. 2. 3. for steps, or - for bullet points. Leave an empty line between paragraphs."}
             value={content}
             onChange={e => setContent(e.target.value)}
             required
@@ -155,7 +156,7 @@ export default function UpdatesPage() {
                 {u.title && (
                   <p className="font-semibold text-sm mb-0.5">{u.title}</p>
                 )}
-                <p className="text-sm opacity-90 whitespace-pre-wrap">{u.content}</p>
+                <div className="opacity-90 mt-1"><NoticeContent text={u.content} size={13} color="currentColor" accent="currentColor" accentSoft="color-mix(in srgb, currentColor 14%, transparent)" /></div>
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 <button
