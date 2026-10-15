@@ -4,6 +4,7 @@ import { connectDB } from '@/lib/mongodb';
 import Student from '@/lib/models/Student';
 import User from '@/lib/models/User';
 import { sendMail } from '@/lib/mailer';
+import { logAction } from '@/lib/auditLog';
 
 // Per-account limits; the site-wide daily caps live in lib/mailer.js
 const COOLDOWN_MIN  = 5;    // minutes between emails to one account
@@ -147,7 +148,10 @@ export async function POST(request) {
       // For admins without a stored email, silently skip (return success below)
       if (toEmail) {
         const wait = await claimAccountSlot(user._id);
-        if (wait) return tooMany(wait);
+        if (wait) {
+          await logAction(user.username, 'RESET_EMAIL_LIMITED', roll, wait);
+          return tooMany(wait);
+        }
         const giveBack = () => User.updateOne({ _id: user._id }, { $pop: { resetSentAt: 1 } });
 
         const token  = crypto.randomBytes(32).toString('hex');
@@ -170,15 +174,18 @@ export async function POST(request) {
           sent = await sendMail({ to: toEmail, subject, html, fromName: 'Change Password' });
         } catch (e) {
           await giveBack();   // not sent: let them retry right away
+          await logAction(user.username, 'RESET_EMAIL_FAILED', roll, `Email to ${toEmail} failed: ${e.message}`.slice(0, 300));
           throw e;
         }
         if (!sent) {
           await giveBack();
+          await logAction(user.username, 'RESET_EMAIL_PAUSED', roll, 'Daily email limit reached — no email sent');
           await User.updateOne({ _id: user._id }, { $set: { resetToken: null, resetTokenExpiry: null } });
           return tooMany(isAdmin
             ? 'Password reset emails are paused for today due to high demand. Please try again tomorrow.'
             : 'Password reset emails are paused for today due to high demand. Please try again tomorrow, or ask your CRT section coordinator to reset your password from the admin panel.');
         }
+        await logAction(user.username, 'RESET_EMAIL_SENT', roll, `Reset link emailed to ${toEmail} via ${sent}`);
       }
     }
 

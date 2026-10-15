@@ -6,6 +6,16 @@ import { todayISO } from '@/lib/helpers';
 const ACTION_LABELS = {
   LOGIN:               { label: 'Login',             color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' },
   LOGIN_FAILED:        { label: 'Failed Login',       color: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' },
+  STUDENT_MESSAGE:     { label: 'Student Message',    color: 'bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400' },
+  PASSWORD_CHANGED:    { label: 'Password Changed',   color: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' },
+  PASSWORD_CHANGE_FAILED: { label: 'Password Change Failed', color: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' },
+  PASSWORD_RESET:      { label: 'Password Reset (link)', color: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' },
+  RESET_EMAIL_SENT:    { label: 'Reset Email Sent',   color: 'bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400' },
+  RESET_EMAIL_LIMITED: { label: 'Reset Email Limited', color: 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400' },
+  RESET_EMAIL_PAUSED:  { label: 'Reset Email Paused', color: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' },
+  RESET_EMAIL_FAILED:  { label: 'Reset Email Failed', color: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' },
+  MESSAGE_ANSWER:      { label: 'Message Answered',   color: 'bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400' },
+  NOTICE:              { label: 'Notice Board',       color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400' },
   LOGOUT:              { label: 'Logout',             color: 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400' },
   UPLOAD_CSV:          { label: 'Upload',             color: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' },
   EDIT_UPLOAD_DATE:    { label: 'Edit Upload Date',   color: 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' },
@@ -115,7 +125,7 @@ export default function LogsPage() {
       const rows = allLogs.map((l, i) => ({
         '#':        i + 1,
         'Timestamp': fmt(l.createdAt),
-        'Admin':    l.admin,
+        'User':     l.admin,
         'Action':   ACTION_LABELS[l.action]?.label || l.action,
         'Target':   l.target || '',
         'Detail':   l.detail || '',
@@ -145,15 +155,12 @@ export default function LogsPage() {
       <div className="card mb-4">
         <p className="card-title mb-3">Filters</p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {admins.length > 1 && (
-            <div>
-              <label className="form-label">Admin</label>
-              <select className="form-input" value={filterAdmin} onChange={e => setFilterAdmin(e.target.value)}>
-                <option value="">All admins</option>
-                {admins.map(a => <option key={a} value={a}>{a}</option>)}
-              </select>
-            </div>
-          )}
+          <div>
+            <label className="form-label">User</label>
+            <input className="form-input" list="log-users" placeholder="Admin or Reg. No." value={filterAdmin}
+                   onChange={e => setFilterAdmin(e.target.value.trim())} />
+            <datalist id="log-users">{admins.map(a => <option key={a} value={a} />)}</datalist>
+          </div>
           <div>
             <label className="form-label">Action</label>
             <select className="form-input" value={filterAction} onChange={e => setFilterAction(e.target.value)}>
@@ -229,7 +236,7 @@ export default function LogsPage() {
                     <th className="text-[10px] font-semibold uppercase tracking-wider text-slate-400
                                    px-3 pb-2 whitespace-nowrap w-44">Timestamp</th>
                     <th className="text-[10px] font-semibold uppercase tracking-wider text-slate-400
-                                   px-3 pb-2 whitespace-nowrap w-24">Admin</th>
+                                   px-3 pb-2 whitespace-nowrap w-24">User</th>
                     <th className="text-[10px] font-semibold uppercase tracking-wider text-slate-400
                                    px-3 pb-2 whitespace-nowrap w-36">Action</th>
                     <th className="text-[10px] font-semibold uppercase tracking-wider text-slate-400

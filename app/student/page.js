@@ -148,6 +148,79 @@ function StartDateCheck({ t, firstDate }) {
     </div>
   );
 }
+/** Personal notices from the CRT team, one at a time, floating over the dashboard */
+function PersonalNotice({ t }) {
+  const [list, setList]   = useState([]);
+  const [step, setStep]   = useState('ask');     // 'ask' | 'reply' | 'thanks'
+  const [reply, setReply] = useState('');
+  const [busy, setBusy]   = useState(false);
+  useEffect(() => { fetch('/api/student/messages').then(r => r.json()).then(d => Array.isArray(d) && setList(d)).catch(() => {}); }, []);
+  const m = list[0];
+  useEffect(() => {
+    if (m?.status === 'unread') fetch('/api/student/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: m._id, action: 'read' }) }).catch(() => {});
+  }, [m?._id]); // eslint-disable-line
+  if (!m) return null;
+
+  async function answer(action) {
+    setBusy(true);
+    try {
+      const r = await fetch('/api/student/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: m._id, action, reply: action === 'not_solved' ? reply : '' }) });
+      if (!r.ok) throw new Error();
+      if (action === 'dismiss') next(); else setStep('thanks');
+    } catch { /* keep the card open so they can try again */ } finally { setBusy(false); }
+  }
+  function next() { setList(list.slice(1)); setStep('ask'); setReply(''); }
+
+  const btn = 'px-3 py-2 rounded-xl text-xs font-bold disabled:opacity-50';
+  return (
+    <div role="dialog" aria-labelledby="pn-title"
+         className="glass fixed z-[62] inset-x-3 bottom-20 sm:inset-x-auto sm:left-5 sm:bottom-5 sm:w-[380px] rounded-3xl p-5"
+         style={{ background: t.sheet, border: `1px solid ${t.line}`, boxShadow: t.shadow }}>
+      <div className="flex items-center gap-2">
+        <span className="text-[10px] font-extrabold tracking-wider px-2 py-0.5 rounded-full" style={{ background: t.chipSoft, color: t.chipInk }}>FOR YOU</span>
+        <span className="text-[11px]" style={{ color: t.muted }}>from the CRT Attendance Tracker team{list.length > 1 ? ` · 1 of ${list.length}` : ''}</span>
+      </div>
+      {step === 'thanks' ? (
+        <>
+          <p className="text-[15px] font-bold mt-3">Thank you!</p>
+          <p className="text-[13px] mt-1" style={{ color: t.muted }}>We’ve noted your answer{reply.trim() ? ' and will look into it' : ''}.</p>
+          <div className="flex justify-end mt-3"><button onClick={next} className={`${btn} sky-btn`}>Close</button></div>
+        </>
+      ) : (
+        <>
+          <p id="pn-title" className="text-[15px] font-bold mt-3">{m.title}</p>
+          <p className="text-[13px] leading-relaxed mt-1.5 whitespace-pre-wrap" style={{ color: t.muted }}>{m.body}</p>
+          {m.askSolved && step === 'ask' && (
+            <>
+              <p className="text-[13px] font-semibold mt-3">Is your issue solved?</p>
+              <div className="flex gap-2 mt-2">
+                <button disabled={busy} onClick={() => answer('solved')} className={`${btn} flex-1`} style={{ background: t.okSoft, color: t.ok }}>Yes, it’s solved</button>
+                <button disabled={busy} onClick={() => setStep('reply')} className={`${btn} flex-1`} style={{ background: t.badSoft, color: t.bad }}>No, still a problem</button>
+              </div>
+            </>
+          )}
+          {step === 'reply' && (
+            <div className="mt-3 space-y-2">
+              <textarea value={reply} onChange={e => setReply(e.target.value)} maxLength={1000} rows={3} autoFocus
+                        placeholder="Tell us what’s still not working"
+                        className="w-full px-3 py-2 rounded-xl text-[13px] outline-none resize-none"
+                        style={{ background: t.well, border: `1px solid ${t.line}`, color: t.fg }} />
+              <div className="flex gap-2 justify-end">
+                <button disabled={busy} onClick={() => setStep('ask')} className={btn} style={{ color: t.muted }}>Back</button>
+                <button disabled={busy} onClick={() => answer('not_solved')} className={`${btn} sky-btn`}>{busy ? 'Sending…' : 'Send'}</button>
+              </div>
+            </div>
+          )}
+          {!m.askSolved && (
+            <div className="flex justify-end mt-3"><button disabled={busy} onClick={() => answer('dismiss')} className={`${btn} sky-btn`}>Got it</button></div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
 const Glass = ({ t, className = '', style, children, as: Tag = 'section', ...rest }) => (
   <Tag className={`glass ${className}`} style={style} {...rest}>{children}</Tag>
 );
@@ -431,6 +504,7 @@ export default function StudentPage() {
       <style>{SEG_CSS}</style>
       {children}
       {data && <ChatWidget role="student" />}
+      {data && <PersonalNotice t={t} />}
     </div>
   );
 
@@ -569,6 +643,10 @@ export default function StudentPage() {
         </span>
       )}
       <div className={iconBtn} style={{ background: t.glass, border: `1px solid ${t.line}` }}><ThemeToggle /></div>
+      <button onClick={() => router.push('/change-password?from=account')} aria-label="Change password" title="Change password"
+              className={iconBtn} style={{ background: t.glass, border: `1px solid ${t.line}` }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="10.5" width="16" height="10.5" rx="2.5" /><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5" /><circle cx="12" cy="15.75" r="1.25" /></svg>
+      </button>
       <button onClick={logout} aria-label="Log out" className={iconBtn} style={{ background: t.glass, border: `1px solid ${t.line}` }}>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="M16 17l5-5-5-5" /><path d="M21 12H9" /></svg>
       </button>

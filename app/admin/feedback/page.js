@@ -60,6 +60,88 @@ function StartDateSummary() {
   );
 }
 
+const MSG_STATUS = {
+  unread:     ['Not seen yet', 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300'],
+  read:       ['Seen, no answer', 'bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400'],
+  solved:     ['Solved', 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'],
+  not_solved: ['Still a problem', 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'],
+  dismissed:  ['Read', 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'],
+};
+
+/** Personal notices shown to individual students when they sign in */
+function PersonalMessages() {
+  const [list, setList]   = useState([]);
+  const [rolls, setRolls] = useState('');
+  const [title, setTitle] = useState('');
+  const [body, setBody]   = useState('');
+  const [ask, setAsk]     = useState(true);
+  const [busy, setBusy]   = useState(false);
+  const [msg, setMsg]     = useState('');
+  const load = () => fetch('/api/admin/messages').then(r => r.json()).then(d => Array.isArray(d) && setList(d)).catch(() => {});
+  useEffect(() => { load(); }, []);
+
+  async function send(e) {
+    e.preventDefault(); setBusy(true); setMsg('');
+    try {
+      const r = await fetch('/api/admin/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rollNumbers: rolls, title, body, askSolved: ask }) });
+      const d = await r.json(); if (!r.ok) throw new Error(d.error);
+      setMsg(`Sent to ${d.sent} student${d.sent !== 1 ? 's' : ''}. They’ll see it when they sign in.`);
+      setRolls(''); setTitle(''); setBody(''); load();
+    } catch (e) { setMsg(e.message); } finally { setBusy(false); }
+  }
+  async function remove(id) {
+    if (!confirm('Withdraw this message? The student will no longer see it.')) return;
+    await fetch('/api/admin/messages', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+    load();
+  }
+
+  const count = s => list.filter(m => m.status === s).length;
+  const field = 'form-input w-full text-sm';
+  return (
+    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-4">
+      <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">Personal messages</div>
+      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+        Shown as a floating notice when the student signs in. No email is sent.
+        {list.length > 0 && ` · ${list.length} sent: ${count('solved')} solved, ${count('not_solved')} still a problem, ${count('read')} seen without answer, ${count('unread')} not seen yet`}
+      </p>
+
+      <form onSubmit={send} className="mt-3 space-y-2">
+        <input className={field} placeholder="Registration numbers (comma or space separated)" value={rolls} onChange={e => setRolls(e.target.value)} />
+        <input className={field} placeholder="Title" maxLength={120} value={title} onChange={e => setTitle(e.target.value)} />
+        <textarea className={`${field} resize-y`} rows={3} maxLength={2000} placeholder="Message. Use {name} for the student’s name." value={body} onChange={e => setBody(e.target.value)} />
+        <div className="flex items-center gap-3 flex-wrap">
+          <label className="text-xs text-slate-600 dark:text-slate-300 flex items-center gap-1.5 mr-auto">
+            <input type="checkbox" checked={ask} onChange={e => setAsk(e.target.checked)} /> Ask “Is your issue solved?”
+          </label>
+          <button className="btn-primary btn-sm" disabled={busy || !rolls.trim() || !title.trim() || !body.trim()}>{busy ? 'Sending…' : 'Send message'}</button>
+        </div>
+        {msg && <p className="text-xs text-slate-600 dark:text-slate-300">{msg}</p>}
+      </form>
+
+      {list.length > 0 && (
+        <div className="mt-3 divide-y divide-slate-100 dark:divide-slate-700">
+          {list.map(m => {
+            const [label, cls] = MSG_STATUS[m.status] || [m.status, ''];
+            return (
+              <div key={m._id} className="py-2 text-xs flex items-start gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="text-slate-700 dark:text-slate-200"><b>{m.rollNumber}</b>{m.name && ` · ${m.name}`}{m.crtSec && ` · ${m.crtSec}`}</div>
+                  <div className="text-slate-500 dark:text-slate-400 truncate">{m.title}</div>
+                  {m.reply && <p className="mt-0.5 text-red-600 dark:text-red-400 whitespace-pre-wrap">“{m.reply}”</p>}
+                  <p className="text-[10px] text-slate-400 mt-0.5">Sent {fmtDate(m.createdAt)}{m.readAt ? ` · seen ${fmtDate(m.readAt)}` : ''}{m.answeredAt ? ` · answered ${fmtDate(m.answeredAt)}` : ''}</p>
+                </div>
+                <span className={`shrink-0 px-1.5 py-0.5 rounded text-[10px] font-bold ${cls}`}>{label}</span>
+                <button onClick={() => remove(m._id)} title="Withdraw" className="shrink-0 text-slate-300 dark:text-slate-600 hover:text-red-400">✕</button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function fmtDate(d) {
   return new Date(d).toLocaleString('en-IN', {
     timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short',
@@ -100,6 +182,7 @@ export default function FeedbackPage() {
         </p>
       </div>
 
+      <PersonalMessages />
       <StartDateSummary />
 
       {loading ? (

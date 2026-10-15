@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import AuditLog from '@/lib/models/AuditLog';
 import { getSession } from '@/lib/auth';
+import User from '@/lib/models/User';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,7 +54,7 @@ export async function GET(request) {
 
   // For super-admin: get list of distinct admin names for the filter dropdown
   const admins = isSuperAdmin(session)
-    ? await AuditLog.distinct('admin')
+    ? (await User.find({ role: { $in: ['admin', 'aprameya'] } }, { _id: 0, username: 1 }).lean()).map(u => u.username)
     : [session.username];
 
   return NextResponse.json({ logs, total, page, limit, admins });

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { connectDB } from '@/lib/mongodb';
 import User from '@/lib/models/User';
+import { logAction } from '@/lib/auditLog';
 
 export async function POST(request) {
   try {
@@ -28,6 +29,7 @@ export async function POST(request) {
     user.resetToken         = null;
     user.resetTokenExpiry   = null;
     await user.save();
+    await logAction(user.username, 'PASSWORD_RESET', user.rollNumber || '', 'Set a new password using the email reset link');
 
     return NextResponse.json({ success: true });
   } catch (e) {
